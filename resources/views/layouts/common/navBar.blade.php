@@ -2,7 +2,8 @@
     <div class="container flex flex-wrap items-center justify-between mx-auto">
         <a href="{{ route('home') }}" class="flex items-center">
             <img src="{{ asset('images/logo.png') }}" class="h-6 mr-3 sm:h-9 rounded" alt="Flowbite Logo" />
-            <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">{{ env('APP_NAME') }}</span>
+            <span
+                class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">{{ env('APP_NAME') }}</span>
         </a>
         <div class="flex items-center md:order-2">
             <button type="button"
@@ -17,14 +18,15 @@
             </button>
 
             <!-- Dropdown menu -->
-            <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600" id="user-dropdown">
-            @if (Auth::check())
-                <div class="px-4 py-3">
-                    <span class="block text-sm text-gray-900 dark:text-white">Test User</span>
-                </div>
-            @endif
+            <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
+                id="user-dropdown">
+                @if (Auth::check())
+                    <div class="px-4 py-3">
+                        <span class="block text-sm text-gray-900 dark:text-white">Test User</span>
+                    </div>
+                @endif
                 <ul class="py-1" aria-labelledby="user-menu-button">
-                    @if(Auth::check())
+                    @if (Auth::check())
                         <li>
                             <a href="#"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
@@ -44,10 +46,13 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-red-600 dark:text-red-400 dark:hover:text-white">
-                                Logout
-                            </a>
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button
+                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-red-600 dark:text-red-400 dark:hover:text-white">
+                                    Logout
+                                </button>
+                            </form>
                         </li>
                     @else
                         <li>
@@ -58,7 +63,6 @@
                             <a href="{{ route('register') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Register</a>
                         </li>
-
                     @endif
                 </ul>
             </div>
