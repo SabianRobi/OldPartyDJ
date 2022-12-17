@@ -21,6 +21,9 @@
         @endif
     </title>
 
+    {{-- Styles --}}
+    @notifyCss
+
     {{-- Header --}}
     <style>
         .header {
@@ -29,11 +32,12 @@
     </style>
 
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/autoRefresh.js'])
-    <!-- 'resources/css/flowbite.css', 'resources/js/flowbite.js', 'resources/js/tailwind.js' -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="dark">
+    @include('notify::components.notify')
+
     @include('layouts.common.navBar')
 
     @sectionMissing('header')
@@ -49,7 +53,9 @@
     @if (View::hasSection('scripts'))
         @yield('scripts')
     @endif
-    <script src="https://unpkg.com/flowbite@1.5.1/dist/flowbite.js"></script>
+    {{-- <script src="https://unpkg.com/flowbite@1.5.1/dist/flowbite.js"></script> --}}
+    {{-- <script src="/node_modules/flowbite/src/flowbite.js"></script> --}}
+    @notifyJs
 </body>
 
 </html>
