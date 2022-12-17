@@ -1,3 +1,18 @@
-[ ] Contact page
-[ ] Dark mode selector
+# General
+[X] Dark mode selector
 [ ] Footer align center on smaller devices
+
+# Pages
+[ ] Contact page
+[ ] Add info to main page
+[ ] Tutorial page
+# Next:
+[x] Format register page
+[ ] Add "New member? Register here!" to login page
+[ ] Make registering validate username field
+
+# Auth
+[ ] Make username length to min 3 chars
+[ ] Add 'Remember me' option ot login page
+[ ] Add option to login with biometric login (WebAuthN)
+[ ] Add option to login with Social Accounts (Facebook, Google)
