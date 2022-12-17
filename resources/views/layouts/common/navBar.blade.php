@@ -22,7 +22,7 @@
                 id="user-dropdown">
                 @if (Auth::check())
                     <div class="px-4 py-3">
-                        <span class="block text-sm text-gray-900 dark:text-white">Test User</span>
+                        <span class="block text-sm text-gray-900 dark:text-white">{{ Auth::user()->username }}</span>
                     </div>
                 @endif
                 <ul class="py-1" aria-labelledby="user-menu-button">
