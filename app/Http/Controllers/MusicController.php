@@ -77,12 +77,32 @@ class MusicController extends Controller
 
     public function searchTrack(Request $request) {
         $this->api->setAccessToken($request->session()->get('spotifyToken'));
+        $limit = 5;
 
         $result = $this->api->search($request->collect()['query'], 'track', [
-        'limit' => 5,
+        'limit' => $limit,
         'market' => config('spotify.default_config.market'),
         ]);
 
-        return response()->json($result);
+        $result = $result->tracks->items;
+
+        $filteredResult = [];
+
+        for ($i=0; $i < $limit; $i++) {
+            $artists = [];
+            foreach ($result[$i]->artists as $artist) {
+                array_push($artists, $artist->name);
+            }
+
+            array_push($filteredResult, [
+                'image' => $result[$i]->album->images[1]->url, //300x300
+                'title' => $result[$i]->name,
+                'artists' => $artists,
+                'length' => $result[$i]->duration_ms,
+            ]);
+        }
+
+
+        return response()->json($filteredResult);
     }
 }

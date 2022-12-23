@@ -1,5 +1,5 @@
 @section('content')
-    <a href="@yield('link')"
+    <a href="#"
         class="relative flex flex-row max-w-xl items-center bg-white border rounded-lg shadow-md hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
         <img class="p-2 object-cover h-auto w-32" src="@yield('image')" alt="">
         <div class="flex flex-col justify-between pl-2 pr-4 py-1 leading-normal">
