@@ -11,9 +11,10 @@ export default defineConfig({
 
                 // Scripts
                 'resources/js/app.js',
+                'resources/js/party.js',
                 // '/node_modules/flowbite/dist/flowbite.js',
             ],
-            refresh: true,
+            // refresh: true,
         }),
     ],
 });
