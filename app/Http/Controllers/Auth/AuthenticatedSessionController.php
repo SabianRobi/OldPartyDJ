@@ -17,6 +17,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function create()
     {
+        session(['url.intended' => url()->previous(route('home'))]);
         return view('auth.login');
     }
 
@@ -34,7 +35,8 @@ class AuthenticatedSessionController extends Controller
 
         notify()->success('Successfully logged in!');
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        $redirectTo = session()->get('url.intended');
+        return redirect($redirectTo);
     }
 
     /**
@@ -53,6 +55,6 @@ class AuthenticatedSessionController extends Controller
 
         notify()->success('Successfully logged out!');
 
-        return redirect('/');
+        return redirect(url()->previous(route('home')));
     }
 }
