@@ -22,6 +22,10 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
+
+            $table->string('partyId')->nullable();
+            $table->string('party_role')->nullable();
+
             $table->timestamps();
         });
     }
