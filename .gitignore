@@ -31,3 +31,4 @@ composer.lock
 package-lock.json
 
 /public/build
+composer.lock
