@@ -51,12 +51,14 @@
 
     @include('layouts.common.navBar')
 
-    @sectionMissing('header')
-        @include('layouts.common.header')
-    @endif
+    <main class="flex-grow bg-white text-black dark:bg-gray-600 dark:text-white overflow-x-hidden">
+        @sectionMissing('header')
+            @include('layouts.common.header')
+        @endif
 
-    <main class="flex flex-grow bg-white text-black dark:bg-gray-600 dark:text-white">
-        @yield('content')
+        <div class="container flex flex-wrap items-center mx-auto p-2 sm:p-0">
+            @yield('content')
+        </div>
     </main>
 
     @include('layouts.common.footer')
