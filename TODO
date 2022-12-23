@@ -1,18 +1,29 @@
 # General
 [X] Dark mode selector
 [ ] Footer align center on smaller devices
+[X] Format register page
+[X] Add "New member? Register here!" to login page
 
 # Pages
 [ ] Contact page
 [ ] Add info to main page
 [ ] Tutorial page
-# Next:
-[x] Format register page
-[ ] Add "New member? Register here!" to login page
-[ ] Make registering validate username field
 
 # Auth
+[X] Redirect user to page where the login requested
+[X] Make registering validate username field
 [ ] Make username length to min 3 chars
-[ ] Add 'Remember me' option ot login page
+[ ] Add 'Remember me' option to login page
 [ ] Add option to login with biometric login (WebAuthN)
 [ ] Add option to login with Social Accounts (Facebook, Google)
+
+# Party
+[X] Make the Spotify login available after user login
+[ ] Spotify token expiring - where to store RefreshToken? (db)
+[ ] Current music queue - display username who added to the list
+[ ] Store the Spotify refresh token in db, not in the session
+[ ] Set defualt image when no cover supplied by Spotify (on music cards)
+[ ] Set the Spotify image on toast message "successfully logged in with spotify"
+
+# After deployment:
+Set Spotify client id, secret, redirect uri in .env file

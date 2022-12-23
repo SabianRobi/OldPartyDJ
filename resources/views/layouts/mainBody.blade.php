@@ -33,6 +33,8 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @yield('viteImports')
+
     <script>
         // On page load or when changing themes, best to add inline in `head` to avoid FOUC
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
@@ -44,7 +46,7 @@
     </script>
 </head>
 
-<body>
+<body class="flex flex-col h-screen">
     @include('notify::components.notify')
 
     @include('layouts.common.navBar')
@@ -53,7 +55,7 @@
         @include('layouts.common.header')
     @endif
 
-    <main class="min-h-screen bg-white text-black dark:bg-gray-600 dark:text-white">
+    <main class="flex flex-grow bg-white text-black dark:bg-gray-600 dark:text-white">
         @yield('content')
     </main>
 
