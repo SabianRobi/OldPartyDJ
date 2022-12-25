@@ -14,7 +14,6 @@ return new class extends Migration
     public function up()
     {
         Schema::create('spotify_states', function (Blueprint $table) {
-            //$table->id();
             $table->string('state')->unique()->primary();
             $table->timestamps();
         });

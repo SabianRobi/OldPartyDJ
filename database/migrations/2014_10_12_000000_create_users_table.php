@@ -23,8 +23,8 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
 
-            $table->string('partyId')->nullable();
-            $table->string('party_role')->nullable();
+            $table->foreignId('party_id')->nullable()->onDelete('cascade')->onUpdate('cascade')->constrained();
+            $table->enum('party_role', ['creator', 'participant'])->nullable();
 
             $table->timestamps();
         });

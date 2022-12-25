@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('parties', function (Blueprint $table) {
             $table->string('id')->unique()->primary();
-            $table->string('creatorId');
+            $table->foreignId('creator_id')->onDelete('cascade')->onUpdate('cascade')->constrained('users');
 
             $table->timestamps();
         });
