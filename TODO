@@ -20,11 +20,19 @@
 
 # Party
 [X] Make the Spotify login available after user login
-[ ] Spotify token expiring - where to store RefreshToken? (db)
+[-] Spotify token expiring - where to store RefreshToken? (db)
 [ ] Current music queue - display username who added to the list
-[ ] Store the Spotify refresh token in db, not in the session
+[X] Store the Spotify refresh token in db, not in the session
 [ ] Set defualt image when no cover supplied by Spotify (on music cards)
-[ ] Set the Spotify image on toast message "successfully logged in with spotify"
+[ ] Guard '/party/spotify/refreshToken' endpoint
+
+[ ] Make welcome page (where select between Create / Join party)
+[ ] Make player page
 
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file
+
+# Currently:
+Set the play width to a fix size
+    Make the title/arists brake into rows if they're long enough
+Test if the player refreshes token automatically
