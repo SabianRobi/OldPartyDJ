@@ -23,6 +23,7 @@ Route::get('/party', [MusicController::class, 'index'])->name('party');
 Route::post('/party/spotify/login', [MusicController::class, 'doLogin']);
 Route::get('/party/spotify/callback', [MusicController::class, 'callback']);
 Route::get('/party/spotify/search', [MusicController::class, 'searchTrack']);
+Route::get('/party/spotify/refreshToken', [MusicController::class, 'refreshToken']);
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
