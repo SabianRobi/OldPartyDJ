@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Providers\RouteServiceProvider;
+use App\Models\SpotifyToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,6 +32,13 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        //Check if user has Spotify token
+        $isOldToken = true;
+        SpotifyToken::where('user_id', auth()->user()->id)->firstOr(function () use (&$isOldToken) {
+            $isOldToken = false;
+        });
+        session(['spotifyToken' => $isOldToken]);
 
         notify()->success('Successfully logged in!');
 
