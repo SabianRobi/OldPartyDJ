@@ -1,15 +1,18 @@
 <nav class="bg-gray-200 border-gray-200 px-2 sm:px-4 py-2.5 dark:bg-gray-900">
     <div class="container flex flex-wrap items-center justify-between mx-auto">
-        <a href="{{ route('home') }}" class="flex items-center">
-            <img src="{{ asset('images/logo.png') }}" class="h-6 mr-3 sm:h-9 rounded" alt="{{ env('APP_NAME') }} Logo" />
+
+        {{-- Logo --}}
+        <a href="{{ route('home') }}" class="flex items-center p-2.5">
+            <img src="{{ asset('images/logo.png') }}" class="h-6 mr-0 sm:mr-3 sm:h-9 rounded" alt="{{ env('APP_NAME') }} Logo" />
             <span
-                class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">{{ env('APP_NAME') }}</span>
+                class="self-center text-xl font-semibold whitespace-nowrap dark:text-white hidden sm:block">{{ env('APP_NAME') }}</span>
         </a>
         <div class="flex items-center md:order-2">
 
             {{-- Theme toggler --}}
             <button id="theme-toggle" type="button"
-                class="mr-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5" title="Toggle theme">
+                class="mr-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5"
+                title="Toggle theme">
                 <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg">
                     <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
@@ -22,9 +25,12 @@
                 </svg>
             </button>
 
-            <button type="button"
+            {{-- CallToAction --}}
+            {{-- <button type="button"
                 class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-5 dark:bg-lime-600 dark:hover:bg-lime-700 dark:focus:ring-lime-800">Get
-                started</button>
+                started</button> --}}
+
+            {{-- User menu button --}}
             <button type="button"
                 class="flex mr-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
                 id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown"
@@ -33,7 +39,7 @@
                 <img class="w-8 h-8 rounded-full" src="{{ asset('images/pl_50x50.png') }}" alt="User photo">
             </button>
 
-            <!-- Dropdown menu -->
+            {{-- Dropdown menu --}}
             <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
                 id="user-dropdown">
                 @if (Auth::check())
@@ -83,6 +89,7 @@
                 </ul>
             </div>
 
+            {{-- Open menu on mobile button --}}
             <button data-collapse-toggle="mobile-menu-2" type="button"
                 class="inline-flex items-center p-2 ml-1 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                 aria-controls="mobile-menu-2" aria-expanded="false">
@@ -95,6 +102,8 @@
                 </svg>
             </button>
         </div>
+
+        {{-- Menu --}}
         <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="mobile-menu-2">
             <ul
                 class="flex flex-col p-4 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-blue-200 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
