@@ -30,17 +30,17 @@
                 class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-5 dark:bg-lime-600 dark:hover:bg-lime-700 dark:focus:ring-lime-800">Get
                 started</button> --}}
 
-            {{-- User menu button --}}
+            {{-- User menu button   mr-3 md:mr-0   --}}
             <button type="button"
-                class="flex mr-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                class="flex text-sm bg-gray-800 rounded-full mr-3 md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
                 id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown"
                 data-dropdown-placement="bottom">
                 <span class="sr-only">Open user menu</span>
                 <img class="w-8 h-8 rounded-full" src="{{ asset('images/pl_50x50.png') }}" alt="User photo">
             </button>
 
-            {{-- Dropdown menu --}}
-            <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
+            {{-- Dropdown menu     my-4  --}}
+            <div class="z-50 hidden text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
                 id="user-dropdown">
                 @if (Auth::check())
                     <div class="px-4 py-3">

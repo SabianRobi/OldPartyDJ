@@ -2,10 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Party;
+use App\Models\PartyParticipant;
+use App\Models\SpotifyQueue;
 use Illuminate\Http\Request;
 use SpotifyWebAPI;
 use App\Models\SpotifyState;
 use App\Models\SpotifyToken;
+use Exception;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class MusicController extends Controller
 {
@@ -20,32 +27,40 @@ class MusicController extends Controller
             config('spotify.auth.redirect_uri'),
         );
         $options = [
-            'auto_refresh' => true,
+            // 'auto_refresh' => true,
         ];
         $this->api = new SpotifyWebAPI\SpotifyWebAPI($options, $this->session);
     }
 
-
-    /**
-     * Handle the incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    // TODO bug: if the user gets the 'creator' role before logging in with spotify: undefined 'token' on null
     public function index(Request $request)
     {
-        if(auth()->check()) {
-            if(auth()->user()->party_role == "creator") {
-                return view('party', [
-                    'user' => auth()->user(),
-                    'spotifyToken' => (SpotifyToken::where('user_id', auth()->user()->id)->first())->token,
-                ]);
-            }
-
+        //User is not logged in
+        if (!auth()->check()) {
+            notify()->error("Log in to access this page!");
+            return redirect()->route('home');
         }
-        return view('party', [
-            'user' => auth()->user()
-        ]);
+
+        $party = DB::table('party_participants')->where([
+            ['user_id', '=', auth()->user()->id],
+        ])->get();
+
+        //User is not in a party
+        if ($party->isEmpty()) {
+            return view('party', [
+                'user' => auth()->user()
+            ]);
+        }
+
+        $party = $party[0];
+
+        //User is in a party
+        if ($party->role == "creator") {
+            return view('party', [
+                'user' => auth()->user(),
+                'spotifyToken' => (SpotifyToken::firstWhere('user_id', auth()->user()->id))->token,
+            ]);
+        }
     }
 
     public function doLogin(Request $request)
@@ -130,21 +145,28 @@ class MusicController extends Controller
         } catch (SpotifyWebAPI\SpotifyWebAPIException $e) {
             if ($e->hasExpiredToken()) {
                 //TODO it doesn't come here anytime, WHY? (cause of autorefresh turned on?)
-                //$refreshToken = $token->refresh_token;
-                $this->session->refreshAccessToken();
+
+                $this->refreshToken();
+                notify()->success("Successfully updated Spotify access token!");
+                $this->searchTrack($request);
+                die();
+
+                //return redirect([MusicController::class, 'searchTrack']);
+
+
+
+                // $this->session->refreshAccessToken($token->refresh_token);
 
                 // $options = [
                 //     'auto_refresh' => true,
                 // ];
-                $this->api->setSession($this->session);
+                // $this->api->setSession($this->session);
 
-                $token->token = $this->session->getAccessToken();
-                $token->refresh_token = $this->session->getRefreshToken();
-                $token->save();
+                // $token->token = $this->session->getAccessToken();
+                // $token->refresh_token = $this->session->getRefreshToken();
+                // $token->save();
 
-                return 'Successfully updated Spotify access token!';
 
-                // notify()->success("Successfully updated Spotify access token!");
             } else {
                 throw new SpotifyWebAPI\SpotifyWebAPIException;
             }
@@ -165,13 +187,15 @@ class MusicController extends Controller
                 'title' => $result[$i]->name,
                 'artists' => $artists,
                 'length' => $result[$i]->duration_ms,
+                'uri' => $result[$i]->uri,
             ]);
         }
 
         return response()->json($filteredResult);
     }
 
-    function refreshToken(Request $request) {
+    public function refreshToken()
+    {
         $token = SpotifyToken::firstWhere('user_id', auth()->user()->id);
         $this->session->refreshAccessToken($token->refresh_token);
         $this->api->setSession($this->session);
@@ -181,5 +205,193 @@ class MusicController extends Controller
         $token->save();
 
         return response()->json($token->token);
+    }
+
+    public function setDeviceId(Request $request)
+    {
+        $validated = $request->validate(
+            [
+                'deviceId' => 'required',
+            ],
+        );
+
+        $party = Party::firstWhere('user_id', auth()->user()->id);
+        $party->playback_device_id = $validated['deviceId'];
+        $party->save();
+
+        $data = [
+            'playback_device_id' => $party->playback_device_id,
+        ];
+
+        return response()->json($data);
+    }
+
+    public function createParty(Request $request)
+    {
+        $validated = $request->validate(
+            [
+                'name' => 'required|min:3|max:255|unique:parties',
+                'password' => 'nullable|string',
+            ],
+        );
+
+        $party = new Party();
+        $party->user_id = auth()->user()->id;
+        $party->name = $validated['party'];
+        $party->password = Hash::make($validated['password']);
+        $party->save();
+
+        $data = [
+            'partyId' => $party->id,
+        ];
+
+        return response()->json($data);
+    }
+
+    public function joinParty(Request $request)
+    {
+        $validated = $request->validate(
+            [
+                'name' => 'required|!!!LÉTEZIK!!!',
+                'password' => 'nullable|string',
+            ],
+        );
+
+        $party = DB::table('parties')->where([
+            ['name', '=', $validated['name']],
+        ])->get(['password', 'id']);
+
+
+        if (Hash::make($validated['password']) != $party->password) {
+            throw new Exception("Did not implement yet.");
+        }
+
+        $participant = new PartyParticipant();
+        $participant->user_id = auth()->user()->id;
+        $participant->party_id = $party->id;
+        $participant->role = "participant";
+        $participant->save();
+
+        return response()->json($participant);
+    }
+
+    public function leaveParty(Request $request)
+    {
+        $participant = DB::table('party_participants')->where([
+            ['user_id', '=', auth()->user()->id],
+        ]);
+        $participant->delete();
+
+        return response()->json($participant);
+    }
+
+    public function addTrackToQueue(Request $request)
+    {
+        $validated = $request->validate(
+            [
+                'uri' => 'required',
+                'platform' => Rule::in(['Spotify']),
+            ],
+        );
+
+        $participant = PartyParticipant::where([
+            ['user_id', '=', auth()->user()->id],
+        ])->get()->first();
+        $party = Party::find($participant->party_id)->first();
+
+        $trackInQueue = new SpotifyQueue();
+        $trackInQueue->party_id = $party->id;
+        $trackInQueue->user_id = auth()->user()->id;
+        $trackInQueue->platform = $validated['platform'];
+        $trackInQueue->track_uri = $validated['uri'];
+        $trackInQueue->score = 0;
+        $trackInQueue->save();
+
+        //Check if player stopped because of no more tracks were in the queue
+        if ($party->waiting_for_track) {
+            $party->waiting_for_track = false;
+            $party->save();
+
+            $this->playNextTrack();
+        }
+
+        $data = [
+            'track_uri' => $trackInQueue->track_uri,
+        ];
+        return response()->json($data);
+    }
+
+    public function playNextTrack()
+    {
+        $participant = PartyParticipant::firstWhere('user_id', auth()->user()->id);
+        if ($participant->role !== "creator") {
+            return response('You do not have permission to do this action!', 403);
+        }
+
+        $token = SpotifyToken::firstWhere('user_id', auth()->user()->id);
+        $this->api->setAccessToken($token->token);
+        $this->session->setAccessToken($token->token);
+
+        $party = Party::firstWhere('user_id', auth()->user()->id);
+        $nextTrack = SpotifyQueue::firstWhere('party_id', $party->id);
+
+        if (!isset($nextTrack)) {
+            $party->waiting_for_track = true;
+            $party->save();
+
+            return response()->json(['error' => 'There is no next track in queue!']);
+        }
+
+        $options = [
+            'uris' => [$nextTrack->track_uri],
+        ];
+        $this->api->play($party->playback_device_id, $options);
+        $nextTrack->delete();
+
+        return response()->json(['track_uri' => $nextTrack->track_uri]);
+
+        // $this->session->refreshAccessToken($token->refresh_token);
+
+        // $partyId = DB::table('party_participants')->where([
+        //     ['user_id', '=', auth()->user()->id],
+        // ])->get('party_id');
+
+        // if ($partyId->isEmpty()) {
+        //     return response()->json(['error' => 'Not in a party!']);
+        // }
+        // $partyId = $partyId[0]->party_id;
+
+        // //TODO: Verify if the user is creator
+
+        // $track = SpotifyQueue::where('party_id', $partyId)
+        //     ->orderByDesc('score')
+        //     ->get()
+        //     ->first();
+
+        // $track->delete();
+
+        // $data = [
+        //     'uri' => $track->track_uri,
+        //     'platform' => $track->platform,
+        // ];
+        //return response()->json($data);
+    }
+
+    public function makePartyAndAssignUser()
+    {
+        $party = new Party;
+        $party->name = 'coolParty';
+        $party->password = Hash::make("admin");
+        $party->user_id = auth()->user()->id;
+        $party->save();
+        $party->refresh();
+
+        $participant = new PartyParticipant();
+        $participant->user_id = auth()->user()->id;
+        $participant->role = "creator";
+        $participant->party_id = $party->id;
+        $participant->save();
+
+        return response()->json($participant);
     }
 }

@@ -2,38 +2,75 @@ const searchForm = document.querySelector('#searchForm');
 const queryInp = document.querySelector('#query');
 const searchBtn = document.querySelector('#searchBtn');
 const resultsUl = document.querySelector('#results');
+const csrfToken = document.head.querySelector('meta[name=csrf-token]').content;
 
+const searchButtonText = document.querySelector('#searchBtnText');
+const searchButtonImage = document.querySelector('#searchBtnImage');
 searchBtn.addEventListener('click', sendSearchRequest);
 searchForm.addEventListener('submit', sendSearchRequest);
 
 let query;
 
-async function sendSearchRequest(e) {
-	e.preventDefault();
-	query = queryInp.value;
+//Toggles the searching icon
+function toggleSearchAnimation() {
+    if (searchButtonText.hidden) {
+        searchForm.addEventListener("submit", sendSearchRequest);
+        searchBtn.addEventListener("click", sendSearchRequest);
+        // setNewSearchHint();
+    } else {
+        searchForm.removeEventListener("submit", sendSearchRequest);
+        searchBtn.removeEventListener("click", sendSearchRequest);
+    }
+    searchButtonText.toggleAttribute('hidden');
+    searchButtonImage.toggleAttribute('hidden');
+}
 
-	if(query.length < 3) {
-		console.log('Please be more specific!'); // TODO alert user
-		return;
-	}
-	console.log('Searching \'' + query + '\'');
-	let result = await searchSpotify();
+async function sendSearchRequest(e) {
+    e.preventDefault();
+    toggleSearchAnimation();
+	query = queryInp.value;
+    const platform = 'Spotify';
+
+    if(query.length < 3) {
+        console.warn('Please be more specific!'); // TODO alert user
+        return;
+    }
+
+    console.log(`Searching '${query}' on ${platform}...`);
+    let result;
+    if(platform == "Spotify") {
+        result = await searchSpotify();
+    }
+    console.log(`Received ${result.length} tracks from ${platform}!`);
 
     resultsUl.innerHTML = "";
     result.forEach(track => {
         let length = new Date(track['length']);
-        resultsUl.appendChild(getMusicCardHTML(track['image'], track['title'], track['artists'], length.getMinutes()+"m"+length.getSeconds()+"s"));
+        const card = getMusicCardHTML(track['image'], track['title'], track['artists'],
+        length.getMinutes()+"m"+length.getSeconds()+"s", track['uri'], platform);
+        resultsUl.appendChild(card);
     });
+    refreshListeners();
+    toggleSearchAnimation();
 }
 
 //Sends AJAX request to make a search in the Spotify database
 async function searchSpotify() {
-	const response = await fetch('/party/spotify/search?query=' + query)
-			.then(res => res.json());
-	return response;
+    const response = await fetch('/party/spotify/search?query=' + query)
+            .then(res => res.json());
+    return response;
 }
 
-function getMusicCardHTML(image, title, artists, length) {
+function refreshListeners() {
+    const cards = resultsUl.querySelectorAll("[data-uri]");
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            addToQueue(card.dataset.uri, card.dataset.platform);
+        });
+    });
+}
+
+function getMusicCardHTML(image, title, artists, length, uri, platform) {
 
     const artistsP = document.createElement('p');
     artistsP.classList.add("mb-3", "font-normal", "text-gray-700", "dark:text-gray-400");
@@ -64,10 +101,38 @@ function getMusicCardHTML(image, title, artists, length) {
     imgO.classList.add("p-2", "object-cover", "h-auto", "w-32");
     imgO.src = image;
 
-    const card = document.createElement('a');
-    card.classList.add("relative", "flex", "flex-row", "max-w-xl", "items-center", "bg-white", "border", "rounded-lg", "shadow-md", "hover:bg-gray-100", "dark:border-gray-700", "dark:bg-gray-800", "dark:hover:bg-gray-700", "mt-1");
+    const card = document.createElement('div');
+    card.classList.add("relative", "flex", "flex-row", "max-w-xl", "items-center", "bg-white", "border",
+        "rounded-lg", "shadow-md", "hover:bg-gray-100", "dark:border-gray-700", "dark:bg-gray-800",
+        "dark:hover:bg-gray-700", "mt-1");
+        card.dataset.uri = uri;
+        card.dataset.platform = platform;
     card.appendChild(imgO);
     card.appendChild(outerDiv);
 
     return card;
+}
+
+async function addToQueue(uri, platform) {
+    console.log(`Adding track ${uri} to queue...`);
+
+    const form = new FormData();
+    form.set('uri', uri);
+    form.set('platform', platform);
+
+    const response = await fetch('/party/spotify/addTrack', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+        },
+        body: form,
+    })
+        .then(res => res.json());
+
+    if(response['track_uri'] == uri) {
+        console.log('Successfully added track to queue!');
+    } else {
+        console.error('Failed to add track to queue:', response);
+    }
+	return response;
 }

@@ -18,14 +18,10 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('username')->unique();
-            $table->boolean('is_admin');
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('is_admin')->default(false);
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
-
-            $table->foreignId('party_id')->nullable()->onDelete('cascade')->onUpdate('cascade')->constrained();
-            $table->enum('party_role', ['creator', 'participant'])->nullable();
-
             $table->timestamps();
         });
     }

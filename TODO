@@ -4,6 +4,7 @@
 [X] Format register page
 [X] Add "New member? Register here!" to login page
 [X] Align page content to center
+[ ] is_admin is not set after registering
 
 # Pages
 [ ] Contact page
@@ -17,6 +18,7 @@
 [ ] Add 'Remember me' option to login page
 [ ] Add option to login with biometric login (WebAuthN)
 [ ] Add option to login with Social Accounts (Facebook, Google)
+[ ] Salt the passwords (user, party)
 
 # Party
 [X] Make the Spotify login available after user login
@@ -29,10 +31,22 @@
 [ ] Make welcome page (where select between Create / Join party)
 [ ] Make player page
 
+# Etc
+[X] Make setDeviceId's method POST
+
+
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file
 
 # Currently:
 Set the play width to a fix size
     Make the title/arists brake into rows if they're long enough
-Test if the player refreshes token automatically
+Test if the player refreshes token automatically -> NO
+Select the player for playback after initalizing it
+correct login and register page
+player: button get too close if the title/artist list is short -> add padding/margin
+Create relations between models
+Guard ALL of controller endpoints (Gate?, Policy?)
+Make party landing page: create / login option
+Auto refresh token does not working properly.
+Add volume bar to music player

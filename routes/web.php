@@ -24,6 +24,15 @@ Route::post('/party/spotify/login', [MusicController::class, 'doLogin']);
 Route::get('/party/spotify/callback', [MusicController::class, 'callback']);
 Route::get('/party/spotify/search', [MusicController::class, 'searchTrack']);
 Route::get('/party/spotify/refreshToken', [MusicController::class, 'refreshToken']);
+Route::post('/party/spotify/setDeviceId', [MusicController::class, 'setDeviceId']);
+Route::post('/party/spotify/addTrack', [MusicController::class, 'addTrackToQueue']);
+Route::post('/party/createParty', [MusicController::class, 'createParty']);
+Route::post('/party/joinParty', [MusicController::class, 'joinParty']);
+Route::post('/party/playNextTrack', [MusicController::class, 'playNextTrack']);
+
+//Temp
+Route::get('/party/makePartyAndAssignUser', [MusicController::class, 'makePartyAndAssignUser']);
+
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');

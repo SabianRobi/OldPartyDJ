@@ -9,12 +9,24 @@ const playerImageObj = document.querySelector("#spotify_player_image");
 const playerTitleObj = document.querySelector("#spotify_player_title");
 const playerArtistObj = document.querySelector("#spotify_player_artist");
 
+const csrfToken = document.head.querySelector("meta[name=csrf-token]").content;
+
 playerTogglePlayObj.addEventListener("click", playerTogglePlay);
 playerPrevObj.addEventListener("click", playerPrev);
 playerNextObj.addEventListener("click", playerNext);
 
 let player;
 let volume = 0.5;
+
+function activatePlayer() {
+    window.onSpotifyWebPlaybackSDKReady = () => {
+        initPlayer();
+        //TODO: terminate loading if error throws
+        addListenersToPlayer();
+        connectPlayer();
+    };
+}
+activatePlayer();
 
 function initPlayer() {
     player = new Spotify.Player({
@@ -26,12 +38,11 @@ function initPlayer() {
     });
 }
 
-window.onSpotifyWebPlaybackSDKReady = () => {
-    initPlayer();
-
+function addListenersToPlayer() {
     // Ready
     player.addListener("ready", ({ device_id }) => {
         console.log("Ready with Device ID", device_id);
+        setDeviceId(device_id);
     });
 
     // Not Ready
@@ -45,12 +56,12 @@ window.onSpotifyWebPlaybackSDKReady = () => {
 
     player.addListener("authentication_error", async ({ message }) => {
         console.error(message);
-        if(message === "Authentication error.") {
-            console.log('Refreshing access token...');
+        if (message === "Authentication failed") {
+            console.log("Refreshing access token...");
             await refreshToken();
-            console.log('Refreshed access token, initalizing player again...');
-            initPlayer();
-            console.log('Success!');
+            console.log("Refreshed access token, initalizing player again...");
+            activatePlayer();
+            console.log("Success!");
         }
     });
 
@@ -60,13 +71,17 @@ window.onSpotifyWebPlaybackSDKReady = () => {
 
     player.addListener(
         "player_state_changed",
-        ({ paused, track_window: { current_track } }) => {
-            // console.log("Currently Playing", current_track["name"]);
-            console.log(current_track);
+        ({ paused, position, duration, track_window: { current_track } }) => {
             updatePlayerGUI(paused, current_track);
+            if(position === duration) {
+                console.log("Track ended, playing next one...");
+                playNextTrack();
+            }
         }
     );
+}
 
+function connectPlayer() {
     player.connect().then((success) => {
         if (success) {
             console.log(
@@ -74,7 +89,7 @@ window.onSpotifyWebPlaybackSDKReady = () => {
             );
         }
     });
-};
+}
 
 async function refreshToken() {
     token = await fetch("/party/spotify/refreshToken").then((res) =>
@@ -91,17 +106,15 @@ function playerTogglePlay() {
 }
 
 function playerNext() {
-    player.nextTrack();
+    playNextTrack();
+    //player.nextTrack();
 }
 
 function updatePlayerGUI(isPaused, track) {
-    console.log(pauseIcon);
     if (isPaused) {
-        console.log("when stops");
         pauseIcon.hidden = true;
         playIcon.hidden = false;
     } else {
-        console.log("when starts");
         pauseIcon.hidden = false;
         playIcon.hidden = true;
     }
@@ -114,4 +127,38 @@ function updatePlayerGUI(isPaused, track) {
     });
     artists = artists.substring(0, artists.length - 2);
     playerArtistObj.innerHTML = artists;
+}
+
+async function setDeviceId(device_id) {
+    console.log("Setting device ID");
+
+    const form = new FormData();
+    form.set("deviceId", device_id);
+
+    const response = await fetch("/party/spotify/setDeviceId", {
+        method: "POST",
+        headers: {
+            "X-CSRF-TOKEN": csrfToken,
+        },
+        body: form,
+    }).then((res) => res.json());
+
+    if (response["playback_device_id"] == device_id) {
+        console.log("Device ID set!");
+    } else {
+        console.error("Could not set Device ID!");
+    }
+}
+
+async function playNextTrack() {
+    console.log("Sending request to play next track...");
+
+    const response = await fetch("/party/playNextTrack", {
+        method: "POST",
+        headers: {
+            "X-CSRF-TOKEN": csrfToken,
+        },
+    }).then((res) => res.json());
+
+    console.log(response);
 }

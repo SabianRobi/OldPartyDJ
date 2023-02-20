@@ -13,10 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('parties', function (Blueprint $table) {
-            $table->string('id')->unique()->primary();
-            $table->foreignId('creator_id')->onDelete('cascade')->onUpdate('cascade')->constrained('users');
-
+        Schema::create('spotify_tokens', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->onDelete('cascade')->onUpdate('cascade')->constrained();
+            $table->string('token');
+            $table->string('refresh_token');
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('parties');
+        Schema::dropIfExists('spotify_tokens');
     }
 };
