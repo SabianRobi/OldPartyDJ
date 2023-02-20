@@ -1,24 +1,26 @@
 # General
 [X] Dark mode selector
+[ ] Make things look good in light mode also
 [ ] Footer align center on smaller devices
 [X] Format register page
 [X] Add "New member? Register here!" to login page
 [X] Align page content to center
-[ ] is_admin is not set after registering
+[X] is_admin is not set after registering
+[ ] Create relations between models
 
 # Pages
 [ ] Contact page
 [ ] Add info to main page
 [ ] Tutorial page
+[ ] Correct login and register page
+[ ] Make welcome page (where select between Create / Join party)
 
 # Auth
 [X] Redirect user to page where the login requested
 [X] Make registering validate username field
-[ ] Make username length to min 3 chars
 [ ] Add 'Remember me' option to login page
 [ ] Add option to login with biometric login (WebAuthN)
 [ ] Add option to login with Social Accounts (Facebook, Google)
-[ ] Salt the passwords (user, party)
 
 # Party
 [X] Make the Spotify login available after user login
@@ -28,25 +30,18 @@
 [ ] Set defualt image when no cover supplied by Spotify (on music cards)
 [ ] Guard '/party/spotify/refreshToken' endpoint
 
-[ ] Make welcome page (where select between Create / Join party)
-[ ] Make player page
+## Player
+[ ] Set the play width to a fix size
+[ ] Add volume bar to music player
+[ ] Make the title/arists brake into rows if they're long enough or make them rolling
+[ ] Select the player for playback after initalizing it
+[ ] Add padding/margin around title / artist, because button get too close if the text is short
 
-# Etc
+# Security
+[ ] Guard all of controller endpoints
+[ ] Salt the passwords (user, party)
+[ ] Make username length to min 3 chars
 [X] Make setDeviceId's method POST
-
 
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file
-
-# Currently:
-Set the play width to a fix size
-    Make the title/arists brake into rows if they're long enough
-Test if the player refreshes token automatically -> NO
-Select the player for playback after initalizing it
-correct login and register page
-player: button get too close if the title/artist list is short -> add padding/margin
-Create relations between models
-Guard ALL of controller endpoints (Gate?, Policy?)
-Make party landing page: create / login option
-Auto refresh token does not working properly.
-Add volume bar to music player
