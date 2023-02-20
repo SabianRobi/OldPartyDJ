@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Party;
 use App\Models\PartyParticipant;
-use App\Models\SpotifyQueue;
+use App\Models\MusicQueue;
 use Illuminate\Http\Request;
 use SpotifyWebAPI;
 use App\Models\SpotifyState;
@@ -299,7 +299,7 @@ class MusicController extends Controller
         ])->get()->first();
         $party = Party::find($participant->party_id)->first();
 
-        $trackInQueue = new SpotifyQueue();
+        $trackInQueue = new MusicQueue();
         $trackInQueue->party_id = $party->id;
         $trackInQueue->user_id = auth()->user()->id;
         $trackInQueue->platform = $validated['platform'];
@@ -333,7 +333,7 @@ class MusicController extends Controller
         $this->session->setAccessToken($token->token);
 
         $party = Party::firstWhere('user_id', auth()->user()->id);
-        $nextTrack = SpotifyQueue::firstWhere('party_id', $party->id);
+        $nextTrack = MusicQueue::firstWhere('party_id', $party->id);
 
         if (!isset($nextTrack)) {
             $party->waiting_for_track = true;
@@ -363,7 +363,7 @@ class MusicController extends Controller
 
         // //TODO: Verify if the user is creator
 
-        // $track = SpotifyQueue::where('party_id', $partyId)
+        // $track = MusicQueue::where('party_id', $partyId)
         //     ->orderByDesc('score')
         //     ->get()
         //     ->first();

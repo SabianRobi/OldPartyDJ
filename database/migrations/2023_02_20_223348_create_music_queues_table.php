@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('spotify_queues', function (Blueprint $table) {
+        Schema::create('music_queues', function (Blueprint $table) {
             $table->id();
             $table->foreignId('party_id');
             $table->foreignId('user_id');
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('spotify_queues');
+        Schema::dropIfExists('music_queues');
     }
 };

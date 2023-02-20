@@ -1,11 +1,11 @@
 # General
 [X] Dark mode selector
-[ ] Make things look good in light mode also
-[ ] Footer align center on smaller devices
 [X] Format register page
 [X] Add "New member? Register here!" to login page
 [X] Align page content to center
 [X] is_admin is not set after registering
+[ ] Make things look good in light mode also
+[ ] Footer align center on smaller devices
 [ ] Create relations between models
 
 # Pages
@@ -24,9 +24,10 @@
 
 # Party
 [X] Make the Spotify login available after user login
-[-] Spotify token expiring - where to store RefreshToken? (db)
-[ ] Current music queue - display username who added to the list
 [X] Store the Spotify refresh token in db, not in the session
+[-] Spotify token expiring - where to store RefreshToken? (db)
+[X] Rename spotify_queues table to music_queues
+[ ] Current music queue - display username who added to the list
 [ ] Set defualt image when no cover supplied by Spotify (on music cards)
 [ ] Guard '/party/spotify/refreshToken' endpoint
 
@@ -38,10 +39,10 @@
 [ ] Add padding/margin around title / artist, because button get too close if the text is short
 
 # Security
-[ ] Guard all of controller endpoints
-[ ] Salt the passwords (user, party)
-[ ] Make username length to min 3 chars
 [X] Make setDeviceId's method POST
+[X] Salt the passwords (user, party) | Salted by default
+[ ] Guard all of controller endpoints
+[ ] Make username length to min 3 chars
 
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file
