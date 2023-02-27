@@ -46,17 +46,17 @@
     </script>
 </head>
 
-<body class="flex flex-col h-screen">
+<body class="flex flex-col h-screen bg-white dark:bg-gray-600">
     @include('notify::components.notify')
 
     @include('layouts.common.navBar')
 
-    <main class="flex-grow bg-white text-black dark:bg-gray-600 dark:text-white overflow-x-hidden">
+    <main class="bg-white text-black mb-auto dark:bg-gray-600 dark:text-white ">
         @sectionMissing('header')
             @include('layouts.common.header')
         @endif
 
-        <div class="container flex flex-wrap items-center mx-auto p-2 sm:p-0">
+        <div class="container items-center mx-auto p-2">
             @yield('content')
         </div>
     </main>

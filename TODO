@@ -5,14 +5,14 @@
 [X] Align page content to center
 [X] is_admin is not set after registering
 [ ] Make things look good in light mode also
-[ ] Footer align center on smaller devices
+[X] Footer align center on smaller devices
 [ ] Create relations between models
 
 # Pages
 [ ] Contact page
 [ ] Add info to main page
 [ ] Tutorial page
-[ ] Correct login and register page
+[X] Correct login and register page
 [ ] Make welcome page (where select between Create / Join party)
 
 # Auth
@@ -29,7 +29,6 @@
 [X] Rename spotify_queues table to music_queues
 [ ] Current music queue - display username who added to the list
 [ ] Set defualt image when no cover supplied by Spotify (on music cards)
-[ ] Guard '/party/spotify/refreshToken' endpoint
 
 ## Player
 [ ] Set the play width to a fix size
