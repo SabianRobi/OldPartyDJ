@@ -18,15 +18,19 @@ playerNextObj.addEventListener("click", playerNext);
 let player;
 let volume = 0.5;
 
-function activatePlayer() {
+function activatePlayerOuter() {
     window.onSpotifyWebPlaybackSDKReady = () => {
-        initPlayer();
-        //TODO: terminate loading if error throws
-        addListenersToPlayer();
-        connectPlayer();
+        activatePlayerInner();
     };
 }
-activatePlayer();
+activatePlayerOuter();
+
+function activatePlayerInner() {
+    initPlayer();
+    //TODO: terminate loading if error throws
+    addListenersToPlayer();
+    connectPlayer();
+}
 
 function initPlayer() {
     player = new Spotify.Player({
@@ -60,7 +64,7 @@ function addListenersToPlayer() {
             console.log("Refreshing access token...");
             await refreshToken();
             console.log("Refreshed access token, initalizing player again...");
-            activatePlayer();
+            activatePlayerInner();
             console.log("Success!");
         }
     });
@@ -73,7 +77,7 @@ function addListenersToPlayer() {
         "player_state_changed",
         ({ paused, position, duration, track_window: { current_track } }) => {
             updatePlayerGUI(paused, current_track);
-            if(position === duration) {
+            if (position === duration) {
                 console.log("Track ended, playing next one...");
                 playNextTrack();
             }
