@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('party_participants', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id');
-            $table->foreignId('party_id');
+            $table->foreignId('user_id')->onDelete('cascade')->onUpdate('cascade')->constrained();
+            $table->foreignId('party_id')->onDelete('cascade')->onUpdate('cascade')->constrained();
             $table->enum('role', ['creator', 'participant']);
             $table->timestamps();
         });

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('parties', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->unique();
+            $table->foreignId('user_id')->onDelete('cascade')->onUpdate('cascade')->constrained();
             $table->string('name')->unique();
             $table->string('password')->nullable();
             $table->string('playback_device_id')->nullable();
