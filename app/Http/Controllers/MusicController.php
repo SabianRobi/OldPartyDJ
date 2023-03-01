@@ -9,10 +9,10 @@ use Illuminate\Http\Request;
 use SpotifyWebAPI;
 use App\Models\SpotifyState;
 use App\Models\SpotifyToken;
-use Exception;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+
+use function PHPUnit\Framework\isEmpty;
 
 class MusicController extends Controller
 {
@@ -30,37 +30,6 @@ class MusicController extends Controller
             // 'auto_refresh' => true,
         ];
         $this->api = new SpotifyWebAPI\SpotifyWebAPI($options, $this->session);
-    }
-
-    // TODO bug: if the user gets the 'creator' role before logging in with spotify: undefined 'token' on null
-    public function index(Request $request)
-    {
-        //User is not logged in
-        if (!auth()->check()) {
-            notify()->error("Log in to access this page!");
-            return redirect()->route('home');
-        }
-
-        $party = DB::table('party_participants')->where([
-            ['user_id', '=', auth()->user()->id],
-        ])->get();
-
-        //User is not in a party
-        if ($party->isEmpty()) {
-            return view('party', [
-                'user' => auth()->user()
-            ]);
-        }
-
-        $party = $party[0];
-
-        //User is in a party
-        if ($party->role == "creator") {
-            return view('party', [
-                'user' => auth()->user(),
-                'spotifyToken' => (SpotifyToken::firstWhere('user_id', auth()->user()->id))->token,
-            ]);
-        }
     }
 
     public function doLogin(Request $request)
@@ -226,65 +195,6 @@ class MusicController extends Controller
         return response()->json($data);
     }
 
-    public function createParty(Request $request)
-    {
-        $validated = $request->validate(
-            [
-                'name' => 'required|min:3|max:255|unique:parties',
-                'password' => 'nullable|string',
-            ],
-        );
-
-        $party = new Party();
-        $party->user_id = auth()->user()->id;
-        $party->name = $validated['party'];
-        $party->password = Hash::make($validated['password']);
-        $party->save();
-
-        $data = [
-            'partyId' => $party->id,
-        ];
-
-        return response()->json($data);
-    }
-
-    public function joinParty(Request $request)
-    {
-        $validated = $request->validate(
-            [
-                'name' => 'required|!!!LÉTEZIK!!!',
-                'password' => 'nullable|string',
-            ],
-        );
-
-        $party = DB::table('parties')->where([
-            ['name', '=', $validated['name']],
-        ])->get(['password', 'id']);
-
-
-        if (Hash::make($validated['password']) != $party->password) {
-            throw new Exception("Did not implement yet.");
-        }
-
-        $participant = new PartyParticipant();
-        $participant->user_id = auth()->user()->id;
-        $participant->party_id = $party->id;
-        $participant->role = "participant";
-        $participant->save();
-
-        return response()->json($participant);
-    }
-
-    public function leaveParty(Request $request)
-    {
-        $participant = DB::table('party_participants')->where([
-            ['user_id', '=', auth()->user()->id],
-        ]);
-        $participant->delete();
-
-        return response()->json($participant);
-    }
-
     public function addTrackToQueue(Request $request)
     {
         $validated = $request->validate(
@@ -324,7 +234,7 @@ class MusicController extends Controller
     public function playNextTrack()
     {
         $participant = PartyParticipant::firstWhere('user_id', auth()->user()->id);
-        if ($participant->role !== "creator") {
+        if (!strcmp($participant->role, "creator")) {
             return response('You do not have permission to do this action!', 403);
         }
 
@@ -375,23 +285,5 @@ class MusicController extends Controller
         //     'platform' => $track->platform,
         // ];
         //return response()->json($data);
-    }
-
-    public function makePartyAndAssignUser()
-    {
-        $party = new Party;
-        $party->name = 'coolParty';
-        $party->password = Hash::make("admin");
-        $party->user_id = auth()->user()->id;
-        $party->save();
-        $party->refresh();
-
-        $participant = new PartyParticipant();
-        $participant->user_id = auth()->user()->id;
-        $participant->role = "creator";
-        $participant->party_id = $party->id;
-        $participant->save();
-
-        return response()->json($participant);
     }
 }

@@ -44,4 +44,12 @@
     </ul>
 @endif
 
+<div>
+    <form action="{{ route('leaveParty') }}" method="post">
+        @csrf
+        <button id="leaveParty" name="leaveParty"
+                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Leave party</button>
+    </form>
+</div>
+
 {{-- Current queue --}}

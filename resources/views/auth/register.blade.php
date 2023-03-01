@@ -1,5 +1,6 @@
 @extends('layouts.mainBody')
 @section('header', 'something')
+@section('title', 'Register')
 @section('content')
     <x-auth-card>
         <x-slot name="logo">

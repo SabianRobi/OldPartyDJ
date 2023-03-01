@@ -14,6 +14,7 @@
 [ ] Tutorial page
 [X] Correct login and register page
 [ ] Make welcome page (where select between Create / Join party)
+[X] Create 'login party' page
 
 # Auth
 [X] Redirect user to page where the login requested
@@ -27,8 +28,11 @@
 [X] Store the Spotify refresh token in db, not in the session
 [-] Spotify token expiring - where to store RefreshToken? (db)
 [X] Rename spotify_queues table to music_queues
+[X] Make users able to create parties without logging in with spotify (PartyController:155)
 [ ] Current music queue - display username who added to the list
 [ ] Set defualt image when no cover supplied by Spotify (on music cards)
+[ ] Create party: mark required fields
+
 
 ## Player
 [ ] Set the play width to a fix size
@@ -42,6 +46,11 @@
 [X] Salt the passwords (user, party) | Salted by default
 [ ] Guard all of controller endpoints
 [ ] Make username length to min 3 chars
+
+
+
+# Etc
+[X] Update party link in nav
 
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file
