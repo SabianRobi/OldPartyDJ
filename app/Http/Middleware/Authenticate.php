@@ -15,7 +15,9 @@ class Authenticate extends Middleware
     protected function redirectTo($request)
     {
         if (! $request->expectsJson()) {
-            return route('login');
+            notify()->error("Please log in first to use this feature!");
+            //TODO still redirects to login page instead of loading the same page where the user was
+            // return route('login');
         }
     }
 }
