@@ -3,7 +3,8 @@
 
         {{-- Logo --}}
         <a href="{{ route('home') }}" class="flex items-center p-2.5">
-            <img src="{{ asset('images/logo.png') }}" class="h-6 mr-0 sm:mr-3 sm:h-9 rounded" alt="{{ env('APP_NAME') }} Logo" />
+            <img src="{{ asset('images/logo.png') }}" class="h-6 mr-0 sm:mr-3 sm:h-9 rounded"
+                alt="{{ env('APP_NAME') }} Logo" />
             <span
                 class="self-center text-xl font-semibold whitespace-nowrap dark:text-white hidden sm:block">{{ env('APP_NAME') }}</span>
         </a>
@@ -42,11 +43,11 @@
             {{-- Dropdown menu     my-4  --}}
             <div class="z-50 hidden text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
                 id="user-dropdown">
-                @if (Auth::check())
+                @auth
                     <div class="px-4 py-3">
                         <span class="block text-sm text-gray-900 dark:text-white">{{ Auth::user()->username }}</span>
                     </div>
-                @endif
+                @endauth
                 <ul class="py-1" aria-labelledby="user-menu-button">
                     @if (Auth::check())
                         <li>
@@ -117,11 +118,13 @@
                         class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">How
                         it works</a>
                 </li> --}}
-                <li>
-                    <a href="{{ route('landingParty') }}"
-                        class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Party
-                        Time</a>
-                </li>
+                @auth
+                    <li>
+                        <a href="{{ route('landingParty') }}"
+                            class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Party
+                            Time</a>
+                    </li>
+                @endauth
             </ul>
         </div>
     </div>
