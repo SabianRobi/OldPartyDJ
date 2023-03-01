@@ -5,14 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Party;
 use App\Models\PartyParticipant;
 use App\Models\SpotifyToken;
-use Egulias\EmailValidator\Parser\PartParser;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
-use function PHPUnit\Framework\isEmpty;
 
 class PartyController extends Controller
 {
@@ -126,7 +121,7 @@ class PartyController extends Controller
         $participant = new PartyParticipant();
         $participant->user_id = Auth::id();
         $participant->party_id = $party->id;
-        $participant->role = "participant";
+        $participant->role = $party->user_id == Auth::id() ? "creator" : "participant";
         $participant->save();
 
         notify()->success("Successfully joined the party!");
@@ -135,26 +130,9 @@ class PartyController extends Controller
     }
 
     // Leave party
-    public function leave(Request $request)
+    public function leave()
     {
-        if (!$this->checkAlredyInParty()) {
-            notify()->error('You are not in a party!');
-            return redirect()->route('landingParty');
-        }
-
-        //Leaving party
-        $participant = PartyParticipant::firstWhere('user_id', Auth::id());
-        $party = Party::find($participant->party_id);
-        $participant->delete();
-
-        //Delete party when the last participant leaves
-        $participants = PartyParticipant::where('party_id', $party->id)->get();
-        if (count($participants) == 0) {
-            $party->delete();
-        }
-
-        notify()->success('Successfully left the party!');
-
+        // LeavePartyMiddleware
         return redirect()->route('landingParty');
     }
 
@@ -186,12 +164,12 @@ class PartyController extends Controller
         ]);
     }
 
-    private function checkHasParty()
+    public static function checkHasParty()
     {
         return Party::where('user_id', Auth::id())->get()->isNotEmpty();
     }
 
-    private function checkAlredyInParty()
+    public static function checkAlredyInParty()
     {
         return PartyParticipant::where('user_id', Auth::id())->get()->isNotEmpty();
     }

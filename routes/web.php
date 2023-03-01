@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\PartyController;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\LeavePartyMiddleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,13 +22,21 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
-Route::get('/party/landing', [PartyController::class, 'index'])->name('landingParty');
-Route::get('/party/create', [PartyController::class, 'create'])->name('createParty')->middleware(Authenticate::class);
-Route::post('/party/create', [PartyController::class, 'store'])->name('storeParty')->middleware(Authenticate::class);
-Route::get('/party/join', [PartyController::class, 'joinPage'])->name('joinPageParty')->middleware(Authenticate::class);
-Route::post('/party/join', [PartyController::class, 'join'])->name('joinParty')->middleware(Authenticate::class);
-Route::post('/party/leave', [PartyController::class, 'leave'])->name('leaveParty')->middleware(Authenticate::class);
-Route::get('/party', [PartyController::class, 'inParty'])->name('party')->middleware(Authenticate::class);
+Route::get('/party/landing', [PartyController::class, 'index'])->name('landingParty')
+    ->middleware(Authenticate::class);
+Route::get('/party/create', [PartyController::class, 'create'])->name('createParty')
+    ->middleware(Authenticate::class);
+Route::post('/party/create', [PartyController::class, 'store'])->name('storeParty')
+    ->middleware(Authenticate::class);
+Route::get('/party/join', [PartyController::class, 'joinPage'])->name('joinPageParty')
+    ->middleware(Authenticate::class);
+Route::post('/party/join', [PartyController::class, 'join'])->name('joinParty')
+    ->middleware(Authenticate::class);
+Route::post('/party/leave', [PartyController::class, 'leave'])->name('leaveParty')
+    ->middleware(Authenticate::class)
+    ->middleware(LeavePartyMiddleware::class);
+Route::get('/party', [PartyController::class, 'inParty'])->name('party')
+    ->middleware(Authenticate::class);
 
 Route::post('/party/spotify/login', [MusicController::class, 'doLogin']);
 Route::get('/party/spotify/callback', [MusicController::class, 'callback']);
