@@ -1,7 +1,7 @@
 @section('content')
     <a href="#"
         class="relative flex flex-row max-w-xl items-center bg-white border rounded-lg shadow-md hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
-        <img class="p-2 object-cover h-auto w-32" src="@yield('image')" alt="">
+        <img class="p-2 object-cover h-auto w-32" src="@yield('image')" alt="Cover image">
         <div class="flex flex-col justify-between pl-2 pr-4 py-1 leading-normal">
             <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">@yield('title')</h5>
             <div class="m-0 p-0">
