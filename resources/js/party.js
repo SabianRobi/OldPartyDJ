@@ -10,7 +10,7 @@ searchBtn.addEventListener("click", sendSearchRequest);
 searchForm.addEventListener("submit", sendSearchRequest);
 
 let query;
-const hints = [ "Blue", "abcdefu", "Turn it up", "Sweet Dreams", "Glad you came", "Monster", "Mizu", "Csavard fel a szőnyeget", "Everthing Black", "RISE", "Me, Myself & I", "Him & I", "Wellerman", "hot girl boomer", "Save Your Tears", "Summer Waves", "Élvezd", "Low", "Dynamite", "Hangover", "I Gotta Feeling", "Can't hold us", "Shape of You", "Beliver", "Thunder", "Tudod, Hmmmm", "Young, Wild & Free", "Csepereg az eső", "Érik a szőlő"];
+const hints = [ "Blue", "abcdefu", "Turn it up", "Sweet Dreams", "Glad you came", "Monster", "Mizu", "Csavard fel a szőnyeget", "Everthing Black", "RISE", "Me, Myself & I", "Him & I", "Wellerman", "hot girl boomer", "Save Your Tears", "Summer Waves", "Élvezd", "Low", "Dynamite", "Hangover", "I Gotta Feeling", "Can't hold us", "Shape of You", "Believer", "Thunder", "Tudod, Hmmmm", "Young, Wild & Free", "Csepereg az eső", "Érik a szőlő"];
 
 //Toggles the searching icon
 function toggleSearchAnimation() {
