@@ -55,7 +55,7 @@
 [ ] Delete db rows cascadly when a user deletes his account (remove its party, leave him from parties)
 [X] Style forms vertically
 [X] Add titles for forms
-[ ] Last logged in db col
+[X] Last logged in db col
 
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file

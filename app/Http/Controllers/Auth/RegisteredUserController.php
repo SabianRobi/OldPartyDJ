@@ -35,18 +35,21 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', 'unique:'.User::class],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
+            'username' => ['required', 'string', 'max:255', 'unique:users,username'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
+        $user = new User([
             'name' => $request->name,
             'username' => $request->username,
             'email' => strtolower($request->email),
             'password' => Hash::make($request->password),
             'is_admin' => false,
+            'last_login' => now(),
         ]);
+        $user->save();
+        $user->update();
 
         event(new Registered($user));
 
@@ -54,6 +57,6 @@ class RegisteredUserController extends Controller
 
         notify()->success('You registered successfully!');
 
-        return redirect(RouteServiceProvider::HOME);
+        return redirect()->route('home');
     }
 }

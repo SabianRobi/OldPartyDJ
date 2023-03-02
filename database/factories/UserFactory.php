@@ -26,7 +26,7 @@ class UserFactory extends Factory
             'username' => str_replace([" ", ".", ","], "", trim($name)),
             //'email_verified_at' => now(),
             'password' => Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'last_login' => now()
         ];
     }
 
