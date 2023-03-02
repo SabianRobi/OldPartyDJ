@@ -54,7 +54,7 @@
 [X] Leave party automatically when logging out
 [ ] Delete db rows cascadly when a user deletes his account (remove its party, leave him from parties)
 [X] Style forms vertically
-[ ] Add titles for forms
+[X] Add titles for forms
 [ ] Last logged in db col
 
 # After deployment:

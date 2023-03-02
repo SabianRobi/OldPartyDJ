@@ -6,12 +6,12 @@
     <div class="flex flex-col justify-center items-center h-full">
         <div class="flex-1"></div>
         <div class="flex-1 flex text-center justify-center">
-            <x-auth-card>
-                <x-slot name="logo">
+            <x-auth-card :title="__('Login')">
+                {{-- <x-slot name="logo">
                     <a href="{{ route('home') }}">
                         <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
                     </a>
-                </x-slot>
+                </x-slot> --}}
 
                 <!-- Session Status -->
                 <x-auth-session-status class="mb-4" :status="session('status')" />
