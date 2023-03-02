@@ -51,14 +51,21 @@
 
     @include('layouts.common.navBar')
 
-    <main class="bg-white text-black mb-auto dark:bg-gray-600 dark:text-white ">
+    <div class="container items-center mx-auto">
         @sectionMissing('header')
             @include('layouts.common.header')
         @endif
+    </div>
 
-        <div class="container items-center mx-auto p-2">
+    <main class="bg-white text-black mb-auto dark:bg-gray-600 dark:text-white flex-1">
+
+        @hasSection('noContentMargin')
             @yield('content')
-        </div>
+        @else
+            <div class="container items-center mx-auto p-2">
+                @yield('content')
+            </div>
+        @endif
     </main>
 
     @include('layouts.common.footer')
