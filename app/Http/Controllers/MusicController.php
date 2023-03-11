@@ -234,8 +234,8 @@ class MusicController extends Controller
     public function playNextTrack()
     {
         $participant = PartyParticipant::firstWhere('user_id', auth()->user()->id);
-        if (!strcmp($participant->role, "creator")) {
-            return response('You do not have permission to do this action!', 403);
+        if (strcmp($participant->role, "creator")) {
+            return response()->json(['message' => 'You do not have permission to do this action!'], 403);
         }
 
         $token = SpotifyToken::firstWhere('user_id', auth()->user()->id);
