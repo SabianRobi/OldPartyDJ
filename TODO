@@ -44,7 +44,7 @@
 [X] Make setDeviceId's method POST
 [X] Salt the passwords (user, party) | Salted by default
 [ ] Guard all of controller endpoints
-[x] Make username length to min 3 chars
+[X] Make username length to min 3 chars
 
 
 # Etc
