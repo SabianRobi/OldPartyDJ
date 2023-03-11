@@ -47,7 +47,6 @@
 [x] Make username length to min 3 chars
 
 
-
 # Etc
 [X] Update party link in nav
 [X] Forms: mark required fields
@@ -56,6 +55,13 @@
 [X] Style forms vertically
 [X] Add titles for forms
 [X] Last logged in db col
+[ ] Add "Go back" buttons to forms
+[ ] Delete typed text button on party page
+[ ] Highlite current page in navbar
+[X] Make Party landing page visible for everybody, on click alert them to log in
 
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file
+
+# Trixi ideas
+- Theme selector (more themes)

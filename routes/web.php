@@ -22,21 +22,27 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
-Route::get('/party/landing', [PartyController::class, 'index'])->name('landingParty')
-    ->middleware(Authenticate::class);
-Route::get('/party/create', [PartyController::class, 'create'])->name('createParty')
-    ->middleware(Authenticate::class);
-Route::post('/party/create', [PartyController::class, 'store'])->name('storeParty')
-    ->middleware(Authenticate::class);
-Route::get('/party/join', [PartyController::class, 'joinPage'])->name('joinPageParty')
-    ->middleware(Authenticate::class);
-Route::post('/party/join', [PartyController::class, 'join'])->name('joinParty')
-    ->middleware(Authenticate::class);
-Route::post('/party/leave', [PartyController::class, 'leave'])->name('leaveParty')
-    ->middleware(Authenticate::class)
-    ->middleware(LeavePartyMiddleware::class);
-Route::get('/party', [PartyController::class, 'inParty'])->name('party')
-    ->middleware(Authenticate::class);
+Route::get('/party/landing', [PartyController::class, 'index'])
+    ->name('landingParty');
+Route::get('/party/create', [PartyController::class, 'create'])
+    ->middleware('auth')
+    ->name('createParty');
+Route::post('/party/create', [PartyController::class, 'store'])
+    ->middleware('auth')
+    ->name('storeParty');
+Route::get('/party/join', [PartyController::class, 'joinPage'])
+    ->middleware('auth')
+    ->name('joinPageParty');
+Route::post('/party/join', [PartyController::class, 'join'])
+    ->middleware('auth')
+    ->name('joinParty');
+Route::post('/party/leave', [PartyController::class, 'leave'])
+    ->middleware(LeavePartyMiddleware::class)
+    ->middleware('auth')
+    ->name('leaveParty');
+Route::get('/party', [PartyController::class, 'inParty'])
+    ->middleware('auth')
+    ->name('party');
 
 Route::post('/party/spotify/login', [MusicController::class, 'doLogin']);
 Route::get('/party/spotify/callback', [MusicController::class, 'callback']);
