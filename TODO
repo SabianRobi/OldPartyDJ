@@ -57,7 +57,7 @@
 [X] Last logged in db col
 [ ] Add "Go back" buttons to forms
 [ ] Delete typed text button on party page
-[ ] Highlite current page in navbar
+[X] Highlite current page in navbar
 [X] Make Party landing page visible for everybody, on click alert them to log in
 
 # After deployment:
