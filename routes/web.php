@@ -53,8 +53,9 @@ Route::post('/party/spotify/addTrack', [MusicController::class, 'addTrackToQueue
 Route::post('/party/playNextTrack', [MusicController::class, 'playNextTrack']);
 
 //Temp
-Route::get('/party/makePartyAndAssignUser', [MusicController::class, 'makePartyAndAssignUser']);
-
+Route::get('/test', function() {
+    return view('test');
+});
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');

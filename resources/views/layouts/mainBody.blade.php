@@ -16,7 +16,7 @@
     {{-- Title --}}
     <title>
         {{ config('app.name', 'PartyDJ') }}
-        @if (View::hasSection('title'))
+        @hasSection('title')
             | @yield('title')
         @endif
     </title>
@@ -62,7 +62,7 @@
         @hasSection('noContentMargin')
             @yield('content')
         @else
-            <div class="container items-center mx-auto p-2">
+        <div class="container items-center mx-auto px-2 pt-2 pb-0">
                 @yield('content')
             </div>
         @endif

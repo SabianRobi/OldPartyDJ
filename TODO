@@ -46,7 +46,6 @@
 [ ] Guard all of controller endpoints
 [X] Make username length to min 3 chars
 
-
 # Etc
 [X] Update party link in nav
 [X] Forms: mark required fields
@@ -73,5 +72,9 @@
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file
 
-# Trixi ideas
-- Theme selector (more themes)
+# Has to be completed until a private party:
+- Add "Go back" buttons to forms
+- Guard all of controller endpoints
+- Player todos
+- Add info to main page
+- A way to list the currently in queue songs
