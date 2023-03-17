@@ -59,6 +59,16 @@
 [ ] Delete typed text button on party page
 [X] Highlite current page in navbar
 [X] Make Party landing page visible for everybody, on click alert them to log in
+[X] Style join/create party page
+[ ] Idea / Bug reporting page
+[ ] Give custom names for DB columns
+[ ] Logout bugging sometimes (more than one headers?)
+
+# Ideas
+- Make more choosable theme
+- Marketing text on the home page, BBG image
+- like / disable current in-queue songs
+- Lyrics
 
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file

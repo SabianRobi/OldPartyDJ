@@ -4,22 +4,20 @@
 
 @section('header', 'nothing')
 
-@section('viteImports')
-    @vite(['resources/js/party.js'])
-@endsection
+@section('noContentMargin', 'something')
 
 @section('content')
-<div class="container mx-auto flex flex-col justify-between items-center md:flex-row">
-    <div id="joinParty" class="flex-auto justify-center text-center align-middle">
-        <a href="{{ route('joinParty') }}">
-            <p>Join a Party</p>
+    <div class="flex flex-col md:flex-row justify-center items-center h-full">
+        <a href="{{ route('joinParty') }}"
+            class="flex-1 text-center self-stretch grid content-center bg-blue-400 bg-no-repeat bg-center bg-cover grayscale hover:grayscale-0"
+            id="joinParty" style="background-image: url({{ asset('images/party/joinParty.webp') }})">
+            <p class="brightness-200 filter-none text-6xl font-extrabold text-red-700">Join</p>
+        </a>
+        <a href="{{ route('createParty') }}"
+            class="flex-1 text-center self-stretch grid content-center bg-green-500 bg-no-repeat bg-center bg-cover grayscale hover:grayscale-0"
+            id="createParty" style="background-image: url({{ asset('images/party/createParty.webp') }})">
+            <p class="brightness-200 filter-none text-6xl font-extrabold text-lime-400">Create</p>
         </a>
     </div>
-    <div id="createParty" class="flex-auto justify-center text-center align-middle">
-        <a href="{{ route('createParty') }}">
-            <p>Create a Party</p>
-        </a>
-    </div>
-</div>
 
 @endsection
