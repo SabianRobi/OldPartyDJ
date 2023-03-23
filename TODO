@@ -15,7 +15,7 @@
 [X] Correct login and register page
 [X] Make welcome page (where select between Create / Join party)
 [X] Create 'login party' page
-[ ] Creat Profile settings page (connected platforms, delete account, light/dark mode, edit database info)
+[ ] Create Profile settings page (connected platforms, delete account, light/dark mode, edit database info)
 
 # Auth
 [X] Redirect user to page where the login requested
@@ -54,7 +54,7 @@
 [X] Style forms vertically
 [X] Add titles for forms
 [X] Last logged in db col
-[ ] Add "Go back" buttons to forms
+[X] Add "Go back" buttons to forms
 [ ] Delete typed text button on party page
 [X] Highlite current page in navbar
 [X] Make Party landing page visible for everybody, on click alert them to log in
@@ -71,6 +71,7 @@
 
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file
+Generate DB
 
 # Has to be completed until a private party:
 - Add "Go back" buttons to forms
@@ -78,3 +79,4 @@ Set Spotify client id, secret, redirect uri in .env file
 - Player todos
 - Add info to main page
 - A way to list the currently in queue songs
+- Elevate the error message when trying to join/create party unauthenticated
