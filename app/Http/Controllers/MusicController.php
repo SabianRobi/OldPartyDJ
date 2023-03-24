@@ -9,10 +9,7 @@ use Illuminate\Http\Request;
 use SpotifyWebAPI;
 use App\Models\SpotifyState;
 use App\Models\SpotifyToken;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-
-use function PHPUnit\Framework\isEmpty;
 
 class MusicController extends Controller
 {
@@ -143,22 +140,7 @@ class MusicController extends Controller
 
         $result = $result->tracks->items;
 
-        $filteredResult = [];
-
-        for ($i = 0; $i < $limit; $i++) {
-            $artists = [];
-            foreach ($result[$i]->artists as $artist) {
-                array_push($artists, $artist->name);
-            }
-
-            array_push($filteredResult, [
-                'image' => $result[$i]->album->images[1]->url, //300x300
-                'title' => $result[$i]->name,
-                'artists' => $artists,
-                'length' => $result[$i]->duration_ms,
-                'uri' => $result[$i]->uri,
-            ]);
-        }
+        $filteredResult = $this->filterTracksForClient($result);
 
         return response()->json($filteredResult);
     }
@@ -285,5 +267,52 @@ class MusicController extends Controller
         //     'platform' => $track->platform,
         // ];
         //return response()->json($data);
+    }
+
+    public function getSongsInQueue() {
+        //make sure user is in party
+        //TODO
+
+        $party = PartyParticipant::firstWhere('user_id', auth()->id());
+        $songs = MusicQueue::where('party_id', $party->id)->select('user_id', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
+        $songData = $this->fetchTrackInfos($songs);
+        $filteredTracks = $this->filterTracksForClient($songData);
+        return response()->json($filteredTracks);
+    }
+
+    private function fetchTrackInfos($dbTrack) {
+        $token = (SpotifyToken::where('user_id', auth()->user()->id)->first());
+        $this->api->setAccessToken($token->token);
+        $this->session->setAccessToken($token->token);
+        $this->session->setRefreshToken($token->refresh_token);
+
+        $uris = [];
+        foreach ($dbTrack as $track) {
+            array_push($uris, $track['track_uri']);
+        }
+
+        $tracks = $this->api->getTracks($uris);
+
+        return $tracks->tracks;
+    }
+
+    private function filterTracksForClient($tracks) {
+        $filteredTracks = [];
+
+        for ($i = 0; $i < count($tracks); $i++) {
+            $artists = [];
+            foreach ($tracks[$i]->artists as $artist) {
+                array_push($artists, $artist->name);
+            }
+
+            array_push($filteredTracks, [
+                'image' => $tracks[$i]->album->images[1]->url, //300x300
+                'title' => $tracks[$i]->name,
+                'artists' => $artists,
+                'length' => $tracks[$i]->duration_ms,
+                'uri' => $tracks[$i]->uri,
+            ]);
+        }
+        return $filteredTracks;
     }
 }

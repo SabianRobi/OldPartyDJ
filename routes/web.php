@@ -4,7 +4,6 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\PartyController;
-use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\LeavePartyMiddleware;
 
 /*
@@ -51,6 +50,7 @@ Route::get('/party/spotify/refreshToken', [MusicController::class, 'refreshToken
 Route::post('/party/spotify/setDeviceId', [MusicController::class, 'setDeviceId']);
 Route::post('/party/spotify/addTrack', [MusicController::class, 'addTrackToQueue']);
 Route::post('/party/playNextTrack', [MusicController::class, 'playNextTrack']);
+Route::get('/party/getSongsInQueue', [MusicController::class, 'getSongsInQueue'])->middleware('auth');
 
 //Temp
 Route::get('/test', function() {

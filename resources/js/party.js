@@ -2,33 +2,65 @@ const searchForm = document.querySelector("#searchForm");
 const queryInp = document.querySelector("#query");
 const searchBtn = document.querySelector("#searchBtn");
 const resultsUl = document.querySelector("#results");
+const queueUl = document.querySelector("#queue");
 const csrfToken = document.head.querySelector("meta[name=csrf-token]").content;
 
-const searchButtonText = document.querySelector("#searchBtnText");
-const searchButtonImage = document.querySelector("#searchBtnImage");
+const getSongsBtn = document.querySelector("#getSongs");
+const clearResultsBtn = document.querySelector("#clearResults");
 searchBtn.addEventListener("click", sendSearchRequest);
 searchForm.addEventListener("submit", sendSearchRequest);
+getSongsBtn.addEventListener("click", getSongsInQueue);
+clearResultsBtn.addEventListener("click", clearResults);
 
 let query;
-const hints = [ "Blue", "abcdefu", "Turn it up", "Sweet Dreams", "Glad you came", "Monster", "Mizu", "Csavard fel a szőnyeget", "Everthing Black", "RISE", "Me, Myself & I", "Him & I", "Wellerman", "hot girl boomer", "Save Your Tears", "Summer Waves", "Élvezd", "Low", "Dynamite", "Hangover", "I Gotta Feeling", "Can't hold us", "Shape of You", "Believer", "Thunder", "Tudod, Hmmmm", "Young, Wild & Free", "Csepereg az eső", "Érik a szőlő"];
+const hints = [
+    "Blue",
+    "abcdefu",
+    "Turn it up",
+    "Sweet Dreams",
+    "Glad you came",
+    "Monster",
+    "Mizu",
+    "Csavard fel a szőnyeget",
+    "Everthing Black",
+    "RISE",
+    "Me, Myself & I",
+    "Him & I",
+    "Wellerman",
+    "hot girl boomer",
+    "Save Your Tears",
+    "Summer Waves",
+    "Élvezd",
+    "Low",
+    "Dynamite",
+    "Hangover",
+    "I Gotta Feeling",
+    "Can't hold us",
+    "Shape of You",
+    "Believer",
+    "Thunder",
+    "Tudod, Hmmmm",
+    "Young, Wild & Free",
+    "Csepereg az eső",
+    "Érik a szőlő",
+];
 
 //Toggles the searching icon
-function toggleSearchAnimation() {
-    if (searchButtonText.hidden) {
-        searchForm.addEventListener("submit", sendSearchRequest);
-        searchBtn.addEventListener("click", sendSearchRequest);
-        // setNewSearchHint();
+function toggleSearchAnimation(e) {
+    if (e.dataset.inProgress === "false") {
+        e.dataset.inProgress = "true";
+        e.innerHTML = `<img src="images/loading.gif" alt="Processing..." class="w-5">`;
     } else {
-        searchForm.removeEventListener("submit", sendSearchRequest);
-        searchBtn.removeEventListener("click", sendSearchRequest);
+        e.dataset.inProgress = "false";
+        e.innerHTML = e.dataset.originalValue;
     }
-    searchButtonText.toggleAttribute("hidden");
-    searchButtonImage.toggleAttribute("hidden");
 }
 
 async function sendSearchRequest(e) {
     e.preventDefault();
-    toggleSearchAnimation();
+    toggleSearchAnimation(this);
+    searchForm.removeEventListener("submit", sendSearchRequest);
+    searchBtn.removeEventListener("click", sendSearchRequest);
 
     query = queryInp.value == "" ? queryInp.placeholder : queryInp.value;
     const platform = "Spotify";
@@ -45,7 +77,7 @@ async function sendSearchRequest(e) {
     }
     console.log(`Received ${result.length} tracks from ${platform}!`);
 
-    resultsUl.innerHTML = "";
+    clearResults();
     result.forEach((track) => {
         let length = new Date(track["length"]);
         const card = getMusicCardHTML(
@@ -60,7 +92,9 @@ async function sendSearchRequest(e) {
     });
     refreshListeners();
     changeHint();
-    toggleSearchAnimation();
+    toggleSearchAnimation(this);
+    searchBtn.addEventListener("click", sendSearchRequest);
+    searchForm.addEventListener("submit", sendSearchRequest);
 }
 
 //Sends AJAX request to make a search in the Spotify database
@@ -188,6 +222,35 @@ async function addToQueue(uri, platform) {
 }
 
 function changeHint() {
-    queryInp.placeholder = hints.at(Math.floor(Math.random()*hints.length));
+    queryInp.placeholder = hints.at(Math.floor(Math.random() * hints.length));
 }
 changeHint();
+
+async function getSongsInQueue() {
+    toggleSearchAnimation(this);
+    console.log("Getting songs is queue...");
+    const response = await fetch("/party/getSongsInQueue").then((res) =>
+        res.json()
+    );
+    console.log(`There is ${response.length} track(s) in the queue.`, response);
+
+    clearResults();
+    response.forEach((track) => {
+        let length = new Date(track["length"]);
+        const card = getMusicCardHTML(
+            track["image"],
+            track["title"],
+            track["artists"],
+            length.getMinutes() + "m" + length.getSeconds() + "s",
+            track["uri"],
+            track["platform"]
+        );
+        queueUl.appendChild(card);
+    });
+    toggleSearchAnimation(this);
+}
+
+function clearResults() {
+    resultsUl.innerHTML = "";
+    queueUl.innerHTML = "";
+}
