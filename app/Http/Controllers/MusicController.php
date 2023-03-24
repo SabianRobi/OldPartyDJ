@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use SpotifyWebAPI;
 use App\Models\SpotifyState;
 use App\Models\SpotifyToken;
+use App\Models\User;
 use Illuminate\Validation\Rule;
 
 class MusicController extends Controller
@@ -276,7 +277,13 @@ class MusicController extends Controller
         $party = PartyParticipant::firstWhere('user_id', auth()->id());
         $songs = MusicQueue::where('party_id', $party->id)->select('user_id', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
         $songData = $this->fetchTrackInfos($songs);
+
         $filteredTracks = $this->filterTracksForClient($songData);
+        for ($i=0; $i < count($filteredTracks); $i++) {
+            $userId = $songs[$i]->user_id;
+            $username = User::firstWhere('id', $songs[$i]->user_id)->username;
+            $filteredTracks[$i]['addedBy'] = $username;
+        }
         return response()->json($filteredTracks);
     }
 

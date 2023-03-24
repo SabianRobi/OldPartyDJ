@@ -114,7 +114,7 @@ function refreshListeners() {
     });
 }
 
-function getMusicCardHTML(image, title, artists, length, uri, platform) {
+function getMusicCardHTML(image, title, artists, length, uri, platform, addedBy) {
     const artistsP = document.createElement("p");
     artistsP.classList.add(
         "mb-3",
@@ -195,6 +195,13 @@ function getMusicCardHTML(image, title, artists, length, uri, platform) {
     card.appendChild(imgO);
     card.appendChild(outerDiv);
 
+    if(addedBy !== undefined) {
+        const addedByP = document.createElement("p");
+        addedByP.classList.add("text-xs", "text-gray-500", "absolute", "top-1", "right-2");
+        addedByP.innerText = addedBy;
+        card.appendChild(addedByP);
+    }
+
     return card;
 }
 
@@ -243,7 +250,8 @@ async function getSongsInQueue() {
             track["artists"],
             length.getMinutes() + "m" + length.getSeconds() + "s",
             track["uri"],
-            track["platform"]
+            track["platform"],
+            track["addedBy"]
         );
         queueUl.appendChild(card);
     });
@@ -254,3 +262,4 @@ function clearResults() {
     resultsUl.innerHTML = "";
     queueUl.innerHTML = "";
 }
+

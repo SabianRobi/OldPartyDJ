@@ -32,7 +32,7 @@
 [X] Make users able to create parties without logging in with spotify (PartyController:155)
 [X] Add a way to see queued songs
 [X] Add animation to buttons when waiting for response
-[ ] Display username who added to the list (when showing queued songs)
+[X] Display username who added to the list (when showing queued songs)
 [ ] Set defualt image when no cover supplied by Spotify (on music cards)
 [ ] Get next song according to the highest score (and date beside that)
 
@@ -80,10 +80,5 @@ Generate DB
 - Guard all of controller endpoints
 - Player todos
 - Add info to main page
-- Current music queue - display username who added to the list
 - Elevate the error message when trying to join/create party unauthenticated
 - Get next song according to the highest score (and date beside that)
-
-
-# now:
-Current music queue - display username who added to the list

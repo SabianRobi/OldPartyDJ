@@ -1,6 +1,7 @@
+{{-- Do I use it anywhere? --}}
 @section('content')
-    <a href="#"
-        class="relative flex flex-row max-w-xl items-center bg-white border rounded-lg shadow-md hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
+    <div class="relative flex flex-row max-w-xl items-center bg-white border rounded-lg shadow-md hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 mt-1"
+        data-uri="@yield('uri')" data-platform="@yield('platform')">
         <img class="p-2 object-cover h-auto w-32" src="@yield('image')" alt="Cover image">
         <div class="flex flex-col justify-between pl-2 pr-4 py-1 leading-normal">
             <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">@yield('title')</h5>
@@ -9,5 +10,6 @@
                 <p class="text-xs text-gray-500 absolute bottom-1 right-2">@yield('length')</p>
             </div>
         </div>
-    </a>
+        <p class="text-xs text-gray-500 absolute top-1 right-2">@yield('addedBy')</p>
+    </div>
 @endsection
