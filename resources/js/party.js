@@ -171,7 +171,7 @@ function getMusicCardHTML(image, title, artists, length, uri, platform, addedBy)
 
     const imgO = document.createElement("img");
     imgO.classList.add("p-2", "object-cover", "h-auto", "w-32");
-    imgO.src = image;
+    imgO.src = (image === '' || image === undefined ? '/images/party/defaultCover.png' : image);
 
     const card = document.createElement("div");
     card.classList.add(

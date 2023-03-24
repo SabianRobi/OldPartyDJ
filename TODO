@@ -33,7 +33,7 @@
 [X] Add a way to see queued songs
 [X] Add animation to buttons when waiting for response
 [X] Display username who added to the list (when showing queued songs)
-[ ] Set defualt image when no cover supplied by Spotify (on music cards)
+[X] Set defualt image when no cover supplied by Spotify (on music cards)
 [ ] Get next song according to the highest score (and date beside that)
 
 ## Player
