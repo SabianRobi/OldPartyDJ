@@ -216,17 +216,17 @@ class MusicController extends Controller
 
     public function playNextTrack()
     {
+        //TODO: crashes if token expired
         $participant = PartyParticipant::firstWhere('user_id', auth()->user()->id);
         if (strcmp($participant->role, "creator")) {
             return response()->json(['message' => 'You do not have permission to do this action!'], 403);
         }
-
-        $token = SpotifyToken::firstWhere('user_id', auth()->user()->id);
+        $token = SpotifyToken::firstWhere('user_id', $participant->user_id);
         $this->api->setAccessToken($token->token);
         $this->session->setAccessToken($token->token);
 
-        $party = Party::firstWhere('user_id', auth()->user()->id);
-        $nextTrack = MusicQueue::firstWhere('party_id', $party->id);
+        $party = Party::firstWhere('user_id', $participant->user_id);
+        $nextTrack = MusicQueue::where('party_id', $party->id)->orderBy('score', 'DESC')->first();
 
         if (!isset($nextTrack)) {
             $party->waiting_for_track = true;
@@ -276,6 +276,7 @@ class MusicController extends Controller
 
         $party = PartyParticipant::firstWhere('user_id', auth()->id());
         $songs = MusicQueue::where('party_id', $party->id)->select('user_id', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
+        //TODO: validate song quantity (if 0 then stop and return something)
         $songData = $this->fetchTrackInfos($songs);
 
         $filteredTracks = $this->filterTracksForClient($songData);

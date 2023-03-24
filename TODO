@@ -27,14 +27,14 @@
 # Party
 [X] Make the Spotify login available after user login
 [X] Store the Spotify refresh token in db, not in the session
-[-] Spotify token expiring - where to store RefreshToken? (db)
+[ ] Spotify token expiring (playNextTrack)
 [X] Rename spotify_queues table to music_queues
 [X] Make users able to create parties without logging in with spotify (PartyController:155)
 [X] Add a way to see queued songs
 [X] Add animation to buttons when waiting for response
 [X] Display username who added to the list (when showing queued songs)
 [X] Set defualt image when no cover supplied by Spotify (on music cards)
-[ ] Get next song according to the highest score (and date beside that)
+[X] Get next song according to the highest score
 
 ## Player
 [ ] Set the play width to a fix size
