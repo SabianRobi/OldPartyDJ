@@ -15,7 +15,7 @@ class PartyController extends Controller
     public function index()
     {
         if ($this->checkAlredyInParty()) {
-            notify()->error("You are already in a party!");
+            notify()->info("You are already in a party!");
             return redirect()->route('party');
         }
 
@@ -142,10 +142,6 @@ class PartyController extends Controller
     // In party page
     public function inParty()
     {
-        if (!$this->checkAlredyInParty()) {
-            return redirect()->route('landingParty');
-        }
-
         $participant = PartyParticipant::firstWhere('user_id', Auth::id());
         $party = Party::find($participant->party_id);
         $spotifyToken = SpotifyToken::firstWhere('user_id', Auth::id());

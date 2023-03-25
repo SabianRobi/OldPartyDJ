@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use ErrorException;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 
 class Authenticate extends Middleware
@@ -15,13 +14,9 @@ class Authenticate extends Middleware
      */
     protected function redirectTo($request)
     {
-        if (! $request->expectsJson()) {
+        if (!$request->expectsJson()) {
             notify()->error("Please log in first to use this feature!");
-            $prevPage = '';
-            try {
-                $prevPage = $request->session()->get('_previous')['url'];
-            } catch(ErrorException $e) {}
-            return $prevPage;
+            return url()->previous('/');
         }
     }
 }

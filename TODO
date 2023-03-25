@@ -46,7 +46,7 @@
 # Security
 [X] Make setDeviceId's method POST
 [X] Salt the passwords (user, party) | Salted by default
-[ ] Guard all of controller endpoints
+[X] Guard all of controller endpoints
 [X] Make username length to min 3 chars
 
 # Etc
@@ -66,6 +66,8 @@
 [ ] Logout bugging sometimes (more than one headers?) - not anymore?
 [ ] Ask to store cookies
 [X] Elevate flash messages to the top
+[ ] Remove test route
+[ ] Solve random TODOs in the project
 
 # Ideas
 - Make more choosable theme
