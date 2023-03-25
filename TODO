@@ -9,9 +9,9 @@
 [-] Create relations between models
 
 # Pages
-[ ] Contact page
-[ ] Add info to main page
-[ ] Tutorial page
+[_] Contact page
+[X] Add info to main page
+[_] Tutorial page (to main page)
 [X] Correct login and register page
 [X] Make welcome page (where select between Create / Join party)
 [X] Create 'login party' page
@@ -20,9 +20,9 @@
 # Auth
 [X] Redirect user to page where the login requested
 [X] Make registering validate username field
-[ ] Add 'Remember me' option to login page
-[ ] Add option to login with biometric login (WebAuthN)
-[ ] Add option to login with Social Accounts (Facebook, Google)
+[_] Add 'Remember me' option to login page
+[_] Add option to login with biometric login (WebAuthN)
+[_] Add option to login with Social Accounts (Facebook, Google)
 
 # Party
 [X] Make the Spotify login available after user login
@@ -61,8 +61,8 @@
 [X] Highlite current page in navbar
 [X] Make Party landing page visible for everybody, on click alert them to log in
 [X] Style join/create party page
-[ ] Idea / Bug reporting page
-[ ] Give custom names for DB columns
+[_] Idea / Bug reporting page
+[_] Give custom names for DB columns
 [ ] Logout bugging sometimes (more than one headers?) - not anymore?
 
 # Ideas
@@ -79,6 +79,4 @@ Generate DB
 # Has to be completed until a private party:
 - Guard all of controller endpoints
 - Player todos
-- Add info to main page
 - Elevate the error message when trying to join/create party unauthenticated
-- Get next song according to the highest score (and date beside that)
