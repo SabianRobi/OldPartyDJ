@@ -64,6 +64,8 @@
 [_] Idea / Bug reporting page
 [_] Give custom names for DB columns
 [ ] Logout bugging sometimes (more than one headers?) - not anymore?
+[ ] Ask to store cookies
+[X] Elevate flash messages to the top
 
 # Ideas
 - Make more choosable theme
@@ -79,4 +81,3 @@ Generate DB
 # Has to be completed until a private party:
 - Guard all of controller endpoints
 - Player todos
-- Elevate the error message when trying to join/create party unauthenticated
