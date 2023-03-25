@@ -189,7 +189,7 @@ class MusicController extends Controller
         );
 
         $participant = PartyParticipant::where('user_id', Auth::id())->get()->first();
-        $party = Party::find($participant->party_id)->first();
+        $party = Party::find($participant->party_id);
 
         $trackInQueue = new MusicQueue();
         $trackInQueue->party_id = $party->id;
@@ -253,7 +253,7 @@ class MusicController extends Controller
         // }
         // $partyId = $partyId[0]->party_id;
 
-        // //TODO: Verify if the user is creator
+        // //TO-DO: Verify if the user is creator
 
         // $track = MusicQueue::where('party_id', $partyId)
         //     ->orderByDesc('score')
@@ -271,7 +271,7 @@ class MusicController extends Controller
 
     public function getSongsInQueue()
     {
-        $participant = PartyParticipant::firstWhere('user_id', auth()->id());
+        $participant = PartyParticipant::firstWhere('user_id', Auth::id());
         // $party = Party::find($participant->party_id);
         $songs = MusicQueue::where('party_id', $participant->party_id)->select('user_id', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
         if(count($songs) <= 0) {

@@ -65,8 +65,16 @@ async function sendSearchRequest(e) {
     query = queryInp.value == "" ? queryInp.placeholder : queryInp.value;
     const platform = "Spotify";
 
-    if (query.length < 3) {
-        console.warn("Please be more specific!"); // TODO alert user
+    if (query.length === 0) {
+        console.warn("Please be more specific!");
+        const text = queryInp.value;
+        queryInp.value = "Please be more specific!";
+        setTimeout(() => {
+            queryInp.value = text;
+        }, 1000);
+        toggleSearchAnimation(this);
+        searchBtn.addEventListener("click", sendSearchRequest);
+        searchForm.addEventListener("submit", sendSearchRequest);
         return;
     }
 
@@ -76,6 +84,14 @@ async function sendSearchRequest(e) {
         result = await searchSpotify();
     }
     console.log(`Received ${result.length} tracks from ${platform}!`);
+
+    if (result.length === 0) {
+        const text = queryInp.value;
+        queryInp.value = "There are no results!";
+        setTimeout(() => {
+            queryInp.value = text;
+        }, 1000);
+    }
 
     clearResults();
     result.forEach((track) => {
@@ -114,7 +130,15 @@ function refreshListeners() {
     });
 }
 
-function getMusicCardHTML(image, title, artists, length, uri, platform, addedBy) {
+function getMusicCardHTML(
+    image,
+    title,
+    artists,
+    length,
+    uri,
+    platform,
+    addedBy
+) {
     const artistsP = document.createElement("p");
     artistsP.classList.add(
         "mb-3",
@@ -171,7 +195,10 @@ function getMusicCardHTML(image, title, artists, length, uri, platform, addedBy)
 
     const imgO = document.createElement("img");
     imgO.classList.add("p-2", "object-cover", "h-auto", "w-32");
-    imgO.src = (image === '' || image === undefined ? '/images/party/defaultCover.png' : image);
+    imgO.src =
+        image === "" || image === undefined
+            ? "/images/party/defaultCover.png"
+            : image;
 
     const card = document.createElement("div");
     card.classList.add(
@@ -195,9 +222,15 @@ function getMusicCardHTML(image, title, artists, length, uri, platform, addedBy)
     card.appendChild(imgO);
     card.appendChild(outerDiv);
 
-    if(addedBy !== undefined) {
+    if (addedBy !== undefined) {
         const addedByP = document.createElement("p");
-        addedByP.classList.add("text-xs", "text-gray-500", "absolute", "top-1", "right-2");
+        addedByP.classList.add(
+            "text-xs",
+            "text-gray-500",
+            "absolute",
+            "top-1",
+            "right-2"
+        );
         addedByP.innerText = addedBy;
         card.appendChild(addedByP);
     }
@@ -239,12 +272,12 @@ async function getSongsInQueue() {
     const response = await fetch("/party/getSongsInQueue").then((res) =>
         res.json()
     );
-    if(response['error']) {
-        console.log('Error occured:', response['error']);
+    if (response["error"]) {
+        console.log("Error occured:", response["error"]);
         toggleSearchAnimation(this);
 
         const text = this.innerText;
-        this.innerText = response['error'];
+        this.innerText = response["error"];
         setTimeout(() => {
             this.innerText = text;
         }, 1200);
@@ -274,4 +307,3 @@ function clearResults() {
     resultsUl.innerHTML = "";
     queueUl.innerHTML = "";
 }
-

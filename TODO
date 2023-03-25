@@ -4,7 +4,7 @@
 [X] Add "New member? Register here!" to login page
 [X] Align page content to center
 [X] is_admin is not set after registering
-[ ] Make things look good in light mode also
+[_] Make things look good in light mode also
 [X] Footer align center on smaller devices
 [-] Create relations between models
 
@@ -42,6 +42,7 @@
 [ ] Make the title/arists brake into rows if they're long enough or make them rolling
 [ ] Select the player for playback after initalizing it
 [ ] Add padding/margin around title / artist, because button get too close if the text is short
+[ ] Track added to queue feedback
 
 # Security
 [X] Make setDeviceId's method POST
@@ -66,20 +67,18 @@
 [ ] Logout bugging sometimes (more than one headers?) - not anymore?
 [ ] Ask to store cookies
 [X] Elevate flash messages to the top
-[ ] Remove test route
+[X] Remove test route
 [ ] Solve random TODOs in the project
 
 # Ideas
 - Make more choosable theme
-- Marketing text on the home page, BBG image
 - like / disable current in-queue songs
 - Lyrics
 - Split MusicController into SpotifyController, and MusicController
+- A 'flashback' page, where the user can see the previous parties they attended, the songs played (with timestamp)
+    - Add 'addedAt' timestamp to queued tracks
+- When a user watching queued songs, get automatic updates
 
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file
 Generate DB
-
-# Has to be completed until a private party:
-- Guard all of controller endpoints
-- Player todos

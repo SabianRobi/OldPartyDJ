@@ -136,9 +136,6 @@ class PartyController extends Controller
         return redirect()->route('landingParty');
     }
 
-    // Show participated parties
-    // TODO
-
     // In party page
     public function inParty()
     {
