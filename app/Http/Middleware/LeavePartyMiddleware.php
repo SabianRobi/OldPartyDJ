@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Controllers\PartyController;
+use App\Models\MusicQueue;
 use App\Models\Party;
 use App\Models\PartyParticipant;
 use Closure;
@@ -26,9 +27,10 @@ class LeavePartyMiddleware
             $party = Party::find($participant->party_id);
             $participant->delete();
 
-            //Delete party when the last participant leaves
+            //Delete party (and ququed tracks) when the last participant leaves
             $participants = PartyParticipant::where('party_id', $party->id)->get();
             if (count($participants) == 0) {
+                MusicQueue::where('party_id', $party->id)->delete();
                 $party->delete();
             }
         }

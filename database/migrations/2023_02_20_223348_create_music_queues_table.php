@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('music_queues', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('party_id')->onDelete('cascade')->onUpdate('cascade')->constrained();
-            $table->foreignId('user_id')->onDelete('cascade')->onUpdate('cascade')->constrained();
+            $table->foreignId('party_id')->onDelete('cascade')->constrained();
+            $table->foreignId('user_id')->onDelete('cascade')->constrained();
             $table->string('platform');
             $table->string('track_uri');
             $table->integer('score');

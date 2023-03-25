@@ -239,6 +239,18 @@ async function getSongsInQueue() {
     const response = await fetch("/party/getSongsInQueue").then((res) =>
         res.json()
     );
+    if(response['error']) {
+        console.log('Error occured:', response['error']);
+        toggleSearchAnimation(this);
+
+        const text = this.innerText;
+        this.innerText = response['error'];
+        setTimeout(() => {
+            this.innerText = text;
+        }, 1200);
+
+        return;
+    }
     console.log(`There is ${response.length} track(s) in the queue.`, response);
 
     clearResults();
