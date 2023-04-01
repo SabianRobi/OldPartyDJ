@@ -94,6 +94,11 @@ async function sendSearchRequest(e) {
     }
 
     clearResults();
+
+    const queueText = document.createElement('p');
+    queueText.innerText = "Search results:";
+    resultsUl.appendChild(queueText);
+
     result.forEach((track) => {
         let length = new Date(track["length"]);
         const card = getMusicCardHTML(
@@ -287,6 +292,11 @@ async function getSongsInQueue() {
     console.log(`There is ${response.length} track(s) in the queue.`, response);
 
     clearResults();
+
+    const queueText = document.createElement('p');
+    queueText.innerText = "Queued tracks:";
+    resultsUl.appendChild(queueText);
+
     response.forEach((track) => {
         let length = new Date(track["length"]);
         const card = getMusicCardHTML(
