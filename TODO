@@ -37,12 +37,12 @@
 [X] Get next song according to the highest score
 
 ## Player
-[ ] Set the play width to a fix size
-[ ] Add volume bar to music player
-[ ] Make the title/arists brake into rows if they're long enough or make them rolling
+[X] Set the play width to a fix size
+[X] Add volume bar to music player
+[X] Make the title/arists brake into rows if they're long enough or make them rolling
 [ ] Select the player for playback after initalizing it
-[ ] Add padding/margin around title / artist, because button get too close if the text is short
-[ ] Track added to queue feedback
+[X] Add padding/margin around title / artist, because button get too close if the text is short
+[ ] Add feedback when track successfully added to queue
 
 # Security
 [X] Make setDeviceId's method POST
@@ -78,6 +78,7 @@
 - A 'flashback' page, where the user can see the previous parties they attended, the songs played (with timestamp)
     - Add 'addedAt' timestamp to queued tracks
 - When a user watching queued songs, get automatic updates
+- Write documentation
 
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file

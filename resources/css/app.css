@@ -4,4 +4,11 @@
 
 html {
 	scroll-behavior: smooth;
+    min-width: 350px;
+}
+
+marquee-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

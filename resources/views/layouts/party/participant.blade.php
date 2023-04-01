@@ -40,12 +40,12 @@
     <form action="{{ route('leaveParty') }}" method="post" class="m-2">
         @csrf
         <button id="leaveParty" name="leaveParty" data-in-progress="false"
-            class="bg-red-800 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">Leave party</button>
+            class="bg-red-800 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Leave party</button>
     </form>
     <button id="getSongs" name="getSongs" data-in-progress="false" data-original-value="Get queued songs"
-        class="bg-teal-500 hover:bg-teal-300 text-white font-bold py-2 px-4 m-2 rounded">Get queued songs</button>
+        class="bg-teal-500 hover:bg-teal-400 text-white font-bold py-2 px-4 m-2 rounded">Get queued songs</button>
     <button id="clearResults" name="clearResults"
-        class="bg-yellow-500 hover:bg-yellow-300 text-black font-bold py-2 px-4 m-2 rounded">Clear results</button>
+        class="bg-yellow-500 hover:bg-yellow-400 text-white font-bold py-2 px-4 m-2 rounded">Clear results</button>
 </div>
 
 

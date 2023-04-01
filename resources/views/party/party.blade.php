@@ -5,7 +5,7 @@
 @section('header', 'nothing')
 
 @section('viteImports')
-    @vite(['resources/js/party.js'])
+    @vite(['resources/js/party.js', 'resources/js/marquee-text-element.js'])
 @endsection
 
 @section('content')
@@ -18,7 +18,12 @@
                 let token = "{{ $spotifyToken }}";
             </script>
             @vite(['resources/js/partyPlayer.js'])
+            <link rel="preload" as="image" href="images/loading.gif">
         @endsection
         @include('layouts.party.player')
-    @endif
+    @else
+        @section('scripts')
+            <link rel="preload" as="image" href="images/loading.gif">
+        @endsection
+    @endisset
 @endsection

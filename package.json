@@ -17,6 +17,7 @@
         "vite": "^3.0.0"
     },
     "dependencies": {
+        "marquee-text-element": "^0.0.1",
         "sqlite3": "^5.1.2"
     }
 }

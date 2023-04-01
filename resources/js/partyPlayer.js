@@ -1,22 +1,23 @@
-const playerPrevObj = document.querySelector("#spotify_player_previous");
-const playerTogglePlayObj = document.querySelector(
-    "#spotify_player_toggle_play"
-);
-let playIcon = document.querySelector("#play-icon");
-let pauseIcon = document.querySelector("#pause-icon");
-const playerNextObj = document.querySelector("#spotify_player_next");
-const playerImageObj = document.querySelector("#spotify_player_image");
-const playerTitleObj = document.querySelector("#spotify_player_title");
-const playerArtistObj = document.querySelector("#spotify_player_artist");
+import { throttle } from "lodash";
+
+// const playerPrevObj = document.querySelector("#spotify_player_previous");
+const playerTogglePlayObj = document.querySelector("#player_toggle_play");
+const togglePlayIcon = document.querySelector("#player_toggle_play");
+const playerNextObj = document.querySelector("#player_next");
+const playerImageObj = document.querySelector("#player_image");
+const playerTitleObj = document.querySelector("#player_title");
+const playerArtistObj = document.querySelector("#player_artist");
 
 const csrfToken = document.head.querySelector("meta[name=csrf-token]").content;
 
 playerTogglePlayObj.addEventListener("click", playerTogglePlay);
-playerPrevObj.addEventListener("click", playerPrev);
+// playerPrevObj.addEventListener("click", playerPrev);
 playerNextObj.addEventListener("click", playerNext);
+const playerVolumeBar = document.querySelector("#player_volume");
+playerVolumeBar.addEventListener("input", throttle(onVolumeChange, 1000));
 
 let player;
-let volume = 0.5;
+let volume = 0.25;
 
 function activatePlayerOuter() {
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -101,26 +102,30 @@ async function refreshToken() {
     );
 }
 
-function playerPrev() {
-    player.previousTrack();
-}
+// function playerPrev() {
+//     player.previousTrack();
+// }
 
-function playerTogglePlay() {
+function playerTogglePlay(e) {
+    pushFeedback(e);
     player.togglePlay();
 }
 
-function playerNext() {
+function playerNext(e) {
+    pushFeedback(e);
     playNextTrack();
     //player.nextTrack();
 }
 
-function updatePlayerGUI(isPaused, track) {
+function onVolumeChange(e) {
+    player.setVolume(e.target.value);
+}
+
+async function updatePlayerGUI(isPaused, track) {
     if (isPaused) {
-        pauseIcon.hidden = true;
-        playIcon.hidden = false;
+        togglePlayIcon.src = togglePlayIcon.dataset.startedSrc;
     } else {
-        pauseIcon.hidden = false;
-        playIcon.hidden = true;
+        togglePlayIcon.src = togglePlayIcon.dataset.pausedSrc;
     }
 
     playerImageObj.src = track["album"]["images"][0]["url"];
@@ -131,6 +136,9 @@ function updatePlayerGUI(isPaused, track) {
     });
     artists = artists.substring(0, artists.length - 2);
     playerArtistObj.innerHTML = artists;
+    updateMarquees();
+
+    playerVolumeBar.value = await player.getVolume();
 }
 
 async function setDeviceId(device_id) {
@@ -166,3 +174,29 @@ async function playNextTrack() {
 
     console.log(response);
 }
+
+function updateMarquees() {
+    document.querySelectorAll("marquee-text").forEach((obj) => {
+        if (obj.innerText.length < 30) {
+            obj.setAttribute("duration", "0s");
+        } else {
+            obj.setAttribute("duration", obj.dataset.duration);
+        }
+    });
+}
+updateMarquees();
+
+function pushFeedback(e) {
+    e.target.animate(pushFeedbackAnimation, pushFeedbackTiming);
+}
+
+const pushFeedbackAnimation = [
+    { transform: "scale(1)" },
+    { transform: "scale(0.9)" },
+    { transform: "scale(1)" },
+];
+
+const pushFeedbackTiming = {
+    duration: 250,
+    iterations: 1,
+};
