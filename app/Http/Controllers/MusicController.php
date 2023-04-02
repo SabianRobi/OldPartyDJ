@@ -46,7 +46,9 @@ class MusicController extends Controller
             'scope' => [
                 // 'user-read-email',
                 'streaming',
-                'user-modify-playback-state'
+                'user-modify-playback-state',
+                'user-read-currently-playing',
+                'user-read-playback-state'
             ],
             'state' => $state,
         ];
@@ -176,6 +178,17 @@ class MusicController extends Controller
             'playback_device_id' => $party->playback_device_id,
         ];
 
+        $participant = PartyParticipant::firstWhere('user_id', Auth::id());
+        $token = SpotifyToken::firstWhere('user_id', $participant->user_id);
+        $this->api->setAccessToken($token->token);
+        $this->session->setAccessToken($token->token);
+
+        $currentTrack = $this->api->getMyCurrentTrack();
+        $options = [
+            'uris' => [$currentTrack ? $currentTrack->item->uri : 'spotify:track:4mPAxO918YuLgviTMMqw8P'],
+            'position_ms' => $currentTrack ? $currentTrack->progress_ms : 0,
+        ];
+        $this->api->play($party->playback_device_id, $options);
         return response()->json($data);
     }
 
@@ -274,7 +287,7 @@ class MusicController extends Controller
         $participant = PartyParticipant::firstWhere('user_id', Auth::id());
         // $party = Party::find($participant->party_id);
         $songs = MusicQueue::where('party_id', $participant->party_id)->select('user_id', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
-        if(count($songs) <= 0) {
+        if (count($songs) <= 0) {
             return response()->json(['error' => 'There are no track in the queue!']);
         }
         $songData = $this->fetchTrackInfos($songs);
