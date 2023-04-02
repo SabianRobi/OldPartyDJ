@@ -27,13 +27,6 @@
         @yield('styles')
     @endif
 
-    {{-- Header --}}
-    <style>
-        .header {
-            background-image: url({{ asset('images/pl_1000x500.png') }});
-        }
-    </style>
-
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('viteImports')
@@ -60,12 +53,12 @@
         @endif
     </div>
 
-    <main class="bg-white text-black mb-auto pb-2 dark:bg-gray-600 dark:text-white flex-1">
+    <main class="bg-white text-black mb-auto dark:bg-gray-600 dark:text-white flex-1">
 
         @hasSection('noContentMargin')
             @yield('content')
         @else
-            <div class="container items-center mx-auto px-2 pt-2 pb-0">
+            <div class="container items-center mx-auto p-2">
                 @yield('content')
             </div>
         @endif

@@ -189,6 +189,7 @@ class MusicController extends Controller
             'position_ms' => $currentTrack ? $currentTrack->progress_ms : 0,
         ];
         $this->api->play($party->playback_device_id, $options);
+
         return response()->json($data);
     }
 
