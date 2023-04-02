@@ -107,12 +107,12 @@ async function refreshToken() {
 // }
 
 function playerTogglePlay(e) {
-    pushFeedback(e);
+    pushFeedback(e.target);
     player.togglePlay();
 }
 
 function playerNext(e) {
-    pushFeedback(e);
+    pushFeedback(e.target);
     playNextTrack();
     //player.nextTrack();
 }
@@ -185,18 +185,3 @@ function updateMarquees() {
     });
 }
 updateMarquees();
-
-function pushFeedback(e) {
-    e.target.animate(pushFeedbackAnimation, pushFeedbackTiming);
-}
-
-const pushFeedbackAnimation = [
-    { transform: "scale(1)" },
-    { transform: "scale(0.9)" },
-    { transform: "scale(1)" },
-];
-
-const pushFeedbackTiming = {
-    duration: 250,
-    iterations: 1,
-};

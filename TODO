@@ -42,7 +42,7 @@
 [X] Make the title/arists brake into rows if they're long enough or make them rolling
 [X] Select the player for playback after initalizing it
 [X] Add padding/margin around title / artist, because button get too close if the text is short
-[ ] Add feedback when track successfully added to queue
+[X] Add feedback when track successfully added to queue
 
 # Security
 [X] Make setDeviceId's method POST
@@ -69,6 +69,7 @@
 [X] Elevate flash messages to the top
 [X] Remove test route
 [ ] Solve random TODOs in the project
+[ ] Add data saving mode (don't show images, shorter response texts)
 
 # Ideas
 - Make more choosable theme

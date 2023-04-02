@@ -7,10 +7,20 @@ const csrfToken = document.head.querySelector("meta[name=csrf-token]").content;
 
 const getSongsBtn = document.querySelector("#getSongs");
 const clearResultsBtn = document.querySelector("#clearResults");
+const leaveParty = document.querySelector("#leaveParty");
 searchBtn.addEventListener("click", sendSearchRequest);
-searchForm.addEventListener("submit", sendSearchRequest);
-getSongsBtn.addEventListener("click", getSongsInQueue);
-clearResultsBtn.addEventListener("click", clearResults);
+// searchForm.addEventListener("submit", sendSearchRequest);
+getSongsBtn.addEventListener("click", function () {
+    pushFeedback(this);
+    getSongsInQueue(this);
+});
+clearResultsBtn.addEventListener("click", function () {
+    pushFeedback(this);
+    clearResults();
+});
+leaveParty.addEventListener("click", function () {
+    pushFeedback(this);
+});
 
 let query;
 const hints = [
@@ -59,6 +69,7 @@ function toggleSearchAnimation(e) {
 async function sendSearchRequest(e) {
     e.preventDefault();
     toggleSearchAnimation(this);
+    pushFeedback(this);
     searchForm.removeEventListener("submit", sendSearchRequest);
     searchBtn.removeEventListener("click", sendSearchRequest);
 
@@ -95,7 +106,7 @@ async function sendSearchRequest(e) {
 
     clearResults();
 
-    const queueText = document.createElement('p');
+    const queueText = document.createElement("p");
     queueText.innerText = "Search results:";
     resultsUl.appendChild(queueText);
 
@@ -129,8 +140,9 @@ async function searchSpotify() {
 function refreshListeners() {
     const cards = resultsUl.querySelectorAll("[data-uri]");
     cards.forEach((card) => {
-        card.addEventListener("click", () => {
-            addToQueue(card.dataset.uri, card.dataset.platform);
+        card.addEventListener("click", (e) => {
+            pushFeedback(card);
+            addToQueue(card);
         });
     });
 }
@@ -243,7 +255,9 @@ function getMusicCardHTML(
     return card;
 }
 
-async function addToQueue(uri, platform) {
+async function addToQueue(card) {
+    const uri = card.dataset.uri;
+    const platform = card.dataset.platform;
     console.log(`Adding track ${uri} to queue...`);
 
     const form = new FormData();
@@ -259,8 +273,10 @@ async function addToQueue(uri, platform) {
     }).then((res) => res.json());
 
     if (response["track_uri"] == uri) {
+        addedToQueueFeedback(card, true);
         console.log("Successfully added track to queue!");
     } else {
+        addedToQueueFeedback(card, false);
         console.error("Failed to add track to queue:", response);
     }
     return response;
@@ -271,20 +287,20 @@ function changeHint() {
 }
 changeHint();
 
-async function getSongsInQueue() {
-    toggleSearchAnimation(this);
+async function getSongsInQueue(e) {
+    toggleSearchAnimation(e);
     console.log("Getting songs is queue...");
     const response = await fetch("/party/getSongsInQueue").then((res) =>
         res.json()
     );
     if (response["error"]) {
         console.log("Error occured:", response["error"]);
-        toggleSearchAnimation(this);
+        toggleSearchAnimation(e);
 
-        const text = this.innerText;
-        this.innerText = response["error"];
+        const text = e.innerText;
+        e.innerText = response["error"];
         setTimeout(() => {
-            this.innerText = text;
+            e.innerText = text;
         }, 1200);
 
         return;
@@ -293,7 +309,7 @@ async function getSongsInQueue() {
 
     clearResults();
 
-    const queueText = document.createElement('p');
+    const queueText = document.createElement("p");
     queueText.innerText = "Queued tracks:";
     resultsUl.appendChild(queueText);
 
@@ -310,10 +326,37 @@ async function getSongsInQueue() {
         );
         queueUl.appendChild(card);
     });
-    toggleSearchAnimation(this);
+    toggleSearchAnimation(e);
 }
 
 function clearResults() {
     resultsUl.innerHTML = "";
     queueUl.innerHTML = "";
+}
+
+function addedToQueueFeedback(card, success) {
+    console.log(card, success);
+    card.classList.remove("dark:border-gray-700");
+    card.classList.remove("dark:bg-gray-800");
+    card.classList.remove("dark:hover:bg-gray-700");
+
+    if (success) {
+        card.classList.add("dark:border-green-800");
+        card.classList.add("dark:bg-green-700");
+    } else {
+        card.classList.add("dark:border-red-800");
+        card.classList.add("dark:bg-red-700");
+    }
+    setTimeout(() => {
+        if (success) {
+            card.classList.remove("dark:border-green-800");
+            card.classList.remove("dark:bg-green-700");
+        } else {
+            card.classList.remove("dark:border-red-800");
+            card.classList.remove("dark:bg-red-700");
+        }
+        card.classList.add("dark:border-gray-700");
+        card.classList.add("dark:bg-gray-800");
+        card.classList.add("dark:hover:bg-gray-700");
+    }, 1000);
 }
