@@ -12,7 +12,8 @@ export default defineConfig({
                 // Scripts
                 'resources/js/app.js',
                 'resources/js/party.js',
-                'resources/js/partyPlayer.js'
+                'resources/js/partyPlayer.js',
+                'resources/js/test.js'
                 // '/node_modules/flowbite/dist/flowbite.js',
             ],
             // refresh: true,
