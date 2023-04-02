@@ -3,10 +3,10 @@
 
         {{-- Logo --}}
         <a href="{{ route('home') }}" class="flex items-center p-2.5">
-            <img src="{{ asset('images/logo.png') }}" class="h-6 mr-0 sm:mr-3 sm:h-9 rounded"
+            <img src="{{ asset('images/logo-light.png') }}" class="h-6 mr-0 sm:mr-3 sm:h-9 rounded"
                 alt="{{ env('APP_NAME') }} Logo" />
             <span
-                class="self-center text-xl font-semibold whitespace-nowrap dark:text-white hidden sm:block">{{ env('APP_NAME') }}</span>
+                class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">{{ env('APP_NAME') }}</span>
         </a>
         <div class="flex items-center md:order-2">
 
