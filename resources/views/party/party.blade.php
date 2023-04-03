@@ -38,12 +38,7 @@
                 };
             </script>
             @vite(['resources/js/partyPlayer.js'])
-            <link rel="preload" as="image" href="images/loading.gif">
         @endsection
         @include('layouts.party.player')
-    @else
-        @section('scripts')
-            <link rel="preload" as="image" href="images/loading.gif">
-        @endsection
     @endisset
 @endsection

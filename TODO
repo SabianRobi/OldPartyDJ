@@ -71,6 +71,7 @@
 [ ] Solve random TODOs in the project
 [ ] Add data saving mode (don't show images, shorter response texts)
 [X] Create a logo
+[X] Fix pre-loading the loading gif
 
 # Ideas
 - Make more choosable theme

@@ -1,4 +1,5 @@
 {{-- Login with Spotify --}}
+<img src="images/loading.gif" alt="Pre-load the loading gif" hidden>
 @auth
     @unless(session('spotifyToken'))
         <form action="/party/spotify/login" method="post">
