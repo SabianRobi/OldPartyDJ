@@ -1,7 +1,7 @@
 {{-- Login with Spotify --}}
 <img src="images/loading.gif" alt="Pre-load the loading gif" hidden>
 @auth
-    @unless(session('spotifyToken'))
+    @unless (session('spotifyToken'))
         <form action="/party/spotify/login" method="post">
             @csrf
             <button id="spotifyLogin" name="spotifyLogin"
@@ -44,9 +44,16 @@
             class="bg-red-800 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Leave party</button>
     </form>
     <button id="getSongs" name="getSongs" data-in-progress="false" data-original-value="Get queued songs"
-        class="bg-teal-500 hover:bg-teal-400 text-white font-bold py-2 px-4 m-2 rounded">Get queued songs</button>
+        class="bg-teal-500 hover:bg-teal-400 text-white font-bold py-2 px-4 m-2 rounded">Watch queue</button>
     <button id="clearResults" name="clearResults"
         class="bg-yellow-500 hover:bg-yellow-400 text-white font-bold py-2 px-4 m-2 rounded">Clear results</button>
+    <input type="checkbox" id="dataSaver" value="" class="hidden peer">
+    <label for="dataSaver"
+        class="inline-flex bg-red-800 hover:bg-red-600 text-white font-bold py-2 px-4 m-2 rounded cursor-pointer peer-checked:bg-green-700 peer-checked:hover:bg-green-500">
+        <span class="self-center">
+            Data saver
+        </span>
+    </label>
 </div>
 
 

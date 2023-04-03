@@ -10,6 +10,7 @@ use SpotifyWebAPI;
 use App\Models\SpotifyState;
 use App\Models\SpotifyToken;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -100,6 +101,9 @@ class MusicController extends Controller
 
     public function searchTrack(Request $request)
     {
+        $query = $request->input('query');
+        $dataSaver = $request->boolean('dataSaver');
+
         $token = (SpotifyToken::where('user_id', Auth::id())->first());
         $this->api->setAccessToken($token->token);
         $this->session->setAccessToken($token->token);
@@ -108,12 +112,14 @@ class MusicController extends Controller
         $result = [];
 
         try {
-            $result = $this->api->search($request->collect()['query'], 'track', [
+            $result = $this->api->search($query, 'track', [
                 'limit' => $limit,
                 'market' => config('spotify.default_config.market'),
             ]);
         } catch (SpotifyWebAPI\SpotifyWebAPIException $e) {
-            if ($e->hasExpiredToken()) {
+            if ($e->hasExpiredToken("Token expired, code gone wild!")) {
+                throw new Exception();
+                return response()->json(['searchTrack' => 'Token expired, code gone wild!']);
                 //TODO it doesn't come here anytime, WHY? (cause of autorefresh turned on?)
 
                 $this->refreshToken();
@@ -138,13 +144,13 @@ class MusicController extends Controller
 
 
             } else {
-                throw new SpotifyWebAPI\SpotifyWebAPIException;
+                throw new Exception($e->getMessage());
             }
         }
 
         $result = $result->tracks->items;
 
-        $filteredResult = $this->filterTracksForClient($result);
+        $filteredResult = $this->filterTracksForClient($result, $dataSaver, true);
 
         return response()->json($filteredResult);
     }
@@ -229,7 +235,6 @@ class MusicController extends Controller
 
     public function playNextTrack()
     {
-        //TODO: crashes if token expired
         $participant = PartyParticipant::firstWhere('user_id', Auth::id());
         if (strcmp($participant->role, "creator")) {
             return response()->json(['message' => 'You do not have permission to do this action!'], 403);
@@ -251,8 +256,15 @@ class MusicController extends Controller
         $options = [
             'uris' => [$nextTrack->track_uri],
         ];
-        $this->api->play($party->playback_device_id, $options);
+        $playSuccess = $this->api->play($party->playback_device_id, $options);
+        // if(!$playSuccess) {
+        //     $token->token = $this->refreshToken();
+        //     $token->save();
+        //     $this->playNextTrack();
+        //     die();
+        // }
         $nextTrack->delete();
+        //TODO if token has been refreshed, send back to client also
 
         return response()->json(['track_uri' => $nextTrack->track_uri]);
 
@@ -283,18 +295,20 @@ class MusicController extends Controller
         //return response()->json($data);
     }
 
-    public function getSongsInQueue()
+    public function getSongsInQueue(Request $request)
     {
+        $dataSaver = $request->boolean('dataSaver');
+
         $participant = PartyParticipant::firstWhere('user_id', Auth::id());
         // $party = Party::find($participant->party_id);
         $songs = MusicQueue::where('party_id', $participant->party_id)->select('user_id', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
         if (count($songs) <= 0) {
-            return response()->json(['error' => 'There are no track in the queue!']);
+            return response()->json(['error' => 'There is no track in the queue!']);
         }
         $songData = $this->fetchTrackInfos($songs);
 
-        $filteredTracks = $this->filterTracksForClient($songData);
-        for ($i = 0; $i < count($filteredTracks); $i++) {
+        $filteredTracks = $this->filterTracksForClient($songData, $dataSaver, false);
+        for ($i = 0; $i < count($filteredTracks) && !$dataSaver; $i++) {
             $userId = $songs[$i]->user_id;
             $username = User::firstWhere('id', $songs[$i]->user_id)->username;
             $filteredTracks[$i]['addedBy'] = $username;
@@ -319,7 +333,7 @@ class MusicController extends Controller
         return $tracks->tracks;
     }
 
-    private function filterTracksForClient($tracks)
+    private function filterTracksForClient($tracks, $dataSaver, $includeURI)
     {
         $filteredTracks = [];
 
@@ -329,13 +343,28 @@ class MusicController extends Controller
                 array_push($artists, $artist->name);
             }
 
-            array_push($filteredTracks, [
-                'image' => $tracks[$i]->album->images[1]->url, //300x300
-                'title' => $tracks[$i]->name,
-                'artists' => $artists,
-                'length' => $tracks[$i]->duration_ms,
-                'uri' => $tracks[$i]->uri,
-            ]);
+            if ($dataSaver) {
+                if($includeURI) {
+                    array_push($filteredTracks, [
+                        'title' => $tracks[$i]->name,
+                        'artists' => $artists,
+                        'uri' => $tracks[$i]->uri,
+                    ]);
+                } else {
+                    array_push($filteredTracks, [
+                        'title' => $tracks[$i]->name,
+                        'artists' => $artists,
+                    ]);
+                }
+            } else {
+                array_push($filteredTracks, [
+                    'image' => $tracks[$i]->album->images[1]->url, //300x300
+                    'title' => $tracks[$i]->name,
+                    'artists' => $artists,
+                    'length' => $tracks[$i]->duration_ms,
+                    'uri' => $tracks[$i]->uri,
+                ]);
+            }
         }
         return $filteredTracks;
     }

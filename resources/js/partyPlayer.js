@@ -122,13 +122,12 @@ function onVolumeChange(e) {
 }
 
 async function updatePlayerGUI(isPaused, track) {
-    if (isPaused) {
-        togglePlayIcon.src = togglePlayIcon.dataset.startedSrc;
-    } else {
-        togglePlayIcon.src = togglePlayIcon.dataset.pausedSrc;
-    }
-
-    playerImageObj.src = track["album"]["images"][0]["url"];
+    togglePlayIcon.src = isPaused
+        ? togglePlayIcon.dataset.startedSrc
+        : togglePlayIcon.dataset.pausedSrc;
+    playerImageObj.src = dataSaver
+        ? "images/party/defaultCover.png"
+        : track["album"]["images"][0]["url"];
     playerTitleObj.innerHTML = track["name"];
     let artists = "";
     track["artists"].forEach((artist) => {
@@ -172,7 +171,11 @@ async function playNextTrack() {
         },
     }).then((res) => res.json());
 
-    console.log(response);
+    if (response["error"]) {
+        console.error(response);
+    } else {
+        console.log(`Playing track: ${response["track_uri"]}`);
+    }
 }
 
 function updateMarquees() {

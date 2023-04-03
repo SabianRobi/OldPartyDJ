@@ -8,6 +8,7 @@ const csrfToken = document.head.querySelector("meta[name=csrf-token]").content;
 const getSongsBtn = document.querySelector("#getSongs");
 const clearResultsBtn = document.querySelector("#clearResults");
 const leaveParty = document.querySelector("#leaveParty");
+const dataSaverObj = document.querySelector('#dataSaver');
 searchBtn.addEventListener("click", sendSearchRequest);
 // searchForm.addEventListener("submit", sendSearchRequest);
 getSongsBtn.addEventListener("click", function () {
@@ -21,6 +22,11 @@ clearResultsBtn.addEventListener("click", function () {
 leaveParty.addEventListener("click", function () {
     pushFeedback(this);
 });
+dataSaverObj.addEventListener("change", function() {
+    pushFeedback(this.nextSibling.nextSibling);
+    dataSaver = !dataSaver;
+    console.log(`Datasaver turned ${dataSaver ? 'on' : 'off'}`);
+})
 
 let query;
 const hints = [
@@ -131,7 +137,7 @@ async function sendSearchRequest(e) {
 
 //Sends AJAX request to make a search in the Spotify database
 async function searchSpotify() {
-    const response = await fetch("/party/spotify/search?query=" + query).then(
+    const response = await fetch(`/party/spotify/search?query=${query}&dataSaver=${dataSaver}`).then(
         (res) => res.json()
     );
     return response;
@@ -179,7 +185,7 @@ function getMusicCardHTML(
         "bottom-1",
         "right-2"
     );
-    lengthP.innerHTML = length;
+    lengthP.innerHTML = length === "NaNmNaNs" ? "" : length;
 
     const innerDiv = document.createElement("div");
     innerDiv.classList.add("m-0", "p-0");
@@ -290,11 +296,11 @@ changeHint();
 async function getSongsInQueue(e) {
     toggleSearchAnimation(e);
     console.log("Getting songs is queue...");
-    const response = await fetch("/party/getSongsInQueue").then((res) =>
+    const response = await fetch(`/party/getSongsInQueue?dataSaver=${dataSaver}`).then((res) =>
         res.json()
     );
     if (response["error"]) {
-        console.log("Error occured:", response["error"]);
+        console.error(response);
         toggleSearchAnimation(e);
 
         const text = e.innerText;
@@ -335,7 +341,6 @@ function clearResults() {
 }
 
 function addedToQueueFeedback(card, success) {
-    console.log(card, success);
     card.classList.remove("dark:border-gray-700");
     card.classList.remove("dark:bg-gray-800");
     card.classList.remove("dark:hover:bg-gray-700");

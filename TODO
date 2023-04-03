@@ -69,7 +69,7 @@
 [X] Elevate flash messages to the top
 [X] Remove test route
 [ ] Solve random TODOs in the project
-[ ] Add data saving mode (don't show images, shorter response texts)
+[X] Add data saver mode (don't show images, shorter responses)
 [X] Create a logo
 [X] Fix pre-loading the loading gif
 

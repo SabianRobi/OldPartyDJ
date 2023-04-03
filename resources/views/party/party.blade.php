@@ -16,6 +16,7 @@
             <script src="https://sdk.scdn.co/spotify-player.js"></script>
             <script>
                 let token = "{{ $spotifyToken }}";
+                let dataSaver = false;
 
                 function pushFeedback(e) {
                     e.animate(pushFeedbackAnimation, pushFeedbackTiming);
