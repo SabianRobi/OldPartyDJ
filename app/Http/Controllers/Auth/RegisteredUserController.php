@@ -40,14 +40,11 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = new User([
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => strtolower($request->email),
-            'password' => Hash::make($request->password),
-            'is_admin' => false,
-            'last_login' => now(),
-        ]);
+        $user = new User();
+        $user->name = $request->name;
+        $user->username = $request->username;
+        $user->email = strtolower($request->email);
+        $user->password = Hash::make($request->password);
         $user->save();
         $user->update();
 
