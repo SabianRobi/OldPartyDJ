@@ -26,6 +26,11 @@
     @hasSection('styles')
         @yield('styles')
     @endif
+    <style type="text/css">
+        .notify {
+            z-index: 1000000;
+        }
+    </style>
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])

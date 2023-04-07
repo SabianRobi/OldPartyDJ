@@ -68,7 +68,7 @@
 [_] Give custom names for DB columns
 [ ] Logout bugging sometimes (when in a party?)
 [ ] Ask to store cookies
-[ ] Elevate flash messages to the top
+[X] Elevate flash messages to the top
 [X] Remove test route
 [ ] Solve random TODOs in the project
 [X] Add data saver mode (don't show images, shorter responses)
