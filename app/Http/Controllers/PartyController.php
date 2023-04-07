@@ -32,8 +32,8 @@ class PartyController extends Controller
             return redirect()->route('party');
         }
         if ($this->checkHasParty()) {
-            notify()->error("You are already have a party!");
-            return redirect()->route('party');
+            notify()->error("You already have a party!");
+            return redirect()->route('landingParty');
         }
 
         return view('party.create');
@@ -47,7 +47,7 @@ class PartyController extends Controller
             return redirect()->route('party');
         }
         if ($this->checkHasParty()) {
-            notify()->error("You are already have a party!");
+            notify()->error("You already have a party!");
             return redirect()->route('party');
         }
 
@@ -71,7 +71,7 @@ class PartyController extends Controller
         $user->role = 'creator';
         $user->save();
 
-        notify()->success("Successfully created party!");
+        notify()->success("Successfully created the party!");
 
         return redirect()->route('party');
     }
@@ -85,11 +85,12 @@ class PartyController extends Controller
         } else if ($this->checkHasParty()) {
             //Join back to they party
             $user = User::find(Auth::id());
-            $user->party_id = $user->party->id;
+            $party = Party::where('creator', $user->id)->first();
+            $user->party_id = $party->id;
             $user->role = 'creator';
             $user->save();
 
-            notify()->error("Successfully joined back to your party!");
+            notify()->success("Successfully joined back to your party!");
             return redirect()->route('party');
         } else {
             return view('party.join');
@@ -138,6 +139,30 @@ class PartyController extends Controller
         return redirect()->route('landingParty');
     }
 
+    // Delete party
+    public function delete() {
+        $user = User::find(Auth::id());
+        $party = Party::where('creator', $user->id)->first();
+
+        if($user->party->creator != $user->id) {
+            notify()->error('You can not delete other\'s party!');
+            return redirect()->redirectTo(url()->previous('/'));
+        }
+
+        $users = User::where('party_id', $party->id)->get();
+        $party->delete();
+
+        $users->map(function ($user) {
+            $user->role = null;
+            $user->save();
+        });
+
+        notify()->success('Successfully deleted your party!');
+        // event('deleteParty');
+
+        return redirect()->route('landingParty');
+    }
+
     // In party page
     public function inParty()
     {
@@ -149,11 +174,13 @@ class PartyController extends Controller
                 // 'user' => $user,
                 'partyName' => $user->party->name,
                 'spotifyToken' => $spotify->token,
+                'creator' => true,
             ]);
         }
 
         return view('party.party', [
             // 'user' => $user,
+            'creator' => false,
             'partyName' => $user->party->name,
         ]);
     }

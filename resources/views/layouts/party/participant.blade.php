@@ -32,35 +32,56 @@
             </div>
         </form>
     </div>
-
-    {{-- Buttons --}}
-    <div class="flex flex-row">
-        {{-- Leave party --}}
-        <form action="{{ route('leaveParty') }}" method="post" class="m-2">
-            @csrf
-            <button id="leaveParty" name="leaveParty" data-in-progress="false"
-                class="bg-red-800 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Leave party</button>
-        </form>
-
+@endunless
+{{-- Buttons --}}
+<div class="grid grid-cols-5 py-2">
+    {{-- Leave party --}}
+    <form action="{{ route('leaveParty') }}" method="post" class="">
+        @csrf
+        <button id="leaveParty" name="leaveParty" data-in-progress="false"
+            class="bg-red-800 hover:bg-red-700 text-white font-bold py-2 px-1 w-full rounded">
+            Leave party
+        </button>
+    </form>
+    @if (session('spotifyToken'))
         {{-- Watch queue --}}
-        <button id="getSongs" name="getSongs" data-in-progress="false" data-original-value="Get queued songs"
-            class="bg-teal-500 hover:bg-teal-400 text-white font-bold py-2 px-4 m-2 rounded">Watch queue</button>
+        <button id="getSongs" name="getSongs" data-in-progress="false" data-original-value="Watch queue"
+            class="bg-teal-500 hover:bg-teal-400 text-white font-bold py-2 px-1 w-full rounded">
+            Watch queue
+        </button>
 
         {{-- Clear results --}}
         <button id="clearResults" name="clearResults"
-            class="bg-yellow-500 hover:bg-yellow-400 text-white font-bold py-2 px-4 m-2 rounded">Clear results</button>
-        <input type="checkbox" id="dataSaver" value="" class="hidden peer">
+            class="bg-yellow-500 hover:bg-yellow-400 text-white font-bold py-2 px-1 w-full rounded">
+            Clear results
+        </button>
 
         {{-- Data saver --}}
-        <label for="dataSaver"
-            class="inline-flex bg-red-800 hover:bg-red-600 text-white font-bold py-2 px-4 m-2 rounded cursor-pointer peer-checked:bg-green-700 peer-checked:hover:bg-green-500">
-            <span class="self-center">
-                Data saver
-            </span>
-        </label>
-    </div>
+        <div>
+            <input type="checkbox" id="dataSaver" value="" class="hidden peer">
+            <label for="dataSaver"
+                class="inline-flex bg-red-800 hover:bg-red-600 text-white font-bold py-2 px-1 w-full rounded cursor-pointer peer-checked:bg-green-700 peer-checked:hover:bg-green-500">
+                <span class="mx-auto">
+                    Data saver
+                </span>
+            </label>
+        </div>
 
+        {{-- Delete party --}}
+        @if ($creator)
+            <form action="{{ route('deleteParty') }}" method="post" class="">
+                @csrf
+                <button id="deleteParty" name="deleteParty" data-in-progress="false"
+                    class="bg-red-900 hover:bg-red-700 text-white font-bold py-2 px-1 w-full rounded">
+                    Delete party
+                </button>
+            </form>
+        @endif
+    @endif
+</div>
+
+@if (session('spotifyToken'))
     {{-- Results --}}
     <ul id="results" class="w-full md:w-1/2 pb-1"></ul>
     <ol id="queue" class="w-full md:w-1/2 pb-1"></ol>
-@endunless
+@endif

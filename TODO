@@ -36,7 +36,7 @@
 [X] Set defualt image when no cover supplied by Spotify (on music cards)
 [X] Get next song according to the highest score
 [X] Display what party the user is in when participating a party
-[ ] Show delete party button to party creators (they can leave the party while not deleting it)
+[X] Show delete party button to party creators (they can leave the party while not deleting it)
 
 ## Player
 [X] Set the play width to a fix size

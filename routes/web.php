@@ -40,6 +40,7 @@ Route::controller(PartyController::class)->middleware('auth')->group(function ()
         Route::post('/party/leave', 'leave')->name('leaveParty')
             ->middleware(LeavePartyMiddleware::class);
     });
+    Route::middleware('hasParty')->post('/party/delete', 'delete')->name('deleteParty');
 });
 
 //Requires auth and the user to be in a party
