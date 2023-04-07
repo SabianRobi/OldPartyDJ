@@ -16,16 +16,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        //admin & Users
-        $admin = User::factory()->makeOne([
-            'name' => 'Admin User',
-            'username' => 'admin',
-            'email' => 'admin@partydj.com',
-            'password' => Hash::make('admin'),
-        ]);
-        $admin->is_admin = true;
+        //admin
+        $admin = new User();
+        $admin->name = 'Admin User';
+        $admin->username = 'admin';
+        $admin->email = 'admin@partydj.com';
+        $admin->password = Hash::make('admin');
         $admin->save();
 
-        \App\Models\User::factory(10)->create();
+        //Users
+        for ($i=0; $i < 5; $i++) {
+            $user = new User();
+            $user->name = 'Example User ' . $i;
+            $user->username = 'ExampleUser' . $i;
+            $user->email = 'exampleuser' . $i . '@partydj.com';
+            $user->password = Hash::make('password');
+            $user->save();
+        }
     }
 }
