@@ -74,7 +74,7 @@
 [X] Add data saver mode (don't show images, shorter responses)
 [X] Create a logo
 [X] Fix pre-loading the loading gif
-[ ] Add Readme.md
+[X] Add Readme.md
 [_] Verify email to create party
 [ ] Update phpseclib
 
