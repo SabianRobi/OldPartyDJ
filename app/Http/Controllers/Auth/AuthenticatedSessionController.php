@@ -65,6 +65,6 @@ class AuthenticatedSessionController extends Controller
 
         notify()->success('Successfully logged out!');
 
-        return redirect(url()->previous(route('home')));
+        return redirect()->route('home');
     }
 }

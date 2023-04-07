@@ -26,12 +26,12 @@ class LeavePartyMiddleware
             //Delete party (and ququed tracks) when the last participant leaves
             $participants = User::where('party_id', $user->party->id)->get();
             if (count($participants) == 1) {
-                $user->party->delete();
+                PartyController::delete();
             } else {
                 $user->party_id = null;
+                $user->role = null;
+                $user->save();
             }
-            $user->role = null;
-            $user->save();
 
             notify()->success('Successfully left the party!');
         }

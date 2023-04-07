@@ -140,7 +140,7 @@ class PartyController extends Controller
     }
 
     // Delete party
-    public function delete() {
+    public static function delete() {
         $user = User::find(Auth::id());
         $party = Party::where('creator', $user->id)->first();
 

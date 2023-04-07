@@ -66,7 +66,7 @@
 [X] Style join/create party page
 [_] Idea / Bug reporting page
 [_] Give custom names for DB columns
-[ ] Logout bugging sometimes (when in a party?)
+[X] Logout bugging when in a party
 [ ] Ask to store cookies
 [X] Elevate flash messages to the top
 [X] Remove test route
