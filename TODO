@@ -6,7 +6,7 @@
 [X] is_admin is not set after registering
 [_] Make things look good in light mode also
 [X] Footer align center on smaller devices
-[-] Create relations between models
+[X] Create relations between models
 
 # Pages
 [_] Contact page
@@ -35,7 +35,7 @@
 [X] Display username who added to the list (when showing queued songs)
 [X] Set defualt image when no cover supplied by Spotify (on music cards)
 [X] Get next song according to the highest score
-[ ] Display what party the user is in when participating a party
+[X] Display what party the user is in when participating a party
 [ ] Show delete party button to party creators (they can leave the party while not deleting it)
 
 ## Player
@@ -66,9 +66,9 @@
 [X] Style join/create party page
 [_] Idea / Bug reporting page
 [_] Give custom names for DB columns
-[ ] Logout bugging sometimes
+[ ] Logout bugging sometimes (when in a party?)
 [ ] Ask to store cookies
-[X] Elevate flash messages to the top
+[ ] Elevate flash messages to the top
 [X] Remove test route
 [ ] Solve random TODOs in the project
 [X] Add data saver mode (don't show images, shorter responses)

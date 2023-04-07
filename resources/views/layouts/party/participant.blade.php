@@ -1,5 +1,6 @@
 {{-- Login with Spotify --}}
 <img src="images/loading.gif" alt="Pre-load the loading gif" hidden>
+<p class="text-center text-xl">{{ $partyName }}</p>
 @unless (session('spotifyToken'))
     <form action="/party/spotify/login" method="post">
         @csrf

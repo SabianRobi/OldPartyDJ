@@ -147,14 +147,14 @@ class PartyController extends Controller
         if ($user->role == "creator" && isset($spotify->token)) {
             return view('party.party', [
                 // 'user' => $user,
-                // 'partyName' => $user->party->name,
+                'partyName' => $user->party->name,
                 'spotifyToken' => $spotify->token,
             ]);
         }
 
         return view('party.party', [
             // 'user' => $user,
-            // 'partyName' => $user->party->name,
+            'partyName' => $user->party->name,
         ]);
     }
 
