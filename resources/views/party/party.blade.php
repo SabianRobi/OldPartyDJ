@@ -4,9 +4,11 @@
 
 @section('header', 'nothing')
 
-@section('viteImports')
-    @vite(['resources/js/party.js', 'resources/js/marquee-text-element.js'])
-@endsection
+@isset($spotifyToken)
+    @section('viteImports')
+        @vite(['resources/js/party.js', 'resources/js/marquee-text-element.js'])
+    @endsection
+@endisset
 
 @section('content')
     @include('layouts.party.participant')
@@ -19,10 +21,10 @@
                 let dataSaver = false;
 
                 function pushFeedback(e) {
-                    e.animate(pushFeedbackAnimation, pushFeedbackTiming);
+                    e.animate(animation, timing);
                 }
 
-                const pushFeedbackAnimation = [{
+                const animation = [{
                         transform: "scale(1)"
                     },
                     {
@@ -33,7 +35,7 @@
                     },
                 ];
 
-                const pushFeedbackTiming = {
+                const timing = {
                     duration: 150,
                     iterations: 1,
                 };

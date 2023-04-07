@@ -32,9 +32,9 @@ class LeavePartyMiddleware
             }
             $user->role = null;
             $user->save();
-        }
 
-        notify()->success('Successfully left the party!');
+            notify()->success('Successfully left the party!');
+        }
 
         return $next($request);
     }

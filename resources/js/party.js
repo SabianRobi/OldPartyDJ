@@ -365,3 +365,5 @@ function addedToQueueFeedback(card, success) {
         card.classList.add("dark:hover:bg-gray-700");
     }, 1000);
 }
+
+console.log('Party JS successfully loaded!');

@@ -157,7 +157,7 @@ async function setDeviceId(device_id) {
     if (response["playback_device_id"] == device_id) {
         console.log("Device ID set!");
     } else {
-        console.error("Could not set Device ID!");
+        console.error("Could not set Device ID!", response);
     }
 }
 
