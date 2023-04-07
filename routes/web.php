@@ -4,6 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\PartyController;
 use App\Http\Middleware\LeavePartyMiddleware;
+// use App\Models\Party;
+// use App\Models\SpotifyThings;
+// use App\Models\TrackInQueue;
+// use App\Models\User;
+// use Illuminate\Support\Facades\Hash;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,8 +44,8 @@ Route::controller(PartyController::class)->middleware('auth')->group(function ()
 
 //Requires auth and the user to be in a party
 Route::controller(MusicController::class)->middleware(['auth', 'inParty'])->group(function () {
-    Route::post('/party/spotify/login', 'doLogin');
-    Route::get('/party/spotify/callback', 'callback');
+    Route::post('/party/spotify/login', 'spotifyLogin');
+    Route::get('/party/spotify/callback', 'spotifyCallback');
     Route::get('/party/spotify/search', 'searchTrack');
     Route::get('/party/spotify/refreshToken', 'refreshToken');
     Route::post('/party/spotify/addTrack', 'addTrackToQueue');
@@ -53,9 +58,172 @@ Route::controller(MusicController::class)->middleware(['auth', 'inParty'])->grou
     });
 });
 
-Route::get('/test', function () {
-    return view('test');
-});
+// Route::get('/testPartyUser', function () {
+//     $user = User::where('name', 'New User')->firstOr(function () {
+//         $user = new User();
+//         $user->name = 'New User';
+//         $user->username = 'user1';
+//         $user->email = 'user1@partydj.com';
+//         $user->password = Hash::make('password');
+//         $user->save();
+//     });
+//     $user = User::where('name', 'New User')->first();
+
+//     $party = Party::where('name', 'New Party')->firstOr(function () use (&$user) {
+//         $party = new Party();
+//         $party->name = "New Party";
+//         $party->creator = $user->id;
+//         $party->save();
+//     });
+//     $party = Party::where('name', 'New Party')->first();
+//     $user->party_id = $party->id;
+//     $user->role = 'creator';
+//     $user->save();
+//     $user->update();
+
+
+
+//     $party->delete();
+
+//     $data = [
+//         'user' => $user,
+//         'party' => $party
+//     ];
+
+//     return response()->json($data);
+//     // return view('test');
+// });
+
+// Route::get('/testUserSpotify', function () {
+//     $user = User::where('name', 'Test Spotify')->firstOr(function () {
+//         $user = new User();
+//         $user->name = 'Test Spotify';
+//         $user->username = 'testspotify';
+//         $user->email = 'testspotify@partydj.com';
+//         $user->password = Hash::make('password');
+//         $user->save();
+//     });
+//     $user = User::where('name', 'Test Spotify')->first();
+
+//     $spotify = SpotifyThings::where('owner', $user->id)->firstOr(function () use (&$user) {
+//         $spotify = new SpotifyThings();
+//         $spotify->token = "krixkrax";
+//         $spotify->refresh_token = "krixkraxkrux";
+//         $spotify->owner = $user->id;
+//         $spotify->save();
+//     });
+//     $spotify = SpotifyThings::where('owner', $user->id)->first();
+
+
+//     $user->delete();
+
+
+//     $data = [
+//         'user' => $user,
+//         'spotify' => $spotify
+//     ];
+
+//     return response()->json($data);
+//     // return view('test');
+// });
+
+// Route::get('/testUserTrack', function () {
+//     $user = User::where('name', 'Test UserTrack')->firstOr(function () {
+//         $user = new User();
+//         $user->name = 'Test UserTrack';
+//         $user->username = 'testUserTrack';
+//         $user->email = 'testUserTrack@partydj.com';
+//         $user->password = Hash::make('password');
+//         $user->save();
+//     });
+//     $user = User::where('name', 'Test UserTrack')->first();
+
+//     $party = Party::where('name', 'New Party')->firstOr(function () use (&$user) {
+//         $party = new Party();
+//         $party->name = "New Party";
+//         $party->creator = $user->id;
+//         $party->save();
+//     });
+//     $party = Party::where('name', 'New Party')->first();
+
+//     $user->party_id = $party->id;
+//     $user->role = 'creator';
+//     $user->save();
+//     $user->update();
+
+//     $track = TrackInQueue::where('addedBy', $user->id)->firstOr(function () use (&$user, &$party) {
+//         $track = new TrackInQueue();
+//         $track->addedBy = $user->id;
+//         $track->party_id = $party->id;
+//         $track->platform = "Spotify";
+//         $track->track_uri = "spot:good:stuff";
+//         $track->score = 23;
+//         $track->save();
+//     });
+//     $track = TrackInQueue::where('addedBy', $user->id)->first();
+
+
+//     $user->delete();
+
+
+//     $data = [
+//         'user' => $user,
+//         'party' => $party,
+//         'track' => $track,
+//     ];
+
+//     return response()->json($data);
+//     // return view('test');
+// });
+
+// Route::get('/testPartyTrack', function () {
+//     $user = User::where('name', 'Test PartyTrack')->firstOr(function () {
+//         $user = new User();
+//         $user->name = 'Test PartyTrack';
+//         $user->username = 'testPartyTrack';
+//         $user->email = 'testPartyTrack@partydj.com';
+//         $user->password = Hash::make('password');
+//         $user->save();
+//     });
+//     $user = User::where('name', 'Test PartyTrack')->first();
+
+//     $party = Party::where('name', 'New Party')->firstOr(function () use (&$user) {
+//         $party = new Party();
+//         $party->name = "New Party";
+//         $party->creator = $user->id;
+//         $party->save();
+//     });
+//     $party = Party::where('name', 'New Party')->first();
+
+//     $user->party_id = $party->id;
+//     $user->role = 'creator';
+//     $user->save();
+//     $user->update();
+
+//     $track = TrackInQueue::where('addedBy', $user->id)->firstOr(function () use (&$user, &$party) {
+//         $track = new TrackInQueue();
+//         $track->addedBy = $user->id;
+//         $track->party_id = $party->id;
+//         $track->platform = "Spotify";
+//         $track->track_uri = "spot:good:stuff";
+//         $track->score = 23;
+//         $track->save();
+//     });
+//     $track = TrackInQueue::where('addedBy', $user->id)->first();
+
+
+//     $party->delete();
+
+
+//     $data = [
+//         'user' => $user,
+//         'party' => $party,
+//         'track' => $track,
+//     ];
+
+//     return response()->json($data);
+//     // return view('test');
+// });
 
 // Route::middleware('auth')->group(function () {
 //     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

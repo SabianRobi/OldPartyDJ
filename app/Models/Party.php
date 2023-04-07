@@ -12,4 +12,14 @@ class Party extends Model
     protected $hidden = [
         'password',
     ];
+
+    public function tracksInQueue()
+    {
+        return $this->hasMany(TrackInQueue::class);
+    }
+
+    public function participants()
+    {
+        return $this->hasMany(User::class);
+    }
 }

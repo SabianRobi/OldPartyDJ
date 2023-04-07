@@ -35,6 +35,8 @@
 [X] Display username who added to the list (when showing queued songs)
 [X] Set defualt image when no cover supplied by Spotify (on music cards)
 [X] Get next song according to the highest score
+[ ] Display what party the user is in when participating a party
+[ ] Show delete party button to party creators (they can leave the party while not deleting it)
 
 ## Player
 [X] Set the play width to a fix size
@@ -54,7 +56,7 @@
 [X] Update party link in nav
 [X] Forms: mark required fields
 [X] Leave party automatically when logging out
-[ ] Delete db rows cascadly when a user deletes his account (remove its party, leave him from parties)
+[X] Delete db rows cascadly when a user deletes his account (remove its party, leave him from parties)
 [X] Style forms vertically
 [X] Add titles for forms
 [X] Last logged in db col
@@ -64,7 +66,7 @@
 [X] Style join/create party page
 [_] Idea / Bug reporting page
 [_] Give custom names for DB columns
-[ ] Logout bugging sometimes (more than one headers?) - not anymore?
+[ ] Logout bugging sometimes
 [ ] Ask to store cookies
 [X] Elevate flash messages to the top
 [X] Remove test route
@@ -72,6 +74,9 @@
 [X] Add data saver mode (don't show images, shorter responses)
 [X] Create a logo
 [X] Fix pre-loading the loading gif
+[ ] Add Readme.md
+[_] Verify email to create party
+[ ] Update phpseclib
 
 # Ideas
 - Make more choosable theme

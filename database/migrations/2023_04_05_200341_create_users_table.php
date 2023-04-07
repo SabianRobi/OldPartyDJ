@@ -20,7 +20,8 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('password');
             $table->boolean('is_admin')->default(false);
-            $table->date('last_login');
+            $table->foreignId('party_id')->nullable()->constrained('parties', 'id')->nullOnDelete();
+            $table->enum('role', ['creator', 'participant'])->nullable();
             // $table->timestamp('email_verified_at')->nullable();
             // $table->rememberToken();
             $table->timestamps();

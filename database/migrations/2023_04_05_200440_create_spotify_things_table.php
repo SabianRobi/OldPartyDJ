@@ -13,13 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('music_queues', function (Blueprint $table) {
+        Schema::create('spotify_things', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('party_id')->onDelete('cascade')->constrained();
-            $table->foreignId('user_id')->onDelete('cascade')->constrained();
-            $table->string('platform');
-            $table->string('track_uri');
-            $table->integer('score');
+            $table->foreignId('owner')->constrained('users', 'id')->onDelete('cascade');
+            $table->string('token')->nullable();
+            $table->string('refresh_token')->nullable();
+            $table->string('state')->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('music_queues');
+        Schema::dropIfExists('spotify_things');
     }
 };

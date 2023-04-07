@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Party;
-use App\Models\PartyParticipant;
-use App\Models\MusicQueue;
+use App\Models\SpotifyThings;
+use App\Models\TrackInQueue;
 use Illuminate\Http\Request;
 use SpotifyWebAPI;
-use App\Models\SpotifyState;
-use App\Models\SpotifyToken;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -32,15 +30,19 @@ class MusicController extends Controller
         $this->api = new SpotifyWebAPI\SpotifyWebAPI($options, $this->session);
     }
 
-    public function doLogin(Request $request)
+    public function spotifyLogin()
     {
         // Generate state
         $state = $this->session->generateState();
 
         // Save state to db
-        $spotState = new SpotifyState();
-        $spotState->state = $state;
-        $spotState->save();
+        $spotify = SpotifyThings::where('owner', Auth::id())->first();
+        if (!$spotify) {
+            $spotify = new SpotifyThings();
+            $spotify->owner = Auth::id();
+        }
+        $spotify->state = $state;
+        $spotify->save();
 
         // Set options
         $options = [
@@ -60,42 +62,29 @@ class MusicController extends Controller
         die();
     }
 
-    public function callback(Request $request)
+    public function spotifyCallback(Request $request)
     {
-        //Check if the state received from Spotify is matches the state we stored before redirecting to Spotify
-        $spotState = SpotifyState::find($request->collect()['state']);
-        if (!is_null($spotState)) {
-            $spotState->delete();
+        $spotify = SpotifyThings::where([
+            ['state', $request->input('state')],
+            ['owner', Auth::id()]
+        ])->first();
 
-            $this->session->requestAccessToken($request->collect()['code']);
 
-            //If its his first login with Spotify, store the Spoitfy tokens in the db
-            $token = (SpotifyToken::where('user_id', Auth::id())->firstOr(function () {
-                $spotToken = new SpotifyToken();
-                $spotToken->user_id = Auth::id();
-                $spotToken->token = $this->session->getAccessToken();
-                $spotToken->refresh_token = $this->session->getRefreshToken();
-                $spotToken->save();
-            }));
+        if ($spotify) {
+            //State matches, store the token
+            $this->session->requestAccessToken($request->input('code'));
+            $spotify->token = $this->session->getAccessToken();
+            $spotify->refresh_token = $this->session->getRefreshToken();
+            $spotify->state = null;
+            $spotify->save();
 
-            // if (!empty($token->token)) {
-
-            //     $token->save();
-            // } else {
-            //     SpotifyToken::create([
-            //         'user_id' => Auth::id(),
-            //         'token' => $this->session->getAccessToken(),
-            //         'refresh_token' => $this->session->getRefreshToken(),
-            //     ]);
-            // }
             session(['spotifyToken' => true]);
 
             notify()->success('Successfully logged in with Spotify!');
         } else {
             //State mismatch
-            notify()->error('Something went wrong, please try again!');;
+            notify()->error('Something went wrong, please try again!');
         }
-
         return redirect()->route('party');
     }
 
@@ -104,7 +93,7 @@ class MusicController extends Controller
         $query = $request->input('query');
         $dataSaver = $request->boolean('dataSaver');
 
-        $token = (SpotifyToken::where('user_id', Auth::id())->first());
+        $token = SpotifyThings::where('owner', Auth::id())->first();
         $this->api->setAccessToken($token->token);
         $this->session->setAccessToken($token->token);
         $this->session->setRefreshToken($token->refresh_token);
@@ -117,32 +106,15 @@ class MusicController extends Controller
                 'market' => config('spotify.default_config.market'),
             ]);
         } catch (SpotifyWebAPI\SpotifyWebAPIException $e) {
-            if ($e->hasExpiredToken("Token expired, code gone wild!")) {
-                throw new Exception();
-                return response()->json(['searchTrack' => 'Token expired, code gone wild!']);
-                //TODO it doesn't come here anytime, WHY? (cause of autorefresh turned on?)
+            if ($e->hasExpiredToken()) {
+                //TODO it doesn't come here anytime, WHY?
+
+                return response()->json(['searchTrack' => 'Token expired, please refresh it!']);
 
                 $this->refreshToken();
                 notify()->success("Successfully updated Spotify access token!");
                 $this->searchTrack($request);
                 die();
-
-                //return redirect([MusicController::class, 'searchTrack']);
-
-
-
-                // $this->session->refreshAccessToken($token->refresh_token);
-
-                // $options = [
-                //     'auto_refresh' => true,
-                // ];
-                // $this->api->setSession($this->session);
-
-                // $token->token = $this->session->getAccessToken();
-                // $token->refresh_token = $this->session->getRefreshToken();
-                // $token->save();
-
-
             } else {
                 throw new Exception($e->getMessage());
             }
@@ -157,7 +129,7 @@ class MusicController extends Controller
 
     public function refreshToken()
     {
-        $token = SpotifyToken::firstWhere('user_id', Auth::id());
+        $token = SpotifyThings::where('owner', Auth::id())->first();
         $this->session->refreshAccessToken($token->refresh_token);
         $this->api->setSession($this->session);
 
@@ -176,7 +148,7 @@ class MusicController extends Controller
             ],
         );
 
-        $party = Party::firstWhere('user_id', Auth::id());
+        $party = Party::where('creator', Auth::id())->first();
         $party->playback_device_id = $validated['deviceId'];
         $party->save();
 
@@ -184,17 +156,18 @@ class MusicController extends Controller
             'playback_device_id' => $party->playback_device_id,
         ];
 
-        $participant = PartyParticipant::firstWhere('user_id', Auth::id());
-        $token = SpotifyToken::firstWhere('user_id', $participant->user_id);
+        // Activate the player by playing the currnetly playing song (in other player)
+        $token = SpotifyThings::where('owner', Auth::id())->first();
         $this->api->setAccessToken($token->token);
         $this->session->setAccessToken($token->token);
 
         $currentTrack = $this->api->getMyCurrentTrack();
         $options = [
-            'uris' => [$currentTrack ? $currentTrack->item->uri : 'spotify:track:4mPAxO918YuLgviTMMqw8P'],
-            'position_ms' => $currentTrack ? $currentTrack->progress_ms : 0,
+            'uris' => [$currentTrack && $currentTrack->item ? $currentTrack->item->uri : 'spotify:track:4mPAxO918YuLgviTMMqw8P'],
+            'position_ms' => $currentTrack && $currentTrack->item ? $currentTrack->progress_ms : 0,
         ];
         $this->api->play($party->playback_device_id, $options);
+        //TODO play method can throw Bad Gateway (when token expires? Too many requests in short time?)
 
         return response()->json($data);
     }
@@ -208,12 +181,12 @@ class MusicController extends Controller
             ],
         );
 
-        $participant = PartyParticipant::where('user_id', Auth::id())->get()->first();
-        $party = Party::find($participant->party_id);
+        $user = User::find(Auth::id());
+        $party = Party::find($user->party_id);
 
-        $trackInQueue = new MusicQueue();
+        $trackInQueue = new TrackInQueue();
         $trackInQueue->party_id = $party->id;
-        $trackInQueue->user_id = Auth::id();
+        $trackInQueue->addedBy = $user->id;
         $trackInQueue->platform = $validated['platform'];
         $trackInQueue->track_uri = $validated['uri'];
         $trackInQueue->score = 0;
@@ -235,22 +208,25 @@ class MusicController extends Controller
 
     public function playNextTrack()
     {
-        $participant = PartyParticipant::firstWhere('user_id', Auth::id());
-        if (strcmp($participant->role, "creator")) {
-            return response()->json(['message' => 'You do not have permission to do this action!'], 403);
+        $user = User::find(Auth::id());
+        $party = Party::find($user->party_id);
+        if (strcmp($party->creator, $user->id)) {
+            return response()->json(['error' => 'You do not have permission to do this action!'], 403);
         }
-        $token = SpotifyToken::firstWhere('user_id', $participant->user_id);
+        // return response()->json(['error' => 'okay']);
+
+        $token = SpotifyThings::where('owner', $user->id)->first();
         $this->api->setAccessToken($token->token);
         $this->session->setAccessToken($token->token);
 
-        $party = Party::firstWhere('user_id', $participant->user_id);
-        $nextTrack = MusicQueue::where('party_id', $party->id)->orderBy('score', 'DESC')->first();
+        $party = Party::where('creator', $user->id)->first();
+        $nextTrack = TrackInQueue::where('party_id', $party->id)->orderBy('score', 'DESC')->first();
 
         if (!isset($nextTrack)) {
             $party->waiting_for_track = true;
             $party->save();
 
-            return response()->json(['error' => 'There is no next track in queue!']);
+            return response()->json(['error' => 'There is no track in queue!']);
         }
 
         $options = [
@@ -264,45 +240,18 @@ class MusicController extends Controller
         //     die();
         // }
         $nextTrack->delete();
-        //TODO if token has been refreshed, send back to client also
+        //TODO if token has been refreshed, send back to client also; idea: send an error that explains token expired, catch this at client side and request new one, then send requestto play the next song.
 
         return response()->json(['track_uri' => $nextTrack->track_uri]);
-
-        // $this->session->refreshAccessToken($token->refresh_token);
-
-        // $partyId = DB::table('party_participants')->where([
-        //     ['user_id', '=', Auth::id()],
-        // ])->get('party_id');
-
-        // if ($partyId->isEmpty()) {
-        //     return response()->json(['error' => 'Not in a party!']);
-        // }
-        // $partyId = $partyId[0]->party_id;
-
-        // //TO-DO: Verify if the user is creator
-
-        // $track = MusicQueue::where('party_id', $partyId)
-        //     ->orderByDesc('score')
-        //     ->get()
-        //     ->first();
-
-        // $track->delete();
-
-        // $data = [
-        //     'uri' => $track->track_uri,
-        //     'platform' => $track->platform,
-        // ];
-        //return response()->json($data);
     }
 
     public function getSongsInQueue(Request $request)
     {
         $dataSaver = $request->boolean('dataSaver');
 
-        $participant = PartyParticipant::firstWhere('user_id', Auth::id());
-        // $party = Party::find($participant->party_id);
-        $songs = MusicQueue::where('party_id', $participant->party_id)->select('user_id', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
-        if (count($songs) <= 0) {
+        $user = User::find(Auth::id());
+        $songs = TrackInQueue::where('party_id', $user->party_id)->select('addedBy', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
+        if (count($songs) == 0) {
             return response()->json(['error' => 'There is no track in the queue!']);
         }
         $songData = $this->fetchTrackInfos($songs);
@@ -310,7 +259,7 @@ class MusicController extends Controller
         $filteredTracks = $this->filterTracksForClient($songData, $dataSaver, false);
         for ($i = 0; $i < count($filteredTracks) && !$dataSaver; $i++) {
             $userId = $songs[$i]->user_id;
-            $username = User::firstWhere('id', $songs[$i]->user_id)->username;
+            $username = User::find($songs[$i]->addedBy)->username;
             $filteredTracks[$i]['addedBy'] = $username;
         }
         return response()->json($filteredTracks);
@@ -318,7 +267,7 @@ class MusicController extends Controller
 
     private function fetchTrackInfos($dbTrack)
     {
-        $token = (SpotifyToken::where('user_id', Auth::id())->first());
+        $token = SpotifyThings::where('owner', Auth::id())->first();
         $this->api->setAccessToken($token->token);
         $this->session->setAccessToken($token->token);
         $this->session->setRefreshToken($token->refresh_token);
@@ -344,7 +293,7 @@ class MusicController extends Controller
             }
 
             if ($dataSaver) {
-                if($includeURI) {
+                if ($includeURI) {
                     array_push($filteredTracks, [
                         'title' => $tracks[$i]->name,
                         'artists' => $artists,

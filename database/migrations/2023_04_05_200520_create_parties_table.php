@@ -13,11 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('spotify_tokens', function (Blueprint $table) {
+        Schema::create('parties', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->onDelete('cascade')->onUpdate('cascade')->constrained();
-            $table->string('token');
-            $table->string('refresh_token');
+            $table->foreignId('creator')->nullable()->constrained('users', 'id')->onDelete('cascade');
+            $table->string('name')->unique();
+            $table->string('password')->nullable();
+            $table->string('playback_device_id')->nullable();
+            $table->boolean('waiting_for_track')->default(false);
             $table->timestamps();
         });
     }
@@ -29,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('spotify_tokens');
+        Schema::dropIfExists('parties');
     }
 };

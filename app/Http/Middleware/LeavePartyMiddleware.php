@@ -3,9 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Controllers\PartyController;
-use App\Models\MusicQueue;
-use App\Models\Party;
-use App\Models\PartyParticipant;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,16 +21,17 @@ class LeavePartyMiddleware
     {
         if (PartyController::checkAlredyInParty()) {
             //Leaving party
-            $participant = PartyParticipant::firstWhere('user_id', Auth::id());
-            $party = Party::find($participant->party_id);
-            $participant->delete();
+            $user = User::find(Auth::id());
 
             //Delete party (and ququed tracks) when the last participant leaves
-            $participants = PartyParticipant::where('party_id', $party->id)->get();
-            if (count($participants) == 0) {
-                MusicQueue::where('party_id', $party->id)->delete();
-                $party->delete();
+            $participants = User::where('party_id', $user->party->id)->get();
+            if (count($participants) == 1) {
+                $user->party->delete();
+            } else {
+                $user->party_id = null;
             }
+            $user->role = null;
+            $user->save();
         }
 
         notify()->success('Successfully left the party!');

@@ -13,11 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('party_participants', function (Blueprint $table) {
+        Schema::create('track_in_queues', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->onDelete('cascade')->constrained();
-            $table->foreignId('party_id')->onDelete('cascade')->constrained();
-            $table->enum('role', ['creator', 'participant']);
+            $table->foreignId('party_id')->constrained('parties', 'id')->onDelete('cascade');
+            $table->foreignId('addedBy')->constrained('users', 'id')->onDelete('cascade');
+            $table->enum('platform', ['Spotify']);
+            $table->string('track_uri');
+            $table->integer('score')->default(0);
             $table->timestamps();
         });
     }
@@ -29,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('party_participants');
+        Schema::dropIfExists('track_in_queues');
     }
 };
