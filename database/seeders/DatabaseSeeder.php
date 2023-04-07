@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $admin->username = 'admin';
         $admin->email = 'admin@partydj.com';
         $admin->password = Hash::make('admin');
+        $admin->is_admin = true;
         $admin->save();
 
         //Users
