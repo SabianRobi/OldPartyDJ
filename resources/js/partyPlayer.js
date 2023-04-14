@@ -97,9 +97,11 @@ function connectPlayer() {
 }
 
 async function refreshToken() {
+    console.log("Refreshing Spotify token...");
     token = await fetch("/party/spotify/refreshToken").then((res) =>
         res.json()
     );
+    console.log("Refreshed token successfully!");
 }
 
 // function playerPrev() {
@@ -156,6 +158,12 @@ async function setDeviceId(device_id) {
 
     if (response["playback_device_id"] == device_id) {
         console.log("Device ID set!");
+    } else if (response["tokenExpired"]) {
+        console.error(
+            "Could not set Device ID due to expired token. Refreshing..."
+        );
+        await refreshToken();
+        setDeviceId(device_id);
     } else {
         console.error("Could not set Device ID!", response);
     }
@@ -171,7 +179,13 @@ async function playNextTrack() {
         },
     }).then((res) => res.json());
 
-    if (response["error"]) {
+    if (response["tokenExpired"]) {
+        console.error(
+            "Could not set Device ID due to expired token. Refreshing..."
+        );
+        await refreshToken();
+        playNextTrack();
+    } else if (response["error"]) {
         console.error(response);
     } else {
         console.log(`Playing track: ${response["track_uri"]}`);
@@ -188,3 +202,5 @@ function updateMarquees() {
     });
 }
 updateMarquees();
+
+console.log("Player JS successfully loaded!");

@@ -8,7 +8,7 @@ const csrfToken = document.head.querySelector("meta[name=csrf-token]").content;
 const getSongsBtn = document.querySelector("#getSongs");
 const clearResultsBtn = document.querySelector("#clearResults");
 const leaveParty = document.querySelector("#leaveParty");
-const dataSaverObj = document.querySelector('#dataSaver');
+const dataSaverObj = document.querySelector("#dataSaver");
 searchBtn.addEventListener("click", sendSearchRequest);
 // searchForm.addEventListener("submit", sendSearchRequest);
 getSongsBtn.addEventListener("click", function () {
@@ -22,12 +22,13 @@ clearResultsBtn.addEventListener("click", function () {
 leaveParty.addEventListener("click", function () {
     pushFeedback(this);
 });
-dataSaverObj.addEventListener("change", function() {
+dataSaverObj.addEventListener("change", function () {
     pushFeedback(this.nextSibling.nextSibling);
     dataSaver = !dataSaver;
-    console.log(`Datasaver turned ${dataSaver ? 'on' : 'off'}`);
-})
+    console.log(`Datasaver turned ${dataSaver ? "on" : "off"}`);
+});
 
+let dataSaver = false;
 let query;
 const hints = [
     "Blue",
@@ -99,6 +100,14 @@ async function sendSearchRequest(e) {
     let result;
     if (platform == "Spotify") {
         result = await searchSpotify();
+
+        if (result["error"]) {
+            console.error(result);
+            toggleSearchAnimation(this);
+            searchBtn.addEventListener("click", sendSearchRequest);
+            searchForm.addEventListener("submit", sendSearchRequest);
+            return;
+        }
     }
     console.log(`Received ${result.length} tracks from ${platform}!`);
 
@@ -137,10 +146,26 @@ async function sendSearchRequest(e) {
 
 //Sends AJAX request to make a search in the Spotify database
 async function searchSpotify() {
-    const response = await fetch(`/party/spotify/search?query=${query}&dataSaver=${dataSaver}`).then(
-        (res) => res.json()
-    );
-    return response;
+    const response = await fetch(
+        `/party/spotify/search?query=${query}&dataSaver=${dataSaver}&creator=true`
+    ).then((res) => res.json());
+
+    if (token) {
+        //Creator
+        if (response["tokenExpired"]) {
+            console.error(
+                "Could not get tracks due to expired token. Refreshing..."
+            );
+            await refreshToken();
+            return searchSpotify();
+        } else if (response["error"]) {
+            console.error("Could not get tracks!", response);
+        }
+        return response;
+    } else {
+        //Participant
+        return response;
+    }
 }
 
 function refreshListeners() {
@@ -296,9 +321,9 @@ changeHint();
 async function getSongsInQueue(e) {
     toggleSearchAnimation(e);
     console.log("Getting songs is queue...");
-    const response = await fetch(`/party/getSongsInQueue?dataSaver=${dataSaver}`).then((res) =>
-        res.json()
-    );
+    const response = await fetch(
+        `/party/getSongsInQueue?dataSaver=${dataSaver}`
+    ).then((res) => res.json());
     if (response["error"]) {
         console.error(response);
         toggleSearchAnimation(e);
@@ -366,4 +391,4 @@ function addedToQueueFeedback(card, success) {
     }, 1000);
 }
 
-console.log('Party JS successfully loaded!');
+console.log("Party JS successfully loaded!");

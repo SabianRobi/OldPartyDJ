@@ -140,11 +140,12 @@ class PartyController extends Controller
     }
 
     // Delete party
-    public static function delete() {
+    public static function delete()
+    {
         $user = User::find(Auth::id());
         $party = Party::where('creator', $user->id)->first();
 
-        if($user->party->creator != $user->id) {
+        if ($user->party->creator != $user->id) {
             notify()->error('You can not delete other\'s party!');
             return redirect()->redirectTo(url()->previous('/'));
         }
@@ -169,19 +170,11 @@ class PartyController extends Controller
         $user = User::find(Auth::id());
         $spotify = SpotifyThings::where('owner', $user->id)->first();
 
-        if ($user->role == "creator" && isset($spotify->token)) {
-            return view('party.party', [
-                // 'user' => $user,
-                'partyName' => $user->party->name,
-                'spotifyToken' => $spotify->token,
-                'creator' => true,
-            ]);
-        }
-
         return view('party.party', [
-            // 'user' => $user,
-            'creator' => false,
             'partyName' => $user->party->name,
+            'loggedInWithSpotify' => isset($spotify->token) && $spotify->token ? true : false,
+            'creator' => $user->role == "creator",
+            'spotifyToken' => $user->role == "creator" && isset($spotify->token) ? $spotify->token : '',
         ]);
     }
 

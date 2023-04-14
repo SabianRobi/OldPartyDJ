@@ -27,7 +27,7 @@
 # Party
 [X] Make the Spotify login available after user login
 [X] Store the Spotify refresh token in db, not in the session
-[ ] Spotify token expiring (playNextTrack)
+[X] Spotify token expiring (✓ searchTrack, ✓ setDeviceID, ✓ playNextTrack)
 [X] Rename spotify_queues table to music_queues
 [X] Make users able to create parties without logging in with spotify (PartyController:155)
 [X] Add a way to see queued songs
@@ -37,6 +37,7 @@
 [X] Get next song according to the highest score
 [X] Display what party the user is in when participating a party
 [X] Show delete party button to party creators (they can leave the party while not deleting it)
+[ ] 'Show more' option after the 5 results from Spotify
 
 ## Player
 [X] Set the play width to a fix size
@@ -76,7 +77,9 @@
 [X] Fix pre-loading the loading gif
 [X] Add Readme.md
 [_] Verify email to create party
+[ ] Update packages
 [ ] Update phpseclib
+[ ] Set the line endings to the same
 
 # Ideas
 - Make more choosable theme

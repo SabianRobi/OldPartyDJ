@@ -4,16 +4,16 @@
 
 @section('header', 'nothing')
 
-@isset($spotifyToken)
+@if ($loggedInWithSpotify)
     @section('viteImports')
         @vite(['resources/js/party.js', 'resources/js/marquee-text-element.js'])
     @endsection
-@endisset
+@endif
 
 @section('content')
     @include('layouts.party.participant')
 
-    @isset($spotifyToken)
+    @if ($loggedInWithSpotify && $creator)
         @section('scripts')
             <script src="https://sdk.scdn.co/spotify-player.js"></script>
             <script>
@@ -43,5 +43,5 @@
             @vite(['resources/js/partyPlayer.js'])
         @endsection
         @include('layouts.party.player')
-    @endisset
+    @endif
 @endsection

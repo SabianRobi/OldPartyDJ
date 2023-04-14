@@ -78,8 +78,6 @@ class MusicController extends Controller
             $spotify->state = null;
             $spotify->save();
 
-            session(['spotifyToken' => true]);
-
             notify()->success('Successfully logged in with Spotify!');
         } else {
             //State mismatch
@@ -90,6 +88,12 @@ class MusicController extends Controller
 
     public function searchTrack(Request $request)
     {
+        //TODO validate?
+        // $request->validate([
+        //         'query' => 'required|string',
+        //         'dataSaver' => 'required|bool',
+        //         'creator' => 'nullable|bool',
+        // ]);
         $query = $request->input('query');
         $dataSaver = $request->boolean('dataSaver');
 
@@ -107,16 +111,14 @@ class MusicController extends Controller
             ]);
         } catch (SpotifyWebAPI\SpotifyWebAPIException $e) {
             if ($e->hasExpiredToken()) {
-                //TODO it doesn't come here anytime, WHY?
-
-                return response()->json(['searchTrack' => 'Token expired, please refresh it!']);
-
-                $this->refreshToken();
-                notify()->success("Successfully updated Spotify access token!");
-                $this->searchTrack($request);
-                die();
+                if ($request->boolean('creator')) {
+                    return response()->json(['error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
+                } else {
+                    $this->refreshToken();
+                    return $this->searchTrack($request);
+                }
             } else {
-                throw new Exception($e->getMessage());
+                return response()->json(['error' => $e->getMessage()]);
             }
         }
 
@@ -161,14 +163,21 @@ class MusicController extends Controller
         $this->api->setAccessToken($token->token);
         $this->session->setAccessToken($token->token);
 
-        $currentTrack = $this->api->getMyCurrentTrack();
-        $options = [
-            'uris' => [$currentTrack && $currentTrack->item ? $currentTrack->item->uri : 'spotify:track:4mPAxO918YuLgviTMMqw8P'],
-            'position_ms' => $currentTrack && $currentTrack->item ? $currentTrack->progress_ms : 0,
-        ];
-        $this->api->play($party->playback_device_id, $options);
-        //TODO play method can throw Bad Gateway (when token expires? Too many requests in short time?)
-
+        //Get the current playing song and continue it in the web player.
+        try {
+            $currentTrack = $this->api->getMyCurrentTrack();
+            $options = [
+                'uris' => [$currentTrack && $currentTrack->item ? $currentTrack->item->uri : 'spotify:track:4mPAxO918YuLgviTMMqw8P'],
+                'position_ms' => $currentTrack && $currentTrack->item ? $currentTrack->progress_ms : 0,
+            ];
+            $this->api->play($party->playback_device_id, $options);
+        } catch (SpotifyWebAPI\SpotifyWebAPIException $e) {
+            if ($e->hasExpiredToken()) {
+                return response()->json(['error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
+            } else {
+                return response()->json(['error' => $e->getMessage()]);
+            }
+        }
         return response()->json($data);
     }
 
@@ -213,7 +222,6 @@ class MusicController extends Controller
         if (strcmp($party->creator, $user->id)) {
             return response()->json(['error' => 'You do not have permission to do this action!'], 403);
         }
-        // return response()->json(['error' => 'okay']);
 
         $token = SpotifyThings::where('owner', $user->id)->first();
         $this->api->setAccessToken($token->token);
@@ -232,15 +240,17 @@ class MusicController extends Controller
         $options = [
             'uris' => [$nextTrack->track_uri],
         ];
-        $playSuccess = $this->api->play($party->playback_device_id, $options);
-        // if(!$playSuccess) {
-        //     $token->token = $this->refreshToken();
-        //     $token->save();
-        //     $this->playNextTrack();
-        //     die();
-        // }
+
+        try {
+            $this->api->play($party->playback_device_id, $options);
+        } catch (SpotifyWebAPI\SpotifyWebAPIException $e) {
+            if ($e->hasExpiredToken()) {
+                return response()->json(['error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
+            } else {
+                return response()->json(['error' => $e->getMessage()]);
+            }
+        }
         $nextTrack->delete();
-        //TODO if token has been refreshed, send back to client also; idea: send an error that explains token expired, catch this at client side and request new one, then send requestto play the next song.
 
         return response()->json(['track_uri' => $nextTrack->track_uri]);
     }
