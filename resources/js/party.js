@@ -181,7 +181,9 @@ async function sendSearchRequest(e) {
 //Sends AJAX request to make a search in the Spotify database
 async function searchSpotify(offset) {
     const response = await fetch(
-        `/party/spotify/search?query=${query}&dataSaver=${dataSaver}&offset=${offset}&creator=true`
+        `/party/spotify/search?query=${query}&dataSaver=${
+            dataSaver ? 1 : 0
+        }&offset=${offset}&creator=${token ? 1 : 0}`
     ).then((res) => res.json());
 
     if (token) {
@@ -193,7 +195,7 @@ async function searchSpotify(offset) {
             await refreshToken();
             return searchSpotify(offset);
         } else if (response["error"]) {
-            console.error("Could not get tracks!", response);
+            console.error("Could not get tracks!");
         }
         return response;
     } else {

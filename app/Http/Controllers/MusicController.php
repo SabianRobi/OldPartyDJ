@@ -8,9 +8,9 @@ use App\Models\TrackInQueue;
 use Illuminate\Http\Request;
 use SpotifyWebAPI;
 use App\Models\User;
-use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class MusicController extends Controller
 {
@@ -88,13 +88,17 @@ class MusicController extends Controller
 
     public function searchTrack(Request $request)
     {
-        //TODO validate?
-        // $request->validate([
-        //         'query' => 'required|string',
-        //         'dataSaver' => 'required|bool',
-        //         'creator' => 'nullable|bool',
-        //         'offset' => 'required|number|min:0',
-        // ]);
+        try {
+            $request->validate([
+                'query' => 'required|string',
+                'dataSaver' => 'required|boolean',
+                'creator' => 'required|boolean',
+                'offset' => 'required|integer|min:0',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => 'Required fields did not specified!', 'message' => $e->getMessage()]);
+        }
+
         $query = $request->input('query');
         $dataSaver = $request->boolean('dataSaver');
         $offset = $request->input('offset');
@@ -173,7 +177,7 @@ class MusicController extends Controller
                 'uris' => [$currentTrack && $currentTrack->item ? $currentTrack->item->uri : 'spotify:track:4mPAxO918YuLgviTMMqw8P'],
                 'position_ms' => $currentTrack && $currentTrack->item ? $currentTrack->progress_ms : 0,
             ];
-            // $this->api->play($party->playback_device_id, $options);
+            $this->api->play($party->playback_device_id, $options);
         } catch (SpotifyWebAPI\SpotifyWebAPIException $e) {
             if ($e->hasExpiredToken()) {
                 return response()->json(['error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
