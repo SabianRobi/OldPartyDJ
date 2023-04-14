@@ -30,6 +30,7 @@ dataSaverObj.addEventListener("change", function () {
 
 let dataSaver = false;
 let query;
+let offset = 0;
 const hints = [
     "Blue",
     "abcdefu",
@@ -99,7 +100,7 @@ async function sendSearchRequest(e) {
     console.log(`Searching '${query}' on ${platform}...`);
     let result;
     if (platform == "Spotify") {
-        result = await searchSpotify();
+        result = await searchSpotify(offset);
 
         if (result["error"]) {
             console.error(result);
@@ -137,6 +138,39 @@ async function sendSearchRequest(e) {
         );
         resultsUl.appendChild(card);
     });
+    offset = result.length;
+
+    resultsUl.innerHTML += `<button id="showMore" name="showMore" data-in-progress="false" data-original-value="Show more"
+    class="bg-blue-500 hover:bg-blue-300 text-white hover:text-black py-2 px-2 my-2 rounded">Show more</button>`;
+    const showMoreBtn = resultsUl.querySelector("#showMore");
+    showMoreBtn.addEventListener("click", async function () {
+        pushFeedback(showMoreBtn);
+        toggleSearchAnimation(showMoreBtn);
+
+        result = await searchSpotify(offset);
+
+        resultsUl.removeChild(showMoreBtn);
+
+        result.forEach((track) => {
+            let length = new Date(track["length"]);
+            const card = getMusicCardHTML(
+                track["image"],
+                track["title"],
+                track["artists"],
+                length.getMinutes() + "m" + length.getSeconds() + "s",
+                track["uri"],
+                platform
+            );
+            resultsUl.appendChild(card);
+        });
+        offset += result.length;
+
+        resultsUl.appendChild(showMoreBtn);
+        toggleSearchAnimation(showMoreBtn);
+
+        refreshListeners();
+    });
+
     refreshListeners();
     changeHint();
     toggleSearchAnimation(this);
@@ -145,9 +179,9 @@ async function sendSearchRequest(e) {
 }
 
 //Sends AJAX request to make a search in the Spotify database
-async function searchSpotify() {
+async function searchSpotify(offset) {
     const response = await fetch(
-        `/party/spotify/search?query=${query}&dataSaver=${dataSaver}&creator=true`
+        `/party/spotify/search?query=${query}&dataSaver=${dataSaver}&offset=${offset}&creator=true`
     ).then((res) => res.json());
 
     if (token) {
@@ -157,7 +191,7 @@ async function searchSpotify() {
                 "Could not get tracks due to expired token. Refreshing..."
             );
             await refreshToken();
-            return searchSpotify();
+            return searchSpotify(offset);
         } else if (response["error"]) {
             console.error("Could not get tracks!", response);
         }
@@ -169,12 +203,13 @@ async function searchSpotify() {
 }
 
 function refreshListeners() {
-    const cards = resultsUl.querySelectorAll("[data-uri]");
+    let cards = resultsUl.querySelectorAll("[data-not-listening]");
     cards.forEach((card) => {
         card.addEventListener("click", (e) => {
             pushFeedback(card);
             addToQueue(card);
         });
+        delete card.dataset.notListening;
     });
 }
 
@@ -267,6 +302,7 @@ function getMusicCardHTML(
     );
     card.dataset.uri = uri;
     card.dataset.platform = platform;
+    card.dataset.notListening = null;
     card.appendChild(imgO);
     card.appendChild(outerDiv);
 

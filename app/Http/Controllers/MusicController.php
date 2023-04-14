@@ -93,9 +93,11 @@ class MusicController extends Controller
         //         'query' => 'required|string',
         //         'dataSaver' => 'required|bool',
         //         'creator' => 'nullable|bool',
+        //         'offset' => 'required|number|min:0',
         // ]);
         $query = $request->input('query');
         $dataSaver = $request->boolean('dataSaver');
+        $offset = $request->input('offset');
 
         $token = SpotifyThings::where('owner', Auth::id())->first();
         $this->api->setAccessToken($token->token);
@@ -107,6 +109,7 @@ class MusicController extends Controller
         try {
             $result = $this->api->search($query, 'track', [
                 'limit' => $limit,
+                'offset' => $offset,
                 'market' => config('spotify.default_config.market'),
             ]);
         } catch (SpotifyWebAPI\SpotifyWebAPIException $e) {
@@ -170,7 +173,7 @@ class MusicController extends Controller
                 'uris' => [$currentTrack && $currentTrack->item ? $currentTrack->item->uri : 'spotify:track:4mPAxO918YuLgviTMMqw8P'],
                 'position_ms' => $currentTrack && $currentTrack->item ? $currentTrack->progress_ms : 0,
             ];
-            $this->api->play($party->playback_device_id, $options);
+            // $this->api->play($party->playback_device_id, $options);
         } catch (SpotifyWebAPI\SpotifyWebAPIException $e) {
             if ($e->hasExpiredToken()) {
                 return response()->json(['error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);

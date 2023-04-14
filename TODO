@@ -37,7 +37,7 @@
 [X] Get next song according to the highest score
 [X] Display what party the user is in when participating a party
 [X] Show delete party button to party creators (they can leave the party while not deleting it)
-[ ] 'Show more' option after the 5 results from Spotify
+[X] 'Show more' option after the 5 results from Spotify
 
 ## Player
 [X] Set the play width to a fix size
