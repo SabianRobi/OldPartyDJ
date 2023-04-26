@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\PartyController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\LeavePartyMiddleware;
 // use App\Models\Party;
 // use App\Models\SpotifyThings;
@@ -43,10 +44,15 @@ Route::controller(PartyController::class)->middleware('auth')->group(function ()
     Route::middleware('hasParty')->post('/party/delete', 'delete')->name('deleteParty');
 });
 
+Route::controller(MusicController::class)->middleware(['auth'])->group(function () {
+    Route::post('/party/spotify/login', 'spotifyLogin')->name('spotifyLogin');
+    Route::get('/party/spotify/callback', 'spotifyCallback');
+    Route::delete('/party/spotify/disconnect', 'spotifyDisconnect')
+        ->name('spotifyDisconnect');
+});
+
 //Requires auth and the user to be in a party
 Route::controller(MusicController::class)->middleware(['auth', 'inParty'])->group(function () {
-    Route::post('/party/spotify/login', 'spotifyLogin');
-    Route::get('/party/spotify/callback', 'spotifyCallback');
     Route::get('/party/spotify/search', 'searchTrack');
     Route::get('/party/spotify/refreshToken', 'refreshToken');
     Route::post('/party/spotify/addTrack', 'addTrackToQueue');
@@ -226,10 +232,10 @@ Route::controller(MusicController::class)->middleware(['auth', 'inParty'])->grou
 //     // return view('test');
 // });
 
-// Route::middleware('auth')->group(function () {
-//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-// });
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
 require __DIR__ . '/auth.php';

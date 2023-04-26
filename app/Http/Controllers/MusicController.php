@@ -83,7 +83,22 @@ class MusicController extends Controller
             //State mismatch
             notify()->error('Something went wrong, please try again!');
         }
-        return redirect()->route('party');
+        return back();
+    }
+
+    public function spotifyDisconnect()
+    {
+        $spotify = SpotifyThings::where('owner', Auth::id());
+        if($spotify->get()->isEmpty()) {
+            notify()->error('Spotify account is not associated!');
+            return back();
+        }
+
+        $spotify->delete();
+        //TODO if in a party, reload page?
+
+        notify()->success('Successfully disconnected Spotify!');
+        return back();
     }
 
     public function searchTrack(Request $request)

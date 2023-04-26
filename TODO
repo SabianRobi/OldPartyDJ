@@ -15,7 +15,7 @@
 [X] Correct login and register page
 [X] Make welcome page (where select between Create / Join party)
 [X] Create 'login party' page
-[ ] Create Profile settings page (connected platforms, delete account, light/dark mode, edit database info)
+[X] Create Profile settings page (change name/email/username/password/delete account, connected platforms)
 
 # Auth
 [X] Redirect user to page where the login requested
@@ -23,11 +23,12 @@
 [_] Add 'Remember me' option to login page
 [_] Add option to login with biometric login (WebAuthN)
 [_] Add option to login with Social Accounts (Facebook, Google)
+[_] Verify email
 
 # Party
 [X] Make the Spotify login available after user login
 [X] Store the Spotify refresh token in db, not in the session
-[X] Spotify token expiring (✓ searchTrack, ✓ setDeviceID, ✓ playNextTrack)
+  [X] Spotify token expiring (✓ searchTrack, ✓ setDeviceID, ✓ playNextTrack) - creator searchTrack, fn not found
 [X] Rename spotify_queues table to music_queues
 [X] Make users able to create parties without logging in with spotify (PartyController:155)
 [X] Add a way to see queued songs
@@ -52,6 +53,7 @@
 [X] Salt the passwords (user, party) | Salted by default
 [X] Guard all of controller endpoints
 [X] Make username length to min 3 chars
+[ ] Make refresh token method post, add get method also
 
 # Etc
 [X] Update party link in nav
@@ -68,7 +70,7 @@
 [_] Idea / Bug reporting page
 [_] Give custom names for DB columns
 [X] Logout bugging when in a party
-[ ] Ask to store cookies
+[_] Ask to store cookies (no cookies?)
 [X] Elevate flash messages to the top
 [X] Remove test route
 [ ] Solve random TODOs in the project
@@ -77,8 +79,6 @@
 [X] Fix pre-loading the loading gif
 [X] Add Readme.md
 [_] Verify email to create party
-[ ] Update packages
-[ ] Update phpseclib
 [ ] Set the line endings to the same
 
 # Ideas
@@ -91,6 +91,12 @@
 - When a user watching queued songs, get automatic updates
 - Write documentation
 
+# Before deployment:
+- Update packages (especially phpseclib)
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file
 Generate DB
+
+
+# NOW:
+Profile settings -> Platform management

@@ -31,4 +31,11 @@ class User extends Authenticatable
         'remember_token',
         'is_admin'
     ];
+
+    protected $fillable = [
+        'password',
+        'username',
+        'name',
+        'email'
+    ];
 }

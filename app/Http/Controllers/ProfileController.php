@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\SpotifyThings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -17,8 +18,11 @@ class ProfileController extends Controller
      */
     public function edit(Request $request)
     {
+        $isSpotifyConnected = SpotifyThings::where('owner', Auth::id())->get()->isNotEmpty();
+
         return view('profile.edit', [
             'user' => $request->user(),
+            'isSpotifyConnected' => $isSpotifyConnected,
         ]);
     }
 
@@ -32,12 +36,15 @@ class ProfileController extends Controller
     {
         $request->user()->fill($request->validated());
 
+        //TODO make sure validation is the same as when registering
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
 
         $request->user()->save();
+        $request->user()->update();
 
+        notify()->success('Successfully updated your profile!');
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
@@ -61,6 +68,8 @@ class ProfileController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        notify()->success('Successfully deleted profile!');
 
         return Redirect::to('/');
     }

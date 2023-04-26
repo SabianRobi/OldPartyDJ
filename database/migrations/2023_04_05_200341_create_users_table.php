@@ -22,7 +22,7 @@ return new class extends Migration
             $table->boolean('is_admin')->default(false);
             $table->foreignId('party_id')->nullable()->constrained('parties', 'id')->nullOnDelete();
             $table->enum('role', ['creator', 'participant'])->nullable();
-            // $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
             // $table->rememberToken();
             $table->timestamps();
         });
