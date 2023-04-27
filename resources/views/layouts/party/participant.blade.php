@@ -1,7 +1,7 @@
 {{-- Login with Spotify --}}
 <img src="images/loading.gif" alt="Pre-load the loading gif" hidden>
 <p class="text-center text-xl">{{ $partyName }}</p>
-@unless($loggedInWithSpotify)
+@unless ($loggedInWithSpotify)
     <form action="/party/spotify/login" method="post">
         @csrf
         <button id="spotifyLogin" name="spotifyLogin"
@@ -43,7 +43,7 @@
             Leave party
         </button>
     </form>
-    @if($loggedInWithSpotify)
+    @if ($loggedInWithSpotify)
         {{-- Watch queue --}}
         <button id="getSongs" name="getSongs" data-in-progress="false" data-original-value="Watch queue"
             class="bg-teal-500 hover:bg-teal-400 text-white font-bold py-2 px-1 w-full rounded">
@@ -66,21 +66,20 @@
                 </span>
             </label>
         </div>
-
-        {{-- Delete party --}}
-        @if ($creator)
-            <form action="{{ route('deleteParty') }}" method="post" class="">
-                @csrf
-                <button id="deleteParty" name="deleteParty" data-in-progress="false"
-                    class="bg-red-900 hover:bg-red-700 text-white font-bold py-2 px-1 w-full rounded">
-                    Delete party
-                </button>
-            </form>
-        @endif
+    @endif
+    {{-- Delete party --}}
+    @if ($creator)
+        <form action="{{ route('deleteParty') }}" method="post" class="">
+            @csrf
+            <button id="deleteParty" name="deleteParty" data-in-progress="false"
+                class="bg-red-900 hover:bg-red-700 text-white font-bold py-2 px-1 w-full rounded">
+                Delete party
+            </button>
+        </form>
     @endif
 </div>
 
-@if($loggedInWithSpotify)
+@if ($loggedInWithSpotify)
     {{-- Results --}}
     <ul id="results" class="w-full md:w-1/2 pb-1"></ul>
     <ol id="queue" class="w-full md:w-1/2 pb-1"></ol>
