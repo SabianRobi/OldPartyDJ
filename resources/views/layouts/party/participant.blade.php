@@ -84,3 +84,9 @@
     <ul id="results" class="w-full md:w-1/2 pb-1"></ul>
     <ol id="queue" class="w-full md:w-1/2 pb-1"></ol>
 @endif
+
+@if ($creator)
+    <span id="isCreator" hidden>true</span>
+@else
+    <span id="isCreator" hidden>false</span>
+@endif

@@ -1,4 +1,5 @@
 import { throttle } from "lodash";
+import { dataSaver, pushFeedback, token, isCreator, refreshToken } from "./partyCommon.js";
 
 // const playerPrevObj = document.querySelector("#spotify_player_previous");
 const playerTogglePlayObj = document.querySelector("#player_toggle_play");
@@ -94,14 +95,6 @@ function connectPlayer() {
             );
         }
     });
-}
-
-async function refreshToken() {
-    console.log("Refreshing Spotify token...");
-    token = await fetch("/party/spotify/refreshToken").then((res) =>
-        res.json()
-    );
-    console.log("Refreshed token successfully!");
 }
 
 // function playerPrev() {

@@ -1,3 +1,5 @@
+import { dataSaver, pushFeedback, isCreator, token } from "./partyCommon.js";
+
 const searchForm = document.querySelector("#searchForm");
 const queryInp = document.querySelector("#query");
 const searchBtn = document.querySelector("#searchBtn");
@@ -28,7 +30,6 @@ dataSaverObj.addEventListener("change", function () {
     console.log(`Datasaver turned ${dataSaver ? "on" : "off"}`);
 });
 
-let dataSaver = false;
 let query;
 let offset = 0;
 const hints = [
@@ -183,25 +184,26 @@ async function searchSpotify(offset) {
     const response = await fetch(
         `/party/spotify/search?query=${query}&dataSaver=${
             dataSaver ? 1 : 0
-        }&offset=${offset}&creator=${token ? 1 : 0}`
+        }&offset=${offset}&creator=${isCreator ? 1 : 0}`
     ).then((res) => res.json());
 
-    if (token) {
-        //Creator
-        if (response["tokenExpired"]) {
-            console.error(
-                "Could not get tracks due to expired token. Refreshing..."
-            );
-            await refreshToken();
-            return searchSpotify(offset);
-        } else if (response["error"]) {
-            console.error("Could not get tracks!");
-        }
-        return response;
-    } else {
-        //Participant
-        return response;
+    if (response["tokenExpired"] && isCreator) {
+        console.error(
+            "Could not get tracks due to expired token. Refreshing..."
+        );
+
+        await refreshToken();
+        return searchSpotify(offset);
+    } else if (response["error"]) {
+        console.error(response["error"]);
+
+        const text = queryInp.value;
+        queryInp.value = "Unexcepted error, please try again!";
+        setTimeout(() => {
+            queryInp.value = text;
+        }, 1000);
     }
+    return response;
 }
 
 function refreshListeners() {
