@@ -5,6 +5,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use \App\Models\User;
 
 class DatabaseSeeder extends Seeder
@@ -26,7 +27,7 @@ class DatabaseSeeder extends Seeder
         $admin->save();
 
         //Users
-        for ($i=0; $i < 5; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             $user = new User();
             $user->name = 'Example User ' . $i;
             $user->username = 'ExampleUser' . $i;
@@ -34,5 +35,13 @@ class DatabaseSeeder extends Seeder
             $user->password = Hash::make('password');
             $user->save();
         }
+
+        //Spotify
+        $spotify = new User();
+        $spotify->name = 'Spotify';
+        $spotify->username = 'Spotify';
+        $spotify->email = 'spotify@partydj.com';
+        $spotify->password = Hash::make(Str::random(128));
+        $spotify->save();
     }
 }

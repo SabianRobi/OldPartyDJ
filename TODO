@@ -48,7 +48,7 @@
 [X] Select the player for playback after initalizing it
 [X] Add padding/margin around title / artist, because button get too close if the text is short
 [X] Add feedback when track successfully added to queue
-[ ] Add auto-play when there is no track in queue
+[X] Add auto-play when there is no track in queue
 [ ] When token expires, playback stops due to not refreshing the token.
 # Security
 [X] Make setDeviceId's method POST
