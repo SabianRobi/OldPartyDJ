@@ -17,7 +17,7 @@
                     <th scope="row" class="pl-2 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                         Spotify
                     </th>
-                    <td class="py-2">
+                    <td class="py-2 {{ $isSpotifyConnected ? 'text-lime-500' : 'text-red-700' }}">
                         {{ $isSpotifyConnected ? 'Connected' : 'Disconnected' }}
                     </td>
                     <td class="py-2">
