@@ -39,6 +39,7 @@
 [X] Display what party the user is in when participating a party
 [X] Show delete party button to party creators (they can leave the party while not deleting it)
 [X] 'Show more' option after the 5 results from Spotify
+[ ] Let the user remove their requested songs from the queue
 
 ## Player
 [X] Set the play width to a fix size
@@ -47,13 +48,14 @@
 [X] Select the player for playback after initalizing it
 [X] Add padding/margin around title / artist, because button get too close if the text is short
 [X] Add feedback when track successfully added to queue
-
+[ ] Add auto-play when there is no track in queue
+[ ] When token expires, playback stops due to not refreshing the token.
 # Security
 [X] Make setDeviceId's method POST
 [X] Salt the passwords (user, party) | Salted by default
 [X] Guard all of controller endpoints
 [X] Make username length to min 3 chars
-[ ] Make refresh token method post, add get method also
+[X] Make refresh token method post, add get method also
 
 # Etc
 [X] Update party link in nav
@@ -80,6 +82,11 @@
 [X] Add Readme.md
 [_] Verify email to create party
 [ ] Set the line endings to the same
+[_] Use the laravel-notify package for showing erros when using javascript
+[X] Split MusicController into Spotify and Music Controllers
+[ ] Spotify login redirects to home page
+[_] Select which platform to search at
+
 
 # Ideas
 - Make more choosable theme
@@ -96,7 +103,3 @@
 # After deployment:
 Set Spotify client id, secret, redirect uri in .env file
 Generate DB
-
-
-# NOW:
-Profile settings -> Platform management

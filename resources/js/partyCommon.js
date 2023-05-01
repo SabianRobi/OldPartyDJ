@@ -1,6 +1,23 @@
-export let token = "";
+export let spoitfyToken = "";
+export function setSpotifyToken(newToken) {
+    spoitfyToken = newToken;
+}
+export async function getSpotifyToken() {
+    const result = await fetch("/platforms/spotify/token").then((res) =>
+        res.json()
+    );
+    return result.token;
+}
 export let dataSaver = false;
-export const isCreator = Boolean(document.querySelector("#isCreator").innerHTML);
+export function setDataSaver(newValue) {
+    dataSaver = newValue;
+}
+export const csrfToken = document.head.querySelector(
+    "meta[name=csrf-token]"
+).content;
+export const isCreator = Boolean(
+    document.querySelector("#isCreator").innerHTML
+);
 
 export function pushFeedback(e) {
     e.animate(animation, timing);
@@ -23,10 +40,25 @@ const timing = {
 
 export async function refreshToken() {
     console.log("Refreshing Spotify token...");
-    token = await fetch("/party/spotify/refreshToken").then((res) =>
-        res.json()
-    );
-    console.log("Refreshed token successfully!");
+
+    //Setting up the form
+    const form = new FormData();
+
+    const response = await fetch("/platforms/spotify/token", {
+        method: "PATCH",
+        headers: {
+            "X-CSRF-TOKEN": csrfToken,
+        },
+        body: form,
+    }).then((res) => res.json());
+
+    if (!response["success"]) {
+        console.error("Could not refresh token!", response);
+        return;
+    } else {
+        console.log("Refreshed token successfully!");
+    }
+    return response["success"];
 }
 
 console.log("Party Common JS succesfully loaded!");

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\PartyController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SpotifyController;
 use App\Http\Middleware\LeavePartyMiddleware;
 // use App\Models\Party;
 // use App\Models\SpotifyThings;
@@ -44,18 +45,19 @@ Route::controller(PartyController::class)->middleware('auth')->group(function ()
     Route::middleware('hasParty')->post('/party/delete', 'delete')->name('deleteParty');
 });
 
-Route::controller(MusicController::class)->middleware(['auth'])->group(function () {
-    Route::post('/party/spotify/login', 'spotifyLogin')->name('spotifyLogin');
-    Route::get('/party/spotify/callback', 'spotifyCallback');
-    Route::delete('/party/spotify/disconnect', 'spotifyDisconnect')
-        ->name('spotifyDisconnect');
+//Spotify
+Route::controller(SpotifyController::class)->middleware(['auth'])->group(function () {
+    Route::post('/platforms/spotify/login', 'login')                ->name('spotifyLogin');
+    Route::get('/platforms/spotify/callback', 'callback');
+    Route::delete('/platforms/spotify/disconnect', 'disconnect')    ->name('spotifyDisconnect');
+    Route::get('/platforms/spotify/token', 'getToken');
+    Route::patch('/platforms/spotify/token', 'refreshToken');
 });
 
 //Requires auth and the user to be in a party
 Route::controller(MusicController::class)->middleware(['auth', 'inParty'])->group(function () {
-    Route::get('/party/spotify/search', 'searchTrack');
-    Route::get('/party/spotify/refreshToken', 'refreshToken');
-    Route::post('/party/spotify/addTrack', 'addTrackToQueue');
+    Route::get('/party/search', 'searchTrack');
+    Route::post('/party/addTrack', 'addTrackToQueue');
     Route::get('/party/getSongsInQueue', 'getSongsInQueue');
 
     //Requires user to own a party

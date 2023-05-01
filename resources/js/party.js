@@ -1,11 +1,18 @@
-import { dataSaver, pushFeedback, isCreator, token } from "./partyCommon.js";
+import {
+    dataSaver,
+    setDataSaver,
+    pushFeedback,
+    isCreator,
+    csrfToken,
+    getSpotifyToken,
+    setSpotifyToken,
+} from "./partyCommon.js";
 
 const searchForm = document.querySelector("#searchForm");
 const queryInp = document.querySelector("#query");
 const searchBtn = document.querySelector("#searchBtn");
 const resultsUl = document.querySelector("#results");
 const queueUl = document.querySelector("#queue");
-const csrfToken = document.head.querySelector("meta[name=csrf-token]").content;
 
 const getSongsBtn = document.querySelector("#getSongs");
 const clearResultsBtn = document.querySelector("#clearResults");
@@ -26,10 +33,11 @@ leaveParty.addEventListener("click", function () {
 });
 dataSaverObj.addEventListener("change", function () {
     pushFeedback(this.nextSibling.nextSibling);
-    dataSaver = !dataSaver;
+    setDataSaver(!dataSaver);
     console.log(`Datasaver turned ${dataSaver ? "on" : "off"}`);
 });
 
+const SpotifySearchLimit = 5;
 let query;
 let offset = 0;
 const hints = [
@@ -63,6 +71,7 @@ const hints = [
     "Csepereg az eső",
     "Érik a szőlő",
 ];
+const platforms = ["Spotify"];
 
 //Toggles the searching icon
 function toggleSearchAnimation(e) {
@@ -83,7 +92,7 @@ async function sendSearchRequest(e) {
     searchBtn.removeEventListener("click", sendSearchRequest);
 
     query = queryInp.value == "" ? queryInp.placeholder : queryInp.value;
-    const platform = "Spotify";
+    offset = 0;
 
     if (query.length === 0) {
         console.warn("Please be more specific!");
@@ -98,28 +107,43 @@ async function sendSearchRequest(e) {
         return;
     }
 
-    console.log(`Searching '${query}' on ${platform}...`);
-    let result;
-    if (platform == "Spotify") {
-        result = await searchSpotify(offset);
+    console.log(`Searching '${query}' on ${platforms.join(", ")}...`);
 
-        if (result["error"]) {
-            console.error(result);
-            toggleSearchAnimation(this);
-            searchBtn.addEventListener("click", sendSearchRequest);
-            searchForm.addEventListener("submit", sendSearchRequest);
-            return;
+    const response = await fetch(
+        `/party/search?query=${query}&dataSaver=${
+            dataSaver ? 1 : 0
+        }&offset=${offset}&creator=${
+            isCreator ? 1 : 0
+        }&platforms=${platforms.join(",")}`
+    ).then((res) => res.json());
+
+    let errorCount = 0;
+    let platformsSuccess = platforms.slice(0, platforms.length);
+    response.forEach((platformResult) => {
+        if (platformResult["error"]) {
+            console.error(platformResult["platform"], platformResult["error"]);
+            platformsSuccess = platformsSuccess.filter((p) => {
+                p !== platformResult["platform"];
+            });
+            errorCount++;
         }
-    }
-    console.log(`Received ${result.length} tracks from ${platform}!`);
+    });
 
-    if (result.length === 0) {
-        const text = queryInp.value;
-        queryInp.value = "There are no results!";
-        setTimeout(() => {
-            queryInp.value = text;
-        }, 1000);
+    if (errorCount === platforms.length) {
+        //All platform search failed
+        toggleSearchAnimation(this);
+        searchBtn.addEventListener("click", sendSearchRequest);
+        searchForm.addEventListener("submit", sendSearchRequest);
+        return;
     }
+
+    let trackCount = 0;
+    response.map((platform) => {
+        trackCount += platform.tracks.length;
+    });
+    console.log(
+        `Received ${trackCount} tracks from ${platformsSuccess.join(", ")}!`
+    );
 
     clearResults();
 
@@ -127,32 +151,8 @@ async function sendSearchRequest(e) {
     queueText.innerText = "Search results:";
     resultsUl.appendChild(queueText);
 
-    result.forEach((track) => {
-        let length = new Date(track["length"]);
-        const card = getMusicCardHTML(
-            track["image"],
-            track["title"],
-            track["artists"],
-            length.getMinutes() + "m" + length.getSeconds() + "s",
-            track["uri"],
-            platform
-        );
-        resultsUl.appendChild(card);
-    });
-    offset = result.length;
-
-    resultsUl.innerHTML += `<button id="showMore" name="showMore" data-in-progress="false" data-original-value="Show more"
-    class="bg-blue-500 hover:bg-blue-300 text-white hover:text-black py-2 px-2 my-2 rounded">Show more</button>`;
-    const showMoreBtn = resultsUl.querySelector("#showMore");
-    showMoreBtn.addEventListener("click", async function () {
-        pushFeedback(showMoreBtn);
-        toggleSearchAnimation(showMoreBtn);
-
-        result = await searchSpotify(offset);
-
-        resultsUl.removeChild(showMoreBtn);
-
-        result.forEach((track) => {
+    response.forEach((platformResults) => {
+        platformResults.tracks.forEach((track) => {
             let length = new Date(track["length"]);
             const card = getMusicCardHTML(
                 track["image"],
@@ -160,17 +160,61 @@ async function sendSearchRequest(e) {
                 track["artists"],
                 length.getMinutes() + "m" + length.getSeconds() + "s",
                 track["uri"],
-                platform
+                platformResults.platform
             );
             resultsUl.appendChild(card);
         });
-        offset += result.length;
-
-        resultsUl.appendChild(showMoreBtn);
-        toggleSearchAnimation(showMoreBtn);
-
-        refreshListeners();
     });
+    offset = trackCount; //TODO manage offset per platform
+
+    if (trackCount === SpotifySearchLimit) {
+        resultsUl.innerHTML += `<button id="showMore" name="showMore" data-in-progress="false" data-original-value="Show more"
+        class="bg-blue-500 hover:bg-blue-300 text-white hover:text-black py-2 px-2 my-2 rounded">Show more</button>`;
+
+        const showMoreBtn = resultsUl.querySelector("#showMore");
+        showMoreBtn.addEventListener("click", async function () {
+            pushFeedback(showMoreBtn);
+            toggleSearchAnimation(showMoreBtn);
+
+            const result = await sendOnlySearchRequest(offset);
+
+            resultsUl.removeChild(showMoreBtn);
+
+            result.forEach((platformResults) => {
+                platformResults.tracks.forEach((track) => {
+                    let length = new Date(track["length"]);
+                    const card = getMusicCardHTML(
+                        track["image"],
+                        track["title"],
+                        track["artists"],
+                        length.getMinutes() + "m" + length.getSeconds() + "s",
+                        track["uri"],
+                        platformResults.platform
+                    );
+                    resultsUl.appendChild(card);
+                });
+            });
+
+            let trackCount = 0;
+            result.map((platform) => {
+                trackCount += platform.tracks.length;
+            });
+
+            offset += trackCount; //TODO manage offsets per platform
+
+            resultsUl.appendChild(showMoreBtn);
+            toggleSearchAnimation(showMoreBtn);
+
+            refreshListeners();
+
+            if (trackCount < SpotifySearchLimit) {
+                showMoreBtn.remove();
+                resultsUl.innerHTML += "<p>No more results!</p>";
+            }
+        });
+    } else {
+        resultsUl.innerHTML += "<p>No more results!</p>";
+    }
 
     refreshListeners();
     changeHint();
@@ -180,29 +224,47 @@ async function sendSearchRequest(e) {
 }
 
 //Sends AJAX request to make a search in the Spotify database
-async function searchSpotify(offset) {
+async function sendOnlySearchRequest(offset) {
     const response = await fetch(
-        `/party/spotify/search?query=${query}&dataSaver=${
+        `/party/search?query=${query}&dataSaver=${
             dataSaver ? 1 : 0
-        }&offset=${offset}&creator=${isCreator ? 1 : 0}`
+        }&offset=${offset}&creator=${
+            isCreator ? 1 : 0
+        }&platforms=${platforms.join(",")}`
     ).then((res) => res.json());
 
-    if (response["tokenExpired"] && isCreator) {
-        console.error(
-            "Could not get tracks due to expired token. Refreshing..."
-        );
+    response.forEach(
+        (platformResult) =>
+            async function () {
+                if (platformResult["error"]) {
+                    //TODO check isset
+                    if (
+                        isCreator &&
+                        platformResult["token_expired"] &&
+                        platformResult["platform"] === "Spotify"
+                    ) {
+                        console.error(
+                            "Could not get tracks due to expired Spotify token. Refreshing..."
+                        );
 
-        await refreshToken();
-        return searchSpotify(offset);
-    } else if (response["error"]) {
-        console.error(response["error"]);
+                        let success = await refreshToken();
+                        if (success) {
+                            setSpotifyToken(await getSpotifyToken());
+                        }
+                        return sendOnlySearchRequest(offset);
+                    } else {
+                        console.error(response["error"]);
 
-        const text = queryInp.value;
-        queryInp.value = "Unexcepted error, please try again!";
-        setTimeout(() => {
-            queryInp.value = text;
-        }, 1000);
-    }
+                        const text = queryInp.value;
+                        queryInp.value = "Unexcepted error, please try again!";
+                        setTimeout(() => {
+                            queryInp.value = text;
+                        }, 1000);
+                        return;
+                    }
+                }
+            }
+    );
     return response;
 }
 
@@ -335,7 +397,7 @@ async function addToQueue(card) {
     form.set("uri", uri);
     form.set("platform", platform);
 
-    const response = await fetch("/party/spotify/addTrack", {
+    const response = await fetch("/party/addTrack", {
         method: "POST",
         headers: {
             "X-CSRF-TOKEN": csrfToken,
@@ -368,11 +430,8 @@ async function getSongsInQueue(e) {
         console.error(response);
         toggleSearchAnimation(e);
 
-        const text = e.innerText;
-        e.innerText = response["error"];
-        setTimeout(() => {
-            e.innerText = text;
-        }, 1200);
+        clearResults();
+        queueUl.innerHTML += "<p>No songs in queue!</p>";
 
         return;
     }
@@ -385,6 +444,7 @@ async function getSongsInQueue(e) {
     resultsUl.appendChild(queueText);
 
     response.forEach((track) => {
+        console.log("tr", track);
         let length = new Date(track["length"]);
         const card = getMusicCardHTML(
             track["image"],
@@ -392,11 +452,12 @@ async function getSongsInQueue(e) {
             track["artists"],
             length.getMinutes() + "m" + length.getSeconds() + "s",
             track["uri"],
-            track["platform"],
+            "Spotify", //TODO don't hard code
             track["addedBy"]
         );
         queueUl.appendChild(card);
     });
+
     toggleSearchAnimation(e);
 }
 

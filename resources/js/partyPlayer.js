@@ -1,5 +1,13 @@
 import { throttle } from "lodash";
-import { dataSaver, pushFeedback, token, isCreator, refreshToken } from "./partyCommon.js";
+import {
+    dataSaver,
+    pushFeedback,
+    spoitfyToken,
+    setSpotifyToken,
+    getSpotifyToken,
+    refreshToken,
+    csrfToken,
+} from "./partyCommon.js";
 
 // const playerPrevObj = document.querySelector("#spotify_player_previous");
 const playerTogglePlayObj = document.querySelector("#player_toggle_play");
@@ -9,8 +17,6 @@ const playerImageObj = document.querySelector("#player_image");
 const playerTitleObj = document.querySelector("#player_title");
 const playerArtistObj = document.querySelector("#player_artist");
 
-const csrfToken = document.head.querySelector("meta[name=csrf-token]").content;
-
 playerTogglePlayObj.addEventListener("click", playerTogglePlay);
 // playerPrevObj.addEventListener("click", playerPrev);
 playerNextObj.addEventListener("click", playerNext);
@@ -19,13 +25,11 @@ playerVolumeBar.addEventListener("input", throttle(onVolumeChange, 1000));
 
 let player;
 let volume = 0.25;
+setSpotifyToken(await getSpotifyToken());
 
-function activatePlayerOuter() {
-    window.onSpotifyWebPlaybackSDKReady = () => {
-        activatePlayerInner();
-    };
-}
-activatePlayerOuter();
+window.onSpotifyWebPlaybackSDKReady = () => {
+    activatePlayerInner();
+};
 
 function activatePlayerInner() {
     initPlayer();
@@ -38,7 +42,7 @@ function initPlayer() {
     player = new Spotify.Player({
         name: "PartyDJ Web Player",
         getOAuthToken: (callback) => {
-            callback(token);
+            callback(spoitfyToken);
         },
         volume: volume,
     });
@@ -64,7 +68,12 @@ function addListenersToPlayer() {
         console.error(message);
         if (message === "Authentication failed") {
             console.log("Refreshing access token...");
-            await refreshToken();
+            const success = await refreshToken();
+            if (!success) {
+                console.error("Could not refresh Spotify token!");
+                return;
+            }
+            setSpotifyToken(await getSpotifyToken());
             console.log("Refreshed access token, initalizing player again...");
             activatePlayerInner();
             console.log("Success!");
@@ -181,7 +190,7 @@ async function playNextTrack() {
     } else if (response["error"]) {
         console.error(response);
     } else {
-        console.log(`Playing track: ${response["track_uri"]}`);
+        console.log(`Playing track: ${response["track_uri"]} (${response["is_recommended"] ? "recommended" : "from queue"})`);
     }
 }
 

@@ -2,7 +2,7 @@
 <img src="images/loading.gif" alt="Pre-load the loading gif" hidden>
 <p class="text-center text-xl">{{ $partyName }}</p>
 @unless ($loggedInWithSpotify)
-    <form action="/party/spotify/login" method="post">
+    <form action="/platforms/spotify/login" method="post">
         @csrf
         <button id="spotifyLogin" name="spotifyLogin"
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Login with Spotify!</button>
