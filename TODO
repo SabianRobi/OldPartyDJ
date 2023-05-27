@@ -1,4 +1,5 @@
 # General
+
 [X] Dark mode selector
 [X] Format register page
 [X] Add "New member? Register here!" to login page
@@ -9,6 +10,7 @@
 [X] Create relations between models
 
 # Pages
+
 [_] Contact page
 [X] Add info to main page
 [_] Tutorial page (to main page)
@@ -18,6 +20,7 @@
 [X] Create Profile settings page (change name/email/username/password/delete account, connected platforms)
 
 # Auth
+
 [X] Redirect user to page where the login requested
 [X] Make registering validate username field
 [_] Add 'Remember me' option to login page
@@ -26,9 +29,11 @@
 [_] Verify email
 
 # Party
+
 [X] Make the Spotify login available after user login
 [X] Store the Spotify refresh token in db, not in the session
-  [X] Spotify token expiring (✓ searchTrack, ✓ setDeviceID, ✓ playNextTrack) - creator searchTrack, fn not found
+[X] Spotify token expiring (✓ searchTrack, ✓ setDeviceID, ✓ playNextTrack)
+[ ] When token expires, playback stops due to not refreshing the token automatically. Only refreshes when clicking 'Play next'
 [X] Rename spotify_queues table to music_queues
 [X] Make users able to create parties without logging in with spotify (PartyController:155)
 [X] Add a way to see queued songs
@@ -40,8 +45,11 @@
 [X] Show delete party button to party creators (they can leave the party while not deleting it)
 [X] 'Show more' option after the 5 results from Spotify
 [ ] Let the user remove their requested songs from the queue
+[X] Let users see what is playing currently
+[_] Player: pause music when pressing space
 
 ## Player
+
 [X] Set the play width to a fix size
 [X] Add volume bar to music player
 [X] Make the title/arists brake into rows if they're long enough or make them rolling
@@ -49,15 +57,18 @@
 [X] Add padding/margin around title / artist, because button get too close if the text is short
 [X] Add feedback when track successfully added to queue
 [X] Add auto-play when there is no track in queue
-[ ] When token expires, playback stops due to not refreshing the token.
+
 # Security
+
 [X] Make setDeviceId's method POST
 [X] Salt the passwords (user, party) | Salted by default
 [X] Guard all of controller endpoints
 [X] Make username length to min 3 chars
 [X] Make refresh token method post, add get method also
+[_] Create recaptcha on login page
 
 # Etc
+
 [X] Update party link in nav
 [X] Forms: mark required fields
 [X] Leave party automatically when logging out
@@ -81,25 +92,32 @@
 [X] Fix pre-loading the loading gif
 [X] Add Readme.md
 [_] Verify email to create party
-[ ] Set the line endings to the same
+[X] Set the line endings to LF
 [_] Use the laravel-notify package for showing erros when using javascript
 [X] Split MusicController into Spotify and Music Controllers
 [ ] Spotify login redirects to home page
 [_] Select which platform to search at
-
+[_] Show total length of queued songs
 
 # Ideas
-- Make more choosable theme
-- like / disable current in-queue songs
-- Lyrics
-- Split MusicController into SpotifyController, and MusicController
-- A 'flashback' page, where the user can see the previous parties they attended, the songs played (with timestamp)
-    - Add 'addedAt / playedAt' timestamp to queued tracks
-- When a user watching queued songs, get automatic updates
-- Write documentation
+
+-   Priority queue:
+    +1 points every time a music did not choosed to play
+    -(2^n) points on the user nth track added
+-   Make more choosable theme
+-   like / disable current in-queue songs
+-   Lyrics
+-   Split MusicController into SpotifyController, and MusicController
+-   A 'flashback' page, where the user can see the previous parties they attended, the songs played (with timestamp)
+    -   Add 'addedAt / playedAt' timestamp to queued tracks
+-   When a user watching queued songs, get automatic updates
+-   Write documentation
 
 # Before deployment:
-- Update packages (especially phpseclib)
+
+-   Update packages (especially phpseclib)
+
 # After deployment:
+
 Set Spotify client id, secret, redirect uri in .env file
 Generate DB

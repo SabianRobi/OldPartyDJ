@@ -41,17 +41,16 @@ class MusicController extends Controller
             if ($platform == "Spotify") {
                 $sp = new SpotifyController();
                 $result = ($sp->search($request))->original;
+
                 if (isset($result['error'])) {
                     $platformResults['error'] = $result['error'];
                     if (isset($result['tokenExpired'])) {
                         $platformResults['tokenExpired'] = $result['tokenExpired'];
                     }
-                    continue;
+                } else {
+                    $platformResults['tracks'] = $this->filterTracksForClient($result, $dataSaver, true);
                 }
-                $filteredResult = $this->filterTracksForClient($result, $dataSaver, true);
             }
-
-            $platformResults['tracks'] = $filteredResult;
             array_push($results, $platformResults);
         }
 
@@ -98,6 +97,7 @@ class MusicController extends Controller
         $trackInQueue->platform = $validated['platform'];
         $trackInQueue->track_uri = $validated['uri'];
         $trackInQueue->score = 0;
+        $trackInQueue->currently_playing = false;
         $trackInQueue->save();
 
         //Check if player stopped because of no more tracks were in the queue
@@ -123,11 +123,25 @@ class MusicController extends Controller
         }
 
         $party = Party::where('creator', $user->id)->first();
-        $nextTrack = TrackInQueue::where('party_id', $party->id)->orderBy('score', 'DESC')->first();
+        $nextTrack = TrackInQueue::where('party_id', $party->id)->where('currently_playing', false)->orderBy('score', 'DESC')->first();
         $isRecommended = false;
 
+        //Move the played song into TrackPlayed db
+        $nowEndedTrack = TrackInQueue::where('party_id', $party->id)->where('currently_playing', true)->first();
+
+        if ($nowEndedTrack) {
+            $playedTrack = new TracksPlayedInParty([
+                "party_id" => $nowEndedTrack->party_id,
+                "added_by" => $nowEndedTrack->addedBy,
+                "platform" => $nowEndedTrack->platform,
+                "track_uri" => $nowEndedTrack->track_uri,
+            ]);
+            $playedTrack->save();
+            $nowEndedTrack->delete();
+        }
+
+        // No next track in queue, set recommended song
         if (!isset($nextTrack)) {
-            // No next track in queue, playing similar songs
             $playedTracks = TracksPlayedInParty::where('party_id', $party->id)->select('track_uri')->inRandomOrder()->take(5)->get()->toArray();
 
             if (sizeof($playedTracks) > 0) {
@@ -140,6 +154,7 @@ class MusicController extends Controller
                 $nextTrack->platform = $recTrack['platform'];
                 $nextTrack->track_uri = $recTrack['uri'];
                 $nextTrack->score = 0;
+                $nextTrack->currently_playing = false;
                 $nextTrack->save();
 
                 $isRecommended = true;
@@ -148,25 +163,21 @@ class MusicController extends Controller
             }
         }
 
+        //Start song
         $response = "";
         if ($nextTrack->platform === 'Spotify') {
             $sp = new SpotifyController();
             $response = $sp->playTrack($party->playback_device_id, $nextTrack->track_uri);
         }
 
+        //Error playing song
         if (!$response['success']) {
             return response()->json($response);
         }
 
-        $playedTrack = new TracksPlayedInParty([
-            "party_id" => $nextTrack->party_id,
-            "added_by" => $nextTrack->addedBy,
-            "platform" => $nextTrack->platform,
-            "track_uri" => $nextTrack->track_uri,
-        ]);
-        $playedTrack->save();
-
-        $nextTrack->delete();
+        //Set the new song currently_playing status to true
+        $nextTrack->currently_playing = true;
+        $nextTrack->save();
 
         return response()->json(['track_uri' => $nextTrack->track_uri, 'is_recommended' => $isRecommended]);
     }

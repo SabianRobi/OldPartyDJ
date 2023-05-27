@@ -439,24 +439,49 @@ async function getSongsInQueue(e) {
 
     clearResults();
 
-    const queueText = document.createElement("p");
-    queueText.innerText = "Queued tracks:";
-    resultsUl.appendChild(queueText);
 
-    response.forEach((track) => {
-        console.log("tr", track);
-        let length = new Date(track["length"]);
-        const card = getMusicCardHTML(
-            track["image"],
-            track["title"],
-            track["artists"],
-            length.getMinutes() + "m" + length.getSeconds() + "s",
-            track["uri"],
-            "Spotify", //TODO don't hard code
-            track["addedBy"]
-        );
-        queueUl.appendChild(card);
-    });
+    //Now playing
+    let textObj = document.createElement("p");
+    textObj.innerHTML = "Now playing:"
+    queueUl.append(textObj);
+
+    let length = new Date(response[0]["length"]);
+    const card = getMusicCardHTML(
+        response[0]["image"],
+        response[0]["title"],
+        response[0]["artists"],
+        length.getMinutes() + "m" + length.getSeconds() + "s",
+        response[0]["uri"],
+        "Spotify", //TODO don't hard code
+        response[0]["addedBy"]
+    );
+    queueUl.appendChild(card);
+
+    //Queue
+    let textObj2 = document.createElement("p");
+    textObj2.innerHTML = "Queued tracks:"
+    queueUl.append(textObj2);
+
+    if(response.slice(1).length > 0) {
+        response.slice(1).forEach((track) => {
+            let length = new Date(track["length"]);
+            const card = getMusicCardHTML(
+                track["image"],
+                track["title"],
+                track["artists"],
+                length.getMinutes() + "m" + length.getSeconds() + "s",
+                track["uri"],
+                "Spotify", //TODO don't hard code
+                track["addedBy"]
+            );
+            queueUl.appendChild(card);
+        });
+    } else {
+        let textObj3 = document.createElement("p");
+        textObj3.classList.add("pl-4")
+        textObj3.innerHTML = "No tracks in queue!"
+        queueUl.append(textObj3);
+    }
 
     toggleSearchAnimation(e);
 }

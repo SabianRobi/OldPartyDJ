@@ -20,6 +20,7 @@ return new class extends Migration
             $table->enum('platform', ['Spotify']);
             $table->string('track_uri');
             $table->integer('score')->default(0);
+            $table->boolean('currently_playing')->default(false);
             $table->timestamps();
         });
     }

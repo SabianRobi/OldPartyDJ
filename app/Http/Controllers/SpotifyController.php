@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SpotifyThings;
+use App\Models\TrackInQueue;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use SpotifyWebAPI;
 
@@ -59,8 +61,7 @@ class SpotifyController extends Controller
 
         // Redirect the user
         $url = $this->session->getAuthorizeUrl($options);
-        header('Location: ' . $url);
-        die();
+        return redirect($url);
     }
 
     //Callback
@@ -169,28 +170,27 @@ class SpotifyController extends Controller
 
     public function activatePlayer($playbackDeviceId)
     {
-        // Activate the player by playing the currnetly playing song (in other player)
         $this->setCredentials();
         $token = $this->getTokens();
         $this->api->setAccessToken($token->token);
         $this->session->setAccessToken($token->token);
 
-        //Get the current playing song and continue it in the web player.
-        //TODO play track from queue if any
-        try {
-            $currentTrack = $this->api->getMyCurrentTrack();
-            $options = [
-                'uris' => [$currentTrack && $currentTrack->item ? $currentTrack->item->uri : 'spotify:track:4mPAxO918YuLgviTMMqw8P'],
-                'position_ms' => $currentTrack && $currentTrack->item ? $currentTrack->progress_ms : 0,
-            ];
-            $this->api->play($playbackDeviceId, $options);
-        } catch (SpotifyWebAPI\SpotifyWebAPIException $e) {
-            if ($e->hasExpiredToken()) {
-                return response()->json(['error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
-            } else {
-                return response()->json(['error' => $e->getMessage()]);
-            }
+        $user = Auth::user();
+
+        $nextTrack = TrackInQueue::where('party_id', $user->party_id)->where('currently_playing', false)->orderBy('score', 'DESC')->first();
+        if(!$nextTrack) {
+            $track = new TrackInQueue();
+            $track->party_id = $user->party_id;
+            $track->addedBy = User::where('username', 'Spotify')->first()->id;
+            $track->platform = "Spotify";
+            $track->track_uri = "spotify:track:5ygDXis42ncn6kYG14lEVG"; //Baby Shark
+            $track->score = 0;
+            $track->currently_playing = false;
+            $track->save();
         }
+
+        $mc = new MusicController();
+        $mc->playNextTrack();
     }
 
     public function playTrack($playbackDeviceId, $trackUri)
