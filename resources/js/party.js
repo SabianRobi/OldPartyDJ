@@ -288,104 +288,35 @@ function getMusicCardHTML(
     platform,
     addedBy
 ) {
-    const artistsP = document.createElement("p");
-    artistsP.classList.add(
-        "mb-3",
-        "font-normal",
-        "text-gray-700",
-        "dark:text-gray-400"
-    );
-    artists.forEach((artist) => {
-        artistsP.innerHTML += artist + ", ";
-    });
-    artistsP.innerHTML = artistsP.innerHTML.substring(
-        artistsP.innerHTML.length - 2,
-        0
-    );
-
-    const lengthP = document.createElement("p");
-    lengthP.classList.add(
-        "text-xs",
-        "text-gray-500",
-        "absolute",
-        "bottom-1",
-        "right-2"
-    );
-    lengthP.innerHTML = length === "NaNmNaNs" ? "" : length;
-
-    const innerDiv = document.createElement("div");
-    innerDiv.classList.add("m-0", "p-0");
-    innerDiv.appendChild(artistsP);
-    innerDiv.appendChild(lengthP);
-
-    const titleP = document.createElement("h5");
-    titleP.classList.add(
-        "mb-2",
-        "text-xl",
-        "font-bold",
-        "tracking-tight",
-        "text-gray-900",
-        "dark:text-white"
-    );
-    titleP.innerHTML = title;
-
-    const outerDiv = document.createElement("div");
-    outerDiv.classList.add(
-        "flex",
-        "flex-col",
-        "justify-between",
-        "pl-2",
-        "pr-4",
-        "py-1",
-        "leading-normal"
-    );
-    outerDiv.appendChild(titleP);
-    outerDiv.appendChild(innerDiv);
-
-    const imgO = document.createElement("img");
-    imgO.classList.add("p-2", "object-cover", "h-auto", "w-32");
-    imgO.src =
-        image === "" || image === undefined
+    const div = document.createElement("div");
+    div.innerHTML = `<div
+        class="relative flex flex-row max-w-xl items-center bg-white border rounded-lg shadow-md hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 mt-1"
+        data-uri="${uri}"
+        data-platform="${platform}"
+        data-not-listening="null"
+    >
+        <img
+            class="p-2 object-cover h-auto w-32"
+            src="${image === "" || image === undefined
             ? "/images/party/defaultCover.png"
-            : image;
-
-    const card = document.createElement("div");
-    card.classList.add(
-        "relative",
-        "flex",
-        "flex-row",
-        "max-w-xl",
-        "items-center",
-        "bg-white",
-        "border",
-        "rounded-lg",
-        "shadow-md",
-        "hover:bg-gray-100",
-        "dark:border-gray-700",
-        "dark:bg-gray-800",
-        "dark:hover:bg-gray-700",
-        "mt-1"
-    );
-    card.dataset.uri = uri;
-    card.dataset.platform = platform;
-    card.dataset.notListening = null;
-    card.appendChild(imgO);
-    card.appendChild(outerDiv);
-
-    if (addedBy !== undefined) {
-        const addedByP = document.createElement("p");
-        addedByP.classList.add(
-            "text-xs",
-            "text-gray-500",
-            "absolute",
-            "top-1",
-            "right-2"
-        );
-        addedByP.innerText = addedBy;
-        card.appendChild(addedByP);
-    }
-
-    return card;
+            : image}"
+        />
+        <div class="flex flex-col justify-between pl-2 pr-4 py-1 leading-normal">
+            <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                ${title}
+            </h5>
+            <div class="m-0 p-0">
+                <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                    ${artists.join(', ')}
+                </p>
+                <p class="text-xs text-gray-500 absolute bottom-1 right-2">
+                    ${length === "NaNmNaNs" ? "" : length}
+                </p>
+            </div>
+        </div>
+        <p class="text-xs text-gray-500 absolute top-1 right-2">${addedBy === undefined ? "" : addedBy}</p>
+    </div>`;
+    return div;
 }
 
 async function addToQueue(card) {
@@ -439,10 +370,9 @@ async function getSongsInQueue(e) {
 
     clearResults();
 
-
     //Now playing
     let textObj = document.createElement("p");
-    textObj.innerHTML = "Now playing:"
+    textObj.innerHTML = "Now playing:";
     queueUl.append(textObj);
 
     let length = new Date(response[0]["length"]);
@@ -459,10 +389,10 @@ async function getSongsInQueue(e) {
 
     //Queue
     let textObj2 = document.createElement("p");
-    textObj2.innerHTML = "Queued tracks:"
+    textObj2.innerHTML = "Queued tracks:";
     queueUl.append(textObj2);
 
-    if(response.slice(1).length > 0) {
+    if (response.slice(1).length > 0) {
         response.slice(1).forEach((track) => {
             let length = new Date(track["length"]);
             const card = getMusicCardHTML(
@@ -478,8 +408,8 @@ async function getSongsInQueue(e) {
         });
     } else {
         let textObj3 = document.createElement("p");
-        textObj3.classList.add("pl-4")
-        textObj3.innerHTML = "No tracks in queue!"
+        textObj3.classList.add("pl-4");
+        textObj3.innerHTML = "No tracks in queue!";
         queueUl.append(textObj3);
     }
 
