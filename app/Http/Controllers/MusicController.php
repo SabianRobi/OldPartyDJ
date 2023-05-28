@@ -114,6 +114,24 @@ class MusicController extends Controller
         return response()->json($data);
     }
 
+    public function removeTrackFromQueue(Request $request)
+    {
+        $validated = $request->validate(
+            [
+                'id' => 'required|integer|exists:track_in_queues,id',
+            ],
+        );
+
+        $track = TrackInQueue::find($validated['id']);
+
+        if(Auth::user()->id !== $track->addedBy) {
+            return response()->json(['success' => false, 'error' => 'You can only remove tracks that you added!'], 403);
+        }
+
+        $track->delete();
+        return response()->json(['success' => true]);
+    }
+
     public function playNextTrack()
     {
         $user = User::find(Auth::id());
@@ -187,7 +205,7 @@ class MusicController extends Controller
         $dataSaver = $request->boolean('dataSaver');
 
         $user = User::find(Auth::id());
-        $songs = TrackInQueue::where('party_id', $user->party_id)->select('addedBy', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
+        $songs = TrackInQueue::where('party_id', $user->party_id)->select('id', 'addedBy', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
 
         if (count($songs) == 0) {
             return response()->json(['error' => 'There is no track in the queue!']);
@@ -196,10 +214,17 @@ class MusicController extends Controller
         $sp = new SpotifyController();
         $songData = $sp->fetchTrackInfos($songs);
 
-        $filteredTracks = $this->filterTracksForClient($songData, $dataSaver, false);
-        for ($i = 0; $i < count($filteredTracks) && !$dataSaver; $i++) {
-            $username = User::find($songs[$i]->addedBy)->username;
-            $filteredTracks[$i]['addedBy'] = $username;
+        if(!$songData['success']) {
+            return response()->json(['success' => false, 'error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
+        }
+
+        $filteredTracks = $this->filterTracksForClient($songData['tracks'], $dataSaver, false);
+        for ($i = 0; $i < count($filteredTracks); $i++) {
+            $filteredTracks[$i]['id'] = $songs[$i]['id'];
+            if (!$dataSaver) {
+                $username = User::find($songs[$i]->addedBy)->username;
+                $filteredTracks[$i]['addedBy'] = $username;
+            }
         }
         return response()->json($filteredTracks);
     }

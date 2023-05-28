@@ -221,9 +221,17 @@ class SpotifyController extends Controller
             array_push($uris, $track['track_uri']);
         }
 
-        $tracks = $this->api->getTracks($uris);
+        try {
+            $tracks = $this->api->getTracks($uris);
+        } catch (SpotifyWebAPI\SpotifyWebAPIException $e) {
+            if ($e->hasExpiredToken()) {
+                return ['success' => false, 'error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true];
+            } else {
+                return ['success' => false, 'error' => $e->getMessage()];
+            }
+        }
 
-        return $tracks->tracks;
+        return ['success' => true, 'tracks' => $tracks->tracks];
     }
 
     public function getRecommended($queueTrackUris)

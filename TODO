@@ -44,7 +44,7 @@
 [X] Display what party the user is in when participating a party
 [X] Show delete party button to party creators (they can leave the party while not deleting it)
 [X] 'Show more' option after the 5 results from Spotify
-[ ] Let the user remove their requested songs from the queue
+[X] Let the user remove their requested songs from the queue
 [X] Let users see what is playing currently
 [_] Player: pause music when pressing space
 

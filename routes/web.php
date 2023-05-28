@@ -58,6 +58,7 @@ Route::controller(SpotifyController::class)->middleware(['auth'])->group(functio
 Route::controller(MusicController::class)->middleware(['auth', 'inParty'])->group(function () {
     Route::get('/party/search', 'searchTrack');
     Route::post('/party/addTrack', 'addTrackToQueue');
+    Route::post('/party/removeTrack', 'removeTrackFromQueue');
     Route::get('/party/getSongsInQueue', 'getSongsInQueue');
 
     //Requires user to own a party

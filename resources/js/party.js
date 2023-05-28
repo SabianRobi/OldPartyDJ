@@ -6,6 +6,7 @@ import {
     csrfToken,
     getSpotifyToken,
     setSpotifyToken,
+    refreshToken,
 } from "./partyCommon.js";
 
 const searchForm = document.querySelector("#searchForm");
@@ -160,7 +161,10 @@ async function sendSearchRequest(e) {
                 track["artists"],
                 length.getMinutes() + "m" + length.getSeconds() + "s",
                 track["uri"],
-                platformResults.platform
+                platformResults.platform,
+                undefined,
+                track["id"],
+                "addToQueue"
             );
             resultsUl.appendChild(card);
         });
@@ -189,7 +193,10 @@ async function sendSearchRequest(e) {
                         track["artists"],
                         length.getMinutes() + "m" + length.getSeconds() + "s",
                         track["uri"],
-                        platformResults.platform
+                        platformResults.platform,
+                        track["id"],
+                        undefined,
+                        "addToQueue"
                     );
                     resultsUl.appendChild(card);
                 });
@@ -269,13 +276,23 @@ async function sendOnlySearchRequest(offset) {
 }
 
 function refreshListeners() {
-    let cards = resultsUl.querySelectorAll("[data-not-listening]");
+    let resultCards = resultsUl.querySelectorAll("[data-event-type]");
+    let queueCards = queueUl.querySelectorAll("[data-event-type]");
+    let cards = [...resultCards, ...queueCards];
+
     cards.forEach((card) => {
-        card.addEventListener("click", (e) => {
-            pushFeedback(card);
-            addToQueue(card);
-        });
-        delete card.dataset.notListening;
+        if (card.dataset.eventType === "addToQueue") {
+            card.addEventListener("click", (e) => {
+                pushFeedback(card);
+                addToQueue(card);
+            });
+        } else if (card.dataset.eventType === "removeFromQueue") {
+            card.addEventListener("click", (e) => {
+                pushFeedback(card);
+                removeFromQueue(card);
+            });
+        }
+        delete card.dataset.eventType;
     });
 }
 
@@ -286,20 +303,25 @@ function getMusicCardHTML(
     length,
     uri,
     platform,
-    addedBy
+    addedBy,
+    id,
+    eventType
 ) {
     const div = document.createElement("div");
     div.innerHTML = `<div
         class="relative flex flex-row max-w-xl items-center bg-white border rounded-lg shadow-md hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 mt-1"
         data-uri="${uri}"
         data-platform="${platform}"
-        data-not-listening="null"
+        data-id="${id === undefined ? "" : id}"
+        data-event-type="${eventType}"
     >
         <img
             class="p-2 object-cover h-auto w-32"
-            src="${image === "" || image === undefined
-            ? "/images/party/defaultCover.png"
-            : image}"
+            src="${
+                image === "" || image === undefined
+                    ? "/images/party/defaultCover.png"
+                    : image
+            }"
         />
         <div class="flex flex-col justify-between pl-2 pr-4 py-1 leading-normal">
             <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -307,14 +329,16 @@ function getMusicCardHTML(
             </h5>
             <div class="m-0 p-0">
                 <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                    ${artists.join(', ')}
+                    ${artists.join(", ")}
                 </p>
                 <p class="text-xs text-gray-500 absolute bottom-1 right-2">
                     ${length === "NaNmNaNs" ? "" : length}
                 </p>
             </div>
         </div>
-        <p class="text-xs text-gray-500 absolute top-1 right-2">${addedBy === undefined ? "" : addedBy}</p>
+        <p class="text-xs text-gray-500 absolute top-1 right-2">${
+            addedBy === undefined ? "" : addedBy
+        }</p>
     </div>`;
     return div;
 }
@@ -346,6 +370,32 @@ async function addToQueue(card) {
     return response;
 }
 
+async function removeFromQueue(card) {
+    const id = card.dataset.id;
+
+    const form = new FormData();
+    form.set("id", id);
+
+    const response = await fetch("/party/removeTrack", {
+        method: "POST",
+        headers: {
+            "X-CSRF-TOKEN": csrfToken,
+        },
+        body: form,
+    }).then((res) => res.json());
+
+    addedToQueueFeedback(card, false);
+    if (response["success"]) {
+        console.log("Successfully removed track from queue!");
+
+        setTimeout(() => {
+            card.remove();
+        }, 1050);
+    } else {
+        console.error("Failed to remove track from queue:", response);
+    }
+}
+
 function changeHint() {
     queryInp.placeholder = hints.at(Math.floor(Math.random() * hints.length));
 }
@@ -357,12 +407,20 @@ async function getSongsInQueue(e) {
     const response = await fetch(
         `/party/getSongsInQueue?dataSaver=${dataSaver}`
     ).then((res) => res.json());
-    if (response["error"]) {
-        console.error(response);
-        toggleSearchAnimation(e);
 
+    if (response["tokenExpired"]) {
+        console.error(
+            "Could not get tracks in queue due to expired token. Refreshing..."
+        );
+        await refreshToken();
+        setSpotifyToken(await getSpotifyToken());
+        getSongsInQueue(e);
+    } else if (response["error"]) {
+        console.error("Could not get tracks in queue:", response);
+
+        toggleSearchAnimation(e);
         clearResults();
-        queueUl.innerHTML += "<p>No songs in queue!</p>";
+        queueUl.innerHTML += "<p>Error getting tracks in queue!</p>";
 
         return;
     }
@@ -383,7 +441,9 @@ async function getSongsInQueue(e) {
         length.getMinutes() + "m" + length.getSeconds() + "s",
         response[0]["uri"],
         "Spotify", //TODO don't hard code
-        response[0]["addedBy"]
+        response[0]["addedBy"],
+        undefined,
+        undefined
     );
     queueUl.appendChild(card);
 
@@ -402,7 +462,9 @@ async function getSongsInQueue(e) {
                 length.getMinutes() + "m" + length.getSeconds() + "s",
                 track["uri"],
                 "Spotify", //TODO don't hard code
-                track["addedBy"]
+                track["addedBy"],
+                track["id"],
+                "removeFromQueue"
             );
             queueUl.appendChild(card);
         });
@@ -413,6 +475,7 @@ async function getSongsInQueue(e) {
         queueUl.append(textObj3);
     }
 
+    refreshListeners();
     toggleSearchAnimation(e);
 }
 
