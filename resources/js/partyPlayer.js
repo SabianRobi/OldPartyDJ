@@ -41,7 +41,9 @@ function activatePlayerInner() {
 function initPlayer() {
     player = new Spotify.Player({
         name: "PartyDJ Web Player",
-        getOAuthToken: (callback) => {
+        getOAuthToken: async (callback) => {
+            await refreshToken();
+            setSpotifyToken(await getSpotifyToken());
             callback(spoitfyToken);
         },
         volume: volume,
@@ -164,7 +166,8 @@ async function setDeviceId(device_id) {
         console.error(
             "Could not set Device ID due to expired token. Refreshing..."
         );
-        await refreshToken();
+        refreshToken();
+        setSpotifyToken(await getSpotifyToken());
         setDeviceId(device_id);
     } else {
         console.error("Could not set Device ID!", response);
@@ -186,6 +189,7 @@ async function playNextTrack() {
             "Could not set Device ID due to expired token. Refreshing..."
         );
         await refreshToken();
+        setSpotifyToken(await getSpotifyToken());
         playNextTrack();
     } else if (response["error"]) {
         console.error(response);
