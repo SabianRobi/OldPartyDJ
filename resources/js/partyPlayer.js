@@ -63,27 +63,25 @@ function addListenersToPlayer() {
     });
 
     player.addListener("initialization_error", ({ message }) => {
-        console.error(message);
+        console.error("initialization_error:", message);
     });
 
     player.addListener("authentication_error", async ({ message }) => {
-        console.error(message);
-        if (message === "Authentication failed") {
-            console.log("Refreshing access token...");
+        console.error("authentication_error:", message);
+        if (message === "Authentication failed" ) {
             const success = await refreshToken();
+            setSpotifyToken(await getSpotifyToken());
             if (!success) {
                 console.error("Could not refresh Spotify token!");
                 return;
             }
-            setSpotifyToken(await getSpotifyToken());
-            console.log("Refreshed access token, initalizing player again...");
+            console.log("Initalizing player again...");
             activatePlayerInner();
-            console.log("Success!");
         }
     });
 
     player.addListener("account_error", ({ message }) => {
-        console.error(message);
+        console.error("account_error:", message);
     });
 
     player.addListener(
@@ -96,6 +94,10 @@ function addListenersToPlayer() {
             }
         }
     );
+
+    player.addListener('autoplay_failed', () => {
+        console.log('Autoplay is not allowed by the browser autoplay rules');
+      });
 }
 
 function connectPlayer() {
@@ -104,6 +106,8 @@ function connectPlayer() {
             console.log(
                 "The Web Playback SDK successfully connected to Spotify!"
             );
+        } else {
+            console.error('Could not connect player!');
         }
     });
 }
@@ -192,9 +196,13 @@ async function playNextTrack() {
         setSpotifyToken(await getSpotifyToken());
         playNextTrack();
     } else if (response["error"]) {
-        console.error(response);
+        console.error('Could not play next track:', response);
     } else {
-        console.log(`Playing track: ${response["track_uri"]} (${response["is_recommended"] ? "recommended" : "from queue"})`);
+        console.log(
+            `Playing track: ${response["track_uri"]} (${
+                response["is_recommended"] ? "recommended" : "from queue"
+            })`
+        );
     }
 }
 
