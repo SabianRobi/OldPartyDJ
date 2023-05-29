@@ -3,7 +3,7 @@
     <div class="flex-1 bg-yellow-800 rounded p-2 md:px-4 w-full flex flex-row flex-wrap justify-items-stretch">
         <div class="grow flex flex-row">
             <img src="/images/party/defaultCover.png" alt="Default cover" id="player_image"
-                class="h-12 rounded border border-black">
+                class="h-12 border border-black">
             <div class="flex flex-col ml-2">
                 <marquee-text data-duration="14s" class="text-gray-200" id="player_title" style="max-width: 30ch;">
                     Track title comes here

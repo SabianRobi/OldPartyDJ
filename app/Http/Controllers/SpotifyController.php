@@ -168,7 +168,7 @@ class SpotifyController extends Controller
         return response()->json(['success' => true, 'token' => $token->token]);
     }
 
-    public function activatePlayer($playbackDeviceId)
+    public function activatePlayer()
     {
         $this->setCredentials();
         $token = $this->getTokens();
@@ -183,7 +183,7 @@ class SpotifyController extends Controller
             $track->party_id = $user->party_id;
             $track->addedBy = User::where('username', 'Spotify')->first()->id;
             $track->platform = "Spotify";
-            $track->track_uri = "spotify:track:5ygDXis42ncn6kYG14lEVG"; //Baby Shark
+            $track->track_uri = $this->getRandomStarterTrack();
             $track->score = 0;
             $track->currently_playing = false;
             $track->save();
@@ -259,5 +259,26 @@ class SpotifyController extends Controller
         ];
 
         return $data;
+    }
+
+    private function getRandomStarterTrack() {
+        $tracks = [
+            "spotify:track:3UEnF6y5tyHVtMzldS3svp",
+            "spotify:track:0yrlRdgnfEFvk5zlZ9yCKy",
+            "spotify:track:5a3rLTbh7L7lBj5cflW3sf",
+            "spotify:track:1TfqLAPs4K3s2rJMoCokcS",
+            "spotify:track:0nrRP2bk19rLc0orkWPQk2",
+            "spotify:track:50DMJJpAeQv4fIpxZvQz2e",
+            "spotify:track:0YU17F0BlVXvmx5ytsR43w",
+            "spotify:track:3H7ihDc1dqLriiWXwsc2po",
+            "spotify:track:0AOmbw8AwDnwXhHC3OhdVB",
+            "spotify:track:5pmL3RzOy3IvGFaSDi4hZL",
+            "spotify:track:1Mu0qs9DQ8OfhiPvHxZMMM",
+            "spotify:track:5ohL55vbPhN999ETafibnk",
+            "spotify:track:4fouWK6XVHhzl78KzQ1UjL",
+            "spotify:track:2woZDcgHTSK51f3UKuTGFj",
+            "spotify:track:0UXm4C89srJgv7nCE4aXA3",
+        ];
+        return $tracks[array_rand($tracks)];
     }
 }

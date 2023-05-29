@@ -74,7 +74,7 @@ class MusicController extends Controller
         ];
 
         $sp = new SpotifyController();
-        $sp->activatePlayer($party->playback_device_id);
+        $sp->activatePlayer();
 
         return response()->json($data);
     }

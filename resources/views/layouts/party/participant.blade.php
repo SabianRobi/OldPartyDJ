@@ -69,7 +69,7 @@
     @endif
     {{-- Delete party --}}
     @if ($creator)
-        <form action="{{ route('deleteParty') }}" method="post" class="">
+        <form action="{{ route('deleteParty') }}" method="post">
             @csrf
             <button id="deleteParty" name="deleteParty" data-in-progress="false"
                 class="bg-red-900 hover:bg-red-700 text-white font-bold py-2 px-1 w-full rounded">
