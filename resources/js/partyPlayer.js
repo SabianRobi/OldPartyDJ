@@ -25,9 +25,9 @@ playerVolumeBar.addEventListener("input", throttle(onVolumeChange, 1000));
 
 let player;
 let volume = 0.25;
-setSpotifyToken(await getSpotifyToken());
 
-window.onSpotifyWebPlaybackSDKReady = () => {
+window.onSpotifyWebPlaybackSDKReady = async () => {
+    setSpotifyToken(await getSpotifyToken());
     activatePlayerInner();
 };
 

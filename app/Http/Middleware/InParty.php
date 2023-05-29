@@ -17,7 +17,7 @@ class InParty
      */
     public function handle(Request $request, Closure $next)
     {
-        if(!PartyController::checkAlredyInParty()) {
+        if (!PartyController::checkAlredyInParty()) {
             notify()->error("Please join a party to use this feature!");
             return response()->redirectTo(url()->previous('/'));
         }
