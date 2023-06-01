@@ -7,6 +7,7 @@ use App\Models\TrackInQueue;
 use App\Models\TracksPlayedInParty;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\UserParty;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -36,7 +37,6 @@ class MusicController extends Controller
                 'platform' => $platform,
                 'tracks' => [],
             ];
-            $filteredResult = [];
 
             if ($platform == "Spotify") {
                 $sp = new SpotifyController();
@@ -88,8 +88,9 @@ class MusicController extends Controller
             ],
         );
 
-        $user = User::find(Auth::id());
-        $party = Party::find($user->party_id);
+        $user = Auth::user();
+        $partyId = UserParty::where('user_id', $user->id)->first()->party_id;
+        $party = Party::find($partyId);
 
         $trackInQueue = new TrackInQueue();
         $trackInQueue->party_id = $party->id;
@@ -124,7 +125,7 @@ class MusicController extends Controller
 
         $track = TrackInQueue::find($validated['id']);
 
-        if(Auth::user()->id !== $track->addedBy) {
+        if(Auth::id() !== $track->addedBy) {
             return response()->json(['success' => false, 'error' => 'You can only remove tracks that you added!'], 403);
         }
 
@@ -134,13 +135,13 @@ class MusicController extends Controller
 
     public function playNextTrack()
     {
-        $user = User::find(Auth::id());
-        $party = Party::find($user->party_id);
+        $user = Auth::user();
+        $partyId = UserParty::where('user_id', $user->id)->first()->party_id;
+        $party = Party::find($partyId);
         if (strcmp($party->creator, $user->id)) {
             return response()->json(['error' => 'You do not have permission to do this action!'], 403);
         }
 
-        $party = Party::where('creator', $user->id)->first();
         $nextTrack = TrackInQueue::where('party_id', $party->id)->where('currently_playing', false)->orderBy('score', 'DESC')->first();
         $isRecommended = false;
 
@@ -204,8 +205,9 @@ class MusicController extends Controller
     {
         $dataSaver = $request->boolean('dataSaver');
 
-        $user = User::find(Auth::id());
-        $songs = TrackInQueue::where('party_id', $user->party_id)->select('id', 'addedBy', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
+        $user = Auth::user();
+        $partyId = UserParty::where('user_id', $user->id)->first()->party_id;
+        $songs = TrackInQueue::where('party_id', $partyId)->select('id', 'addedBy', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
 
         if (count($songs) == 0) {
             return response()->json(['error' => 'There is no track in the queue!']);

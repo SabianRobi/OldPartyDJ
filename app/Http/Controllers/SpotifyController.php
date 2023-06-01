@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\SpotifyThings;
 use App\Models\TrackInQueue;
 use App\Models\User;
+use App\Models\UserParty;
 use Illuminate\Support\Facades\Auth;
 use SpotifyWebAPI;
 
@@ -176,11 +177,12 @@ class SpotifyController extends Controller
         $this->session->setAccessToken($token->token);
 
         $user = Auth::user();
+        $partyId = UserParty::where('user_id', $user->id)->first()->party_id;
 
-        $nextTrack = TrackInQueue::where('party_id', $user->party_id)->where('currently_playing', false)->orderBy('score', 'DESC')->first();
+        $nextTrack = TrackInQueue::where('party_id', $partyId)->where('currently_playing', false)->orderBy('score', 'DESC')->first();
         if(!$nextTrack) {
             $track = new TrackInQueue();
-            $track->party_id = $user->party_id;
+            $track->party_id = $partyId;
             $track->addedBy = User::where('username', 'Spotify')->first()->id;
             $track->platform = "Spotify";
             $track->track_uri = $this->getRandomStarterTrack();

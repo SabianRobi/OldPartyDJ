@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Party;
 use App\Models\SpotifyThings;
-use App\Models\User;
+use App\Models\UserParty;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -56,7 +56,7 @@ class PartyController extends Controller
             'password' => 'nullable|string|min:3|max:255',
         ]);
 
-        $user = User::find(Auth::id());
+        $user = Auth::user();
 
         $party = new Party();
         $party->name = $validated['name'];
@@ -67,9 +67,11 @@ class PartyController extends Controller
         $party->save();
         $party->update();
 
-        $user->party_id = $party->id;
-        $user->role = 'creator';
-        $user->save();
+        $userParty = new UserParty();
+        $userParty->user_id = $user->id;
+        $userParty->party_id = $party->id;
+        $userParty->role = 'creator';
+        $userParty->save();
 
         notify()->success("Successfully created the party!");
 
@@ -84,11 +86,14 @@ class PartyController extends Controller
             return redirect()->route('party');
         } else if ($this->checkHasParty()) {
             //Join back to they party
-            $user = User::find(Auth::id());
+            $user = Auth::user();
             $party = Party::where('creator', $user->id)->first();
-            $user->party_id = $party->id;
-            $user->role = 'creator';
-            $user->save();
+
+            $userParty = new UserParty();
+            $userParty->user_id = $user->id;
+            $userParty->party_id = $party->id;
+            $userParty->role = 'creator';
+            $userParty->save();
 
             notify()->success("Successfully joined back to your party!");
             return redirect()->route('party');
@@ -122,10 +127,13 @@ class PartyController extends Controller
         }
 
         //Joining party
-        $user = User::find(Auth::id());
-        $user->party_id = $party->id;
-        $user->role = $party->creator == $user->id ? "creator" : "participant";
-        $user->save();
+        $user = Auth::user();
+
+        $userParty = new UserParty();
+        $userParty->user_id = $user->id;
+        $userParty->party_id = $party->id;
+        $userParty->role = $party->creator == $user->id ? "creator" : "participant";
+        $userParty->save();
 
         notify()->success("Successfully joined the party!");
 
@@ -142,24 +150,18 @@ class PartyController extends Controller
     // Delete party
     public static function delete()
     {
-        $user = User::find(Auth::id());
-        $party = Party::where('creator', $user->id)->first();
+        $user = Auth::user();
+        $party = Party::where('creator', $user->id)->first(); //TODO can fail if not the creator wants to delete?
 
-        if ($user->party->creator != $user->id) {
+        if ($party->creator != $user->id) {
             notify()->error('You can not delete other\'s party!');
             return redirect()->redirectTo(url()->previous('/'));
         }
 
-        $users = User::where('party_id', $party->id)->get();
+        UserParty::where('party_id', $party->id)->delete();
         $party->delete();
 
-        $users->map(function ($user) {
-            $user->role = null;
-            $user->save();
-        });
-
         notify()->success('Successfully deleted your party!');
-        // event('deleteParty');
 
         return redirect()->route('landingParty');
     }
@@ -167,26 +169,26 @@ class PartyController extends Controller
     // In party page
     public function inParty()
     {
-        $user = User::find(Auth::id());
+        $user = Auth::user();
+        $userParty = UserParty::where('user_id', $user->id)->first();
+        $party = Party::find($userParty->party_id);
         $spotify = SpotifyThings::where('owner', $user->id)->first();
 
         return view('party.party', [
-            'partyName' => $user->party->name,
+            'partyName' => $party->name,
             'loggedInWithSpotify' => isset($spotify->token) && $spotify->token ? true : false,
-            'creator' => $user->role == "creator",
-            'spotifyToken' => $user->role == "creator" && isset($spotify->token) ? $spotify->token : '',
+            'creator' => $userParty->role == "creator",
+            'spotifyToken' => $userParty->role == "creator" && isset($spotify->token) ? $spotify->token : '', //TODO still needed?
         ]);
     }
 
     public static function checkHasParty()
     {
-        $user = User::find(Auth::id());
-        return Party::where('creator', $user->id)->get()->isNotEmpty();
+        return Party::where('creator', Auth::id())->get()->isNotEmpty();
     }
 
     public static function checkAlredyInParty()
     {
-        $user = User::find(Auth::id());
-        return isset($user->party_id);
+        return UserParty::where('user_id', Auth::id())->get()->isNotEmpty();
     }
 }

@@ -98,6 +98,12 @@
 [ ] Spotify login redirects to home page
 [_] Select which platform to search at
 [_] Show total length of queued songs
+[X] Seperate party-user relationship
+[ ] Recommended track song not working
+
+# Tests
+
+[ ] Write tests
 
 # Ideas
 

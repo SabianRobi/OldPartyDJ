@@ -13,15 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('user_parties', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('username')->unique();
-            $table->string('password');
-            $table->boolean('is_admin')->default(false);
-            $table->timestamp('email_verified_at')->nullable();
-            // $table->rememberToken();
+            $table->foreignId('party_id')->constrained('parties', 'id')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users', 'id')->onDelete('cascade');
+            $table->enum('role', ['creator', 'participant'])->nullable();
             $table->timestamps();
         });
     }
@@ -33,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('user_parties');
     }
 };

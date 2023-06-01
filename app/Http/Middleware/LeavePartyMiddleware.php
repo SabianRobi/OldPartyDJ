@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Controllers\PartyController;
-use App\Models\User;
+use App\Models\UserParty;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,16 +21,15 @@ class LeavePartyMiddleware
     {
         if (PartyController::checkAlredyInParty()) {
             //Leaving party
-            $user = User::find(Auth::id());
+            $user = Auth::user();
+            $partyId = UserParty::where('user_id', $user->id)->first()->party_id;
 
             //Delete party (and ququed tracks) when the last participant leaves
-            $participants = User::where('party_id', $user->party->id)->get();
+            $participants = UserParty::where('party_id', $partyId)->get();
             if (count($participants) == 1) {
-                PartyController::delete();
+                PartyController::delete(); //TODO will not work if the last person is not the creator
             } else {
-                $user->party_id = null;
-                $user->role = null;
-                $user->save();
+                UserParty::where('user_id', $user->id)->delete();
             }
 
             notify()->success('Successfully left the party!');
