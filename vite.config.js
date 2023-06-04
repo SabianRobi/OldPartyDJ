@@ -1,22 +1,16 @@
-import { defineConfig } from 'vite';
-import laravel from 'laravel-vite-plugin';
+import { defineConfig } from "vite";
+import laravel from "laravel-vite-plugin";
 
 export default defineConfig({
     plugins: [
-        laravel({
-            input: [
-                // Styles
-                'resources/css/app.css',
-                // '/node_modules/flowbite/dist/flowbite.css',
-
-                // Scripts
-                'resources/js/app.js',
-                'resources/js/party.js',
-                'resources/js/partyPlayer.js',
-                'resources/js/test.js'
-                // '/node_modules/flowbite/dist/flowbite.js',
-            ],
-            // refresh: true,
-        }),
+        laravel(
+            [
+                "resources/css/app.css",
+                "resources/js/app.js",
+                "resources/js/party.js",
+                "resources/js/partyPlayer.js",
+                "resources/js/marquee-text-element.js"
+            ]
+        ),
     ],
 });

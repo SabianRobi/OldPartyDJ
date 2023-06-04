@@ -99,7 +99,7 @@
 [_] Select which platform to search at
 [_] Show total length of queued songs
 [X] Seperate party-user relationship
-[ ] Recommended track song not working
+[X] Recommended track song not working (Spotify user was missing)
 
 # Tests
 

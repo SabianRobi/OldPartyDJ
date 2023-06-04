@@ -17,23 +17,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        //admin
-        $admin = new User();
-        $admin->name = 'Admin User';
-        $admin->username = 'admin';
-        $admin->email = 'admin@partydj.com';
-        $admin->password = Hash::make('admin');
-        $admin->is_admin = true;
-        $admin->save();
-
-        //Users
-        for ($i = 0; $i < 5; $i++) {
-            $user = new User();
-            $user->name = 'Example User ' . $i;
-            $user->username = 'ExampleUser' . $i;
-            $user->email = 'exampleuser' . $i . '@partydj.com';
-            $user->password = Hash::make('password');
-            $user->save();
+        if(strcmp(env("APP_ENV", 'production'), "local")) {
+            //admin
+            $admin = new User();
+            $admin->name = 'Admin User';
+            $admin->username = 'admin';
+            $admin->email = 'admin@partydj.com';
+            $admin->password = Hash::make('admin');
+            $admin->is_admin = true;
+            $admin->save();
+            
+            //Users
+            for ($i = 0; $i < 5; $i++) {
+                $user = new User();
+                $user->name = 'Example User ' . $i;
+                $user->username = 'ExampleUser' . $i;
+                $user->email = 'exampleuser' . $i . '@partydj.com';
+                $user->password = Hash::make('password');
+                $user->save();
+            }
         }
 
         //Spotify

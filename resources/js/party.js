@@ -95,7 +95,7 @@ async function sendSearchRequest(e) {
     query = queryInp.value == "" ? queryInp.placeholder : queryInp.value;
     offset = 0;
 
-    if (query.length === 0) {
+    if (query.trim().length === 0) {
         console.warn("Please be more specific!");
         const text = queryInp.value;
         queryInp.value = "Please be more specific!";
@@ -107,6 +107,9 @@ async function sendSearchRequest(e) {
         searchForm.addEventListener("submit", sendSearchRequest);
         return;
     }
+
+    query = query.trim();
+    queryInp.value = query;
 
     console.log(`Searching '${query}' on ${platforms.join(", ")}...`);
 
