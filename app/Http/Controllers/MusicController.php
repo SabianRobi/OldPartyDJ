@@ -125,7 +125,7 @@ class MusicController extends Controller
 
         $track = TrackInQueue::find($validated['id']);
 
-        if(Auth::id() !== $track->addedBy) {
+        if (Auth::id() !== $track->addedBy) {
             return response()->json(['success' => false, 'error' => 'You can only remove tracks that you added!'], 403);
         }
 
@@ -216,7 +216,7 @@ class MusicController extends Controller
         $sp = new SpotifyController();
         $songData = $sp->fetchTrackInfos($songs);
 
-        if(!$songData['success']) {
+        if (!$songData['success']) {
             return response()->json(['success' => false, 'error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
         }
 

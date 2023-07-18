@@ -68,7 +68,7 @@ function addListenersToPlayer() {
 
     player.addListener("authentication_error", async ({ message }) => {
         console.error("authentication_error:", message);
-        if (message === "Authentication failed" ) {
+        if (message === "Authentication failed") {
             const success = await refreshToken();
             setSpotifyToken(await getSpotifyToken());
             if (!success) {
@@ -95,9 +95,9 @@ function addListenersToPlayer() {
         }
     );
 
-    player.addListener('autoplay_failed', () => {
-        console.log('Autoplay is not allowed by the browser autoplay rules');
-      });
+    player.addListener("autoplay_failed", () => {
+        console.log("Autoplay is not allowed by the browser autoplay rules");
+    });
 }
 
 function connectPlayer() {
@@ -107,7 +107,7 @@ function connectPlayer() {
                 "The Web Playback SDK successfully connected to Spotify!"
             );
         } else {
-            console.error('Could not connect player!');
+            console.error("Could not connect player!");
         }
     });
 }
@@ -196,7 +196,7 @@ async function playNextTrack() {
         setSpotifyToken(await getSpotifyToken());
         playNextTrack();
     } else if (response["error"]) {
-        console.error('Could not play next track:', response);
+        console.error("Could not play next track:", response);
     } else {
         console.log(
             `Playing track: ${response["track_uri"]} (${

@@ -172,15 +172,12 @@ class SpotifyController extends Controller
     public function activatePlayer()
     {
         $this->setCredentials();
-        $token = $this->getTokens();
-        $this->api->setAccessToken($token->token);
-        $this->session->setAccessToken($token->token);
 
         $user = Auth::user();
         $partyId = UserParty::where('user_id', $user->id)->first()->party_id;
 
         $nextTrack = TrackInQueue::where('party_id', $partyId)->where('currently_playing', false)->orderBy('score', 'DESC')->first();
-        if(!$nextTrack) {
+        if (!$nextTrack) {
             $track = new TrackInQueue();
             $track->party_id = $partyId;
             $track->addedBy = User::where('username', 'Spotify')->first()->id;
