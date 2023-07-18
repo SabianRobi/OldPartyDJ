@@ -25,6 +25,7 @@ playerVolumeBar.addEventListener("input", throttle(onVolumeChange, 1000));
 
 let player;
 let volume = 0.25;
+let firstStart = true;
 
 window.onSpotifyWebPlaybackSDKReady = async () => {
     setSpotifyToken(await getSpotifyToken());
@@ -42,7 +43,10 @@ function initPlayer() {
     player = new Spotify.Player({
         name: "PartyDJ Web Player",
         getOAuthToken: async (callback) => {
-            await refreshToken();
+            if (!firstStart) {
+                await refreshToken();
+                firstStart = false;
+            }
             setSpotifyToken(await getSpotifyToken());
             callback(spoitfyToken);
         },
