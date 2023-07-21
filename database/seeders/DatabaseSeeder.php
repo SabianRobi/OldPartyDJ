@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        if(strcmp(env("APP_ENV", 'production'), "local")) {
+        if (!strcmp(env("APP_ENV", 'production'), "local")) {
             //admin
             $admin = new User();
             $admin->name = 'Admin User';
@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             $admin->password = Hash::make('admin');
             $admin->is_admin = true;
             $admin->save();
-            
+
             //Users
             for ($i = 0; $i < 5; $i++) {
                 $user = new User();

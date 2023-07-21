@@ -284,31 +284,39 @@ class SpotifyController extends Controller
         $filteredTracks = [];
 
         for ($i = 0; $i < count($tracks); $i++) {
+            $platform = "Spotify";
+            $title = $tracks[$i]->name;
             $artists = [];
             foreach ($tracks[$i]->artists as $artist) {
                 array_push($artists, $artist->name);
             }
+            $uri = $tracks[$i]->uri;
+            $image = $tracks[$i]->album->images[1]->url; //300x300
+            $length = $tracks[$i]->duration_ms;
 
             if ($dataSaver) {
                 if ($includeURI) {
                     array_push($filteredTracks, [
-                        'title' => $tracks[$i]->name,
+                        'platform' => $platform,
+                        'title' => $title,
                         'artists' => $artists,
-                        'uri' => $tracks[$i]->uri,
+                        'uri' => $uri,
                     ]);
                 } else {
                     array_push($filteredTracks, [
-                        'title' => $tracks[$i]->name,
+                        'platform' => $platform,
+                        'title' => $title,
                         'artists' => $artists,
                     ]);
                 }
             } else {
                 array_push($filteredTracks, [
-                    'image' => $tracks[$i]->album->images[1]->url, //300x300
-                    'title' => $tracks[$i]->name,
+                    'platform' => $platform,
+                    'title' => $title,
                     'artists' => $artists,
-                    'length' => $tracks[$i]->duration_ms,
-                    'uri' => $tracks[$i]->uri,
+                    'image' => $image,
+                    'length' => $length,
+                    'uri' => $uri,
                 ]);
             }
         }

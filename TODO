@@ -48,6 +48,7 @@
 [X] Let users see what is playing currently
 [ ] Player: pause music when pressing space
 [ ] Clicking twice on the Search button on paty pages redirects to a 404 page
+[ ] Remove required login to Spotify
 
 ## Player
 
@@ -128,3 +129,7 @@
 
 Set Spotify client id, secret, redirect uri in .env file
 Generate DB
+
+
+# NOW:
+Spotify token not refreshing automatically
