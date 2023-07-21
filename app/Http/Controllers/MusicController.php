@@ -75,12 +75,6 @@ class MusicController extends Controller
                     $filteredVideos = $yt->filterVideos($videos, $dataSaver, true);
                     $platformResult['tracks'] = $filteredVideos;
                 }
-
-
-                // let posterSrc = result['items'][i]['snippet']['thumbnails']['default']['url'];
-                // let title = result['items'][i]['snippet']['title'];
-                // let artists = result['items'][i]['snippet']['channelTitle'];
-                // let uri = result['items'][i]['id']['videoId'];
             }
             array_push($results, $platformResult);
         }
