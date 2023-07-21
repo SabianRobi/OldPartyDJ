@@ -8,7 +8,10 @@ use function PHPUnit\Framework\isNull;
 
 class YouTubeController extends Controller
 {
-    private $link = 'https://www.googleapis.com/youtube/v3/search?part=snippet&kind=video&videoCaption=any';
+    private $api = 'https://www.googleapis.com/youtube/v3/';
+    private $searchApi = 'search?part=snippet&kind=video&videoCaption=any';
+    private $fetchVideosApi = 'videos?part=snippet';
+
 
     // Get search results
     public function searchVideos(Request $request)
@@ -19,7 +22,8 @@ class YouTubeController extends Controller
         $result = [];
 
         // Send the query to YouTube
-        $finalLink = $this->link . '&key=' . env('YOUTUBE_API_KEY') . '&maxResults=' . $limit . '&q=' . str_replace(' ', '%20', $query);
+        $finalLink = $this->api . $this->searchApi . '&maxResults=' . $limit . '&q=' . str_replace(' ', '%20', $query) . '&key=' . env('YOUTUBE_API_KEY');
+        // TODO: use a normal converter instead of str replace (for example & causes bad search results)
         $result = json_decode(@file_get_contents($finalLink));
 
         return response()->json($result);
@@ -30,30 +34,54 @@ class YouTubeController extends Controller
         $filteredVideos = [];
 
         for ($i = 0; $i < count($videos); $i++) {
+            $platform = 'YouTube';
+            $title = $videos[$i]->snippet->title;
+            $artists = array($videos[$i]->snippet->channelTitle);
+            $uri = is_string($videos[$i]->id) ? $videos[$i]->id : $videos[$i]->id->videoId;
+            $image = $videos[$i]->snippet->thumbnails->medium->url; // 320x180
+
             if ($dataSaver) {
                 if ($includeURI) {
                     array_push($filteredVideos, [
-                        'title' => $videos[$i]->snippet->title,
-                        'artists' => array($videos[$i]->snippet->channelTitle),
-                        'uri' => $videos[$i]->id->videoId,
+                        'platform' => $platform,
+                        'title' => $title,
+                        'artists' => $artists,
+                        'uri' => $uri,
                     ]);
                 } else {
                     array_push($filteredVideos, [
-                        'title' => $videos[$i]->snippet->title,
-                        'artists' => array($videos[$i]->snippet->channelTitle),
+                        'platform' => $platform,
+                        'title' => $title,
+                        'artists' => $artists,
                     ]);
                 }
             } else {
                 array_push($filteredVideos, [
-                    'image' => $videos[$i]->snippet->thumbnails->medium->url, // 320x180
-                    'title' => $videos[$i]->snippet->title,
-                    'artists' => array($videos[$i]->snippet->channelTitle),
-                    'length' => 0,
-                    'uri' => $videos[$i]->id->videoId,
+                    'platform' => $platform,
+                    'title' => $title,
+                    'artists' => $artists,
+                    'uri' => $uri,
+                    'image' => $image,
+                    'length' => 0, // TODO get the duration of the video also and include it here
                 ]);
             }
         }
         return $filteredVideos;
+    }
+
+    public function fetchVideoInfos($dbVideos)
+    {
+        $uris = [];
+        foreach ($dbVideos as $video) {
+            array_push($uris, $video['track_uri']);
+        }
+
+        $finalLink = $this->api . $this->fetchVideosApi . '&key=' . env('YOUTUBE_API_KEY') . '&id=' . implode('&id=', $uris);
+
+
+        $videos = json_decode(@file_get_contents($finalLink));
+
+        return ['success' => true, 'tracks' => $videos->items];
     }
 
     public function test()

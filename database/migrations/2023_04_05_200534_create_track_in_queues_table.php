@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('party_id')->constrained('parties', 'id')->onDelete('cascade');
             $table->foreignId('addedBy')->constrained('users', 'id')->onDelete('cascade');
-            $table->enum('platform', ['Spotify']);
+            $table->enum('platform', ['Spotify', 'YouTube']);
             $table->string('track_uri');
             $table->integer('score')->default(0);
             $table->boolean('currently_playing')->default(false);

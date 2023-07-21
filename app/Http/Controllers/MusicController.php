@@ -115,7 +115,7 @@ class MusicController extends Controller
         $validated = $request->validate(
             [
                 'uri' => 'required',
-                'platform' => Rule::in(['Spotify']),
+                'platform' => Rule::in(['Spotify', 'YouTube']),
             ],
         );
 
@@ -238,27 +238,59 @@ class MusicController extends Controller
 
         $user = Auth::user();
         $partyId = UserParty::where('user_id', $user->id)->first()->party_id;
-        $songs = TrackInQueue::where('party_id', $partyId)->select('id', 'addedBy', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get();
+        $songs = TrackInQueue::where('party_id', $partyId)->select('id', 'addedBy', 'platform', 'track_uri', 'score')->orderBy('score', 'DESC')->get()->toArray();
 
         if (count($songs) == 0) {
             return response()->json(['error' => 'There is no track in the queue!']);
         }
 
-        $sp = new SpotifyController();
-        $songData = $sp->fetchTrackInfos($songs);
+        // Spotify tracks
+        $spTracks = array_values(array_filter($songs, function ($song) {
+            return !strcmp($song['platform'], "Spotify");
+        }));
 
-        if (!$songData['success']) {
+        $sp = new SpotifyController();
+        $spSongData = $sp->fetchTrackInfos($spTracks);
+
+        if (!$spSongData['success']) {
             return response()->json(['success' => false, 'error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
         }
 
-        $filteredTracks = $this->filterTracksForClient($songData['tracks'], $dataSaver, false);
-        for ($i = 0; $i < count($filteredTracks); $i++) {
-            $filteredTracks[$i]['id'] = $songs[$i]['id'];
+        $filteredSpTracks = $sp->filterTracks($spSongData['tracks'], $dataSaver, false);
+        for ($i = 0; $i < count($filteredSpTracks); $i++) {
+            $filteredSpTracks[$i]['id'] = $spTracks[$i]['id'];
             if (!$dataSaver) {
-                $username = User::find($songs[$i]->addedBy)->username;
-                $filteredTracks[$i]['addedBy'] = $username;
+                $username = User::find($spTracks[$i]['addedBy'])->username;
+                $filteredSpTracks[$i]['addedBy'] = $username;
             }
         }
-        return response()->json($filteredTracks);
+
+        // YouTube videos
+        $ytTracks = array_values(array_filter($songs, function ($song) {
+            return !strcmp($song['platform'], "YouTube");
+        }));
+
+        $yt = new YouTubeController();
+        $ytVideoData = $yt->fetchVideoInfos($ytTracks);
+
+        $filteredYtTracks = $yt->filterVideos($ytVideoData['tracks'], $dataSaver, false);
+
+        for ($i = 0; $i < count($filteredYtTracks); $i++) {
+            $filteredYtTracks[$i]['id'] = $ytTracks[$i]['id'];
+            if (!$dataSaver) {
+                $username = User::find($ytTracks[$i]['addedBy'])->username;
+                $filteredYtTracks[$i]['addedBy'] = $username;
+            }
+        }
+
+
+        // TODO priority (DESC order in score) losed, temporarily using the id
+        // Merge results and apply the sort (id)
+        $allTracks = array_merge($filteredSpTracks, $filteredYtTracks);
+        $sortedAllTrack = usort($allTracks, function($t1, $t2) {
+            return ($t1['id'] < $t2['id']) ? -1 : 1;
+        });
+
+        return response()->json($allTracks);
     }
 }

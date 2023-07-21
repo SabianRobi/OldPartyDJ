@@ -340,7 +340,11 @@ function getMusicCardHTML(
 ) {
     const div = document.createElement("div");
     div.innerHTML = `<div
-        class="relative flex flex-row max-w-xl items-center border rounded-lg shadow-md mt-1 dark:border-gray-700 ${platform === "Spotify" ? "bg-green-100 hover:bg-green-200 dark:bg-green-950 dark:hover:bg-green-900" : "bg-red-100 hover:bg-red-200 dark:bg-red-950 dark:hover:bg-red-900"}"
+        class="relative flex flex-row max-w-xl items-center border rounded-lg shadow-md mt-1 dark:border-gray-700 ${
+            platform === "Spotify"
+                ? "bg-green-100 hover:bg-green-200 dark:bg-green-950 dark:hover:bg-green-900"
+                : "bg-red-100 hover:bg-red-200 dark:bg-red-950 dark:hover:bg-red-900"
+        }"
         data-uri="${uri}"
         data-platform="${platform}"
         data-id="${id === undefined ? "" : id}"
@@ -471,7 +475,7 @@ async function getSongsInQueue(e) {
         response[0]["artists"],
         length.getMinutes() + "m" + length.getSeconds() + "s",
         response[0]["uri"],
-        "Spotify", //TODO don't hard code
+        response[0]["platform"],
         response[0]["addedBy"],
         undefined,
         undefined
@@ -492,7 +496,7 @@ async function getSongsInQueue(e) {
                 track["artists"],
                 length.getMinutes() + "m" + length.getSeconds() + "s",
                 track["uri"],
-                "Spotify", //TODO don't hard code
+                track["platform"],
                 track["addedBy"],
                 track["id"],
                 "removeFromQueue"
