@@ -18,7 +18,7 @@ class MusicController extends Controller
     {
         try {
             $request->validate([
-                'query' => 'required|string',
+                'query' => 'required|string|min:1',
                 'dataSaver' => 'required|boolean',
                 'creator' => 'required|boolean',
                 'offset' => 'required|integer|min:0',
@@ -33,25 +33,56 @@ class MusicController extends Controller
         $results = [];
 
         foreach ($platforms as $platform) {
-            $platformResults = [
+            $platformResult = [
                 'platform' => $platform,
-                'tracks' => [],
+                // 'tracks' => [],
+                // 'error' => 'message'
             ];
 
             if ($platform == "Spotify") {
                 $sp = new SpotifyController();
-                $result = ($sp->search($request))->original;
+                $tracks = ($sp->searchTracks($request))->original->tracks->items;
 
-                if (isset($result['error'])) {
-                    $platformResults['error'] = $result['error'];
+                // Check whether the search was successful
+                if (isset($tracks['error'])) {
+                    // On error
+                    $platformResult['error'] = $tracks['error'];
+
+                    // Check whether the search failed due to expired token
                     if (isset($result['tokenExpired'])) {
-                        $platformResults['tokenExpired'] = $result['tokenExpired'];
+                        $platformResult['tokenExpired'] = $tracks['tokenExpired'];
                     }
                 } else {
-                    $platformResults['tracks'] = $this->filterTracksForClient($result, $dataSaver, true);
+                    // On successful search
+                    $filteredTracks = $sp->filterTracks($tracks, $dataSaver, true);
+                    $platformResult['tracks'] = $filteredTracks;
                 }
             }
-            array_push($results, $platformResults);
+
+            if ($platform == "YouTube") {
+                $yt = new YouTubeController();
+
+                $videoResponse = ($yt->searchVideos($request))->original;
+                // ($yt->searchVideos($request))->original->nextPageToken; // For supporting pagination
+
+                // Check whether the search was successful (empty object)
+                if (count((array)$videoResponse) == 0) {
+                    // On error
+                    $platformResult['error'] = "YouTube API did not respond.";
+                } else {
+                    // On success
+                    $videos = $videoResponse->items;
+                    $filteredVideos = $yt->filterVideos($videos, $dataSaver, true);
+                    $platformResult['tracks'] = $filteredVideos;
+                }
+
+
+                // let posterSrc = result['items'][i]['snippet']['thumbnails']['default']['url'];
+                // let title = result['items'][i]['snippet']['title'];
+                // let artists = result['items'][i]['snippet']['channelTitle'];
+                // let uri = result['items'][i]['id']['videoId'];
+            }
+            array_push($results, $platformResult);
         }
 
         return response()->json($results);
@@ -229,41 +260,5 @@ class MusicController extends Controller
             }
         }
         return response()->json($filteredTracks);
-    }
-
-    private function filterTracksForClient($tracks, $dataSaver, $includeURI)
-    {
-        $filteredTracks = [];
-
-        for ($i = 0; $i < count($tracks); $i++) {
-            $artists = [];
-            foreach ($tracks[$i]->artists as $artist) {
-                array_push($artists, $artist->name);
-            }
-
-            if ($dataSaver) {
-                if ($includeURI) {
-                    array_push($filteredTracks, [
-                        'title' => $tracks[$i]->name,
-                        'artists' => $artists,
-                        'uri' => $tracks[$i]->uri,
-                    ]);
-                } else {
-                    array_push($filteredTracks, [
-                        'title' => $tracks[$i]->name,
-                        'artists' => $artists,
-                    ]);
-                }
-            } else {
-                array_push($filteredTracks, [
-                    'image' => $tracks[$i]->album->images[1]->url, //300x300
-                    'title' => $tracks[$i]->name,
-                    'artists' => $artists,
-                    'length' => $tracks[$i]->duration_ms,
-                    'uri' => $tracks[$i]->uri,
-                ]);
-            }
-        }
-        return $filteredTracks;
     }
 }

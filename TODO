@@ -46,7 +46,8 @@
 [X] 'Show more' option after the 5 results from Spotify
 [X] Let the user remove their requested songs from the queue
 [X] Let users see what is playing currently
-[_] Player: pause music when pressing space
+[ ] Player: pause music when pressing space
+[ ] Clicking twice on the Search button on paty pages redirects to a 404 page
 
 ## Player
 

@@ -106,13 +106,12 @@ class SpotifyController extends Controller
         return back();
     }
 
-    public function search(Request $request)
+    public function searchTracks(Request $request)
     {
         $this->setCredentials();
         $query = $request->input('query');
         $offset = $request->input('offset');
-        $isCreator = $request->boolean('isCreator');
-
+        $isCreator = $request->boolean('creator');
         $limit = 5;
         $result = [];
 
@@ -128,14 +127,12 @@ class SpotifyController extends Controller
                     return response()->json(['error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
                 } else {
                     $this->refreshToken();
-                    return $this->searchTrack($request);
+                    return $this->searchTracks($request);
                 }
             } else {
                 return response()->json(['error' => $e->getMessage()]);
             }
         }
-
-        $result = $result->tracks->items;
 
         return response()->json($result);
     }
@@ -260,7 +257,8 @@ class SpotifyController extends Controller
         return $data;
     }
 
-    private function getRandomStarterTrack() {
+    private function getRandomStarterTrack()
+    {
         $tracks = [
             "spotify:track:3UEnF6y5tyHVtMzldS3svp",
             "spotify:track:0yrlRdgnfEFvk5zlZ9yCKy",
@@ -279,5 +277,41 @@ class SpotifyController extends Controller
             "spotify:track:0UXm4C89srJgv7nCE4aXA3",
         ];
         return $tracks[array_rand($tracks)];
+    }
+
+    public function filterTracks($tracks, $dataSaver, $includeURI)
+    {
+        $filteredTracks = [];
+
+        for ($i = 0; $i < count($tracks); $i++) {
+            $artists = [];
+            foreach ($tracks[$i]->artists as $artist) {
+                array_push($artists, $artist->name);
+            }
+
+            if ($dataSaver) {
+                if ($includeURI) {
+                    array_push($filteredTracks, [
+                        'title' => $tracks[$i]->name,
+                        'artists' => $artists,
+                        'uri' => $tracks[$i]->uri,
+                    ]);
+                } else {
+                    array_push($filteredTracks, [
+                        'title' => $tracks[$i]->name,
+                        'artists' => $artists,
+                    ]);
+                }
+            } else {
+                array_push($filteredTracks, [
+                    'image' => $tracks[$i]->album->images[1]->url, //300x300
+                    'title' => $tracks[$i]->name,
+                    'artists' => $artists,
+                    'length' => $tracks[$i]->duration_ms,
+                    'uri' => $tracks[$i]->uri,
+                ]);
+            }
+        }
+        return $filteredTracks;
     }
 }

@@ -21,6 +21,10 @@ const leaveParty = document.querySelector("#leaveParty");
 const dataSaverObj = document.querySelector("#dataSaver");
 searchBtn.addEventListener("click", sendSearchRequest);
 // searchForm.addEventListener("submit", sendSearchRequest);
+
+const doSearchSpotify = document.querySelector("#searchSpotify");
+const doSearchYouTube = document.querySelector("#searchYouTube");
+
 getSongsBtn.addEventListener("click", function () {
     pushFeedback(this);
     getSongsInQueue(this);
@@ -72,7 +76,7 @@ const hints = [
     "Csepereg az eső",
     "Érik a szőlő",
 ];
-const platforms = ["Spotify"];
+let platforms = [];
 
 //Toggles the searching icon
 function toggleSearchAnimation(e) {
@@ -92,19 +96,42 @@ async function sendSearchRequest(e) {
     searchForm.removeEventListener("submit", sendSearchRequest);
     searchBtn.removeEventListener("click", sendSearchRequest);
 
+    platforms = [];
+    if (doSearchSpotify.checked) {
+        platforms.push("Spotify");
+    }
+    if (doSearchYouTube.checked) {
+        platforms.push("YouTube");
+    }
+
     query = queryInp.value == "" ? queryInp.placeholder : queryInp.value;
     offset = 0;
 
+    // Error handling: Empty query
     if (query.trim().length === 0) {
         console.warn("Please be more specific!");
         const text = queryInp.value;
         queryInp.value = "Please be more specific!";
         setTimeout(() => {
             queryInp.value = text;
+            searchBtn.addEventListener("click", sendSearchRequest);
+            searchForm.addEventListener("submit", sendSearchRequest);
         }, 1000);
         toggleSearchAnimation(this);
-        searchBtn.addEventListener("click", sendSearchRequest);
-        searchForm.addEventListener("submit", sendSearchRequest);
+        return;
+    }
+
+    // Error handling: No platforms selected
+    if (platforms.length === 0) {
+        console.warn("Set at least one platform to search on!");
+        const text = queryInp.value;
+        queryInp.value = "Please choose at least one platform!";
+        setTimeout(() => {
+            queryInp.value = text;
+            searchBtn.addEventListener("click", sendSearchRequest);
+            searchForm.addEventListener("submit", sendSearchRequest);
+        }, 1000);
+        toggleSearchAnimation(this);
         return;
     }
 
@@ -134,7 +161,7 @@ async function sendSearchRequest(e) {
     });
 
     if (errorCount === platforms.length) {
-        //All platform search failed
+        // All platform search failed
         toggleSearchAnimation(this);
         searchBtn.addEventListener("click", sendSearchRequest);
         searchForm.addEventListener("submit", sendSearchRequest);
@@ -226,6 +253,7 @@ async function sendSearchRequest(e) {
         resultsUl.innerHTML += "<p>No more results!</p>";
     }
 
+    queryInp.value = "";
     refreshListeners();
     changeHint();
     toggleSearchAnimation(this);
@@ -312,7 +340,7 @@ function getMusicCardHTML(
 ) {
     const div = document.createElement("div");
     div.innerHTML = `<div
-        class="relative flex flex-row max-w-xl items-center bg-white border rounded-lg shadow-md hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 mt-1"
+        class="relative flex flex-row max-w-xl items-center border rounded-lg shadow-md mt-1 dark:border-gray-700 ${platform === "Spotify" ? "bg-green-100 hover:bg-green-200 dark:bg-green-950 dark:hover:bg-green-900" : "bg-red-100 hover:bg-red-200 dark:bg-red-950 dark:hover:bg-red-900"}"
         data-uri="${uri}"
         data-platform="${platform}"
         data-id="${id === undefined ? "" : id}"
