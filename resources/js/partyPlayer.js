@@ -122,10 +122,10 @@ function addListenersToPlayer() {
         console.error("account_error:", message);
     });
 
+    // TODO random error: cannot destructure 'position' (when sp token expires?)
     SPPlayer.addListener(
         "player_state_changed",
         async ({ position, duration, track_window: { current_track } }) => {
-            console.log(current_track);
             if (currentTrack.platform === "Spotify") {
                 let artists = "";
                 current_track["artists"].forEach((artist) => {
@@ -181,7 +181,6 @@ function playerTogglePlay(e) {
         }
     }
     currentTrack.isPlaying = !currentTrack.isPlaying;
-    console.log(currentTrack); // TODO remove this line
 }
 
 function playerNext(e) {
@@ -206,7 +205,6 @@ async function updatePlayerGUI(infos) {
     playerArtistObj.innerHTML = infos.artists;
     playerVolumeBar.value = infos.volume;
     updateMarquees();
-    console.log(currentTrack); // TODO remove this line
 }
 
 async function setDeviceId(device_id) {
@@ -237,7 +235,6 @@ async function setDeviceId(device_id) {
     } else {
         console.error("Could not set Device ID!", response);
     }
-    console.log(currentTrack); // TODO remove this line
 }
 
 async function playNextTrack() {
@@ -278,7 +275,6 @@ async function playNextTrack() {
             response["is_recommended"] ? "recommended" : "from queue"
         })`
     );
-    console.log(currentTrack); // TODO remove this line
 }
 
 function updateMarquees() {
@@ -299,7 +295,6 @@ function onYTPlayerReady() {
 
 function onYTPlayerStateChange(event) {
     console.log("YT player state changed to:", event);
-    console.log(currentTrack); // TODO remove this line
 
     if(event.data === 0) {
         console.log("Track ended, playing next one...");
@@ -323,7 +318,6 @@ console.log("Player JS successfully loaded!");
 // YT image
 // if the first track is from yt, it wont start
 
-// Double clicking on the search buttons gets 404 page
-// Remove required login to Spotify
+// Remove required login to Spotify | PREMIUM NOT REQUIRED !!
 // Next page search on YT
 // addedToQueueFeedback

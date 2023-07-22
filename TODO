@@ -48,7 +48,7 @@
 [X] Let users see what is playing currently
 [ ] Player: pause music when pressing space
 [X] Clicking twice on the Search button on paty pages redirects to a 404 page
-[ ] Remove required login to Spotify
+[_] Remove required login to Spotify -> Premuim not required, only for hosting!
 
 ## Player
 
@@ -134,7 +134,7 @@ Generate DB
 # NOW:
 
 [X] Double clicking on the search button gets 404 page
-[ ] Remove required login to Spotify
+[_] Remove required login to Spotify
 [ ] Next page search on YT
 
 [ ] Spotify token not refreshing automatically
