@@ -77,6 +77,9 @@ const hints = [
     "Érik a szőlő",
 ];
 let platforms = [];
+let isInProgress = {
+    search: false,
+}
 
 //Toggles the searching icon
 function toggleSearchAnimation(e) {
@@ -91,10 +94,11 @@ function toggleSearchAnimation(e) {
 
 async function sendSearchRequest(e) {
     e.preventDefault();
+    if(isInProgress.search) return;
+    isInProgress.search = true;
+
     toggleSearchAnimation(this);
     pushFeedback(this);
-    searchForm.removeEventListener("submit", sendSearchRequest);
-    searchBtn.removeEventListener("click", sendSearchRequest);
 
     platforms = [];
     if (doSearchSpotify.checked) {
@@ -114,10 +118,9 @@ async function sendSearchRequest(e) {
         queryInp.value = "Please be more specific!";
         setTimeout(() => {
             queryInp.value = text;
-            searchBtn.addEventListener("click", sendSearchRequest);
-            searchForm.addEventListener("submit", sendSearchRequest);
         }, 1000);
         toggleSearchAnimation(this);
+        isInProgress.search = false;
         return;
     }
 
@@ -128,10 +131,9 @@ async function sendSearchRequest(e) {
         queryInp.value = "Please choose at least one platform!";
         setTimeout(() => {
             queryInp.value = text;
-            searchBtn.addEventListener("click", sendSearchRequest);
-            searchForm.addEventListener("submit", sendSearchRequest);
         }, 1000);
         toggleSearchAnimation(this);
+        isInProgress.search = false;
         return;
     }
 
@@ -140,6 +142,7 @@ async function sendSearchRequest(e) {
 
     console.log(`Searching '${query}' on ${platforms.join(", ")}...`);
 
+    // TODO handle unexcpeted errors
     const response = await fetch(
         `/party/search?query=${encodeURIComponent(query)}&dataSaver=${
             dataSaver ? 1 : 0
@@ -165,8 +168,7 @@ async function sendSearchRequest(e) {
     if (errorCount === platforms.length) {
         // All platform search failed
         toggleSearchAnimation(this);
-        searchBtn.addEventListener("click", sendSearchRequest);
-        searchForm.addEventListener("submit", sendSearchRequest);
+        isInProgress.search = false;
         return;
     }
 
@@ -259,8 +261,7 @@ async function sendSearchRequest(e) {
     refreshListeners();
     changeHint();
     toggleSearchAnimation(this);
-    searchBtn.addEventListener("click", sendSearchRequest);
-    searchForm.addEventListener("submit", sendSearchRequest);
+    isInProgress.search = false;
 }
 
 //Sends AJAX request to make a search in the Spotify database

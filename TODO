@@ -47,7 +47,7 @@
 [X] Let the user remove their requested songs from the queue
 [X] Let users see what is playing currently
 [ ] Player: pause music when pressing space
-[ ] Clicking twice on the Search button on paty pages redirects to a 404 page
+[X] Clicking twice on the Search button on paty pages redirects to a 404 page
 [ ] Remove required login to Spotify
 
 ## Player
@@ -132,4 +132,17 @@ Generate DB
 
 
 # NOW:
-Spotify token not refreshing automatically
+
+[X] Double clicking on the search button gets 404 page
+[ ] Remove required login to Spotify
+[ ] Next page search on YT
+
+[ ] Spotify token not refreshing automatically
+
+[ ] addedToQueueFeedback
+[ ] YT image
+[ ] if the first track is from yt, it wont start
+
+
+[ ] ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web\_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 39
+from yt api (when sending lots a requests)
