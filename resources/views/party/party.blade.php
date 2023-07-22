@@ -22,5 +22,6 @@
             @vite(['resources/js/partyPlayer.js'])
         @endsection
         @include('layouts.party.player')
+        @include('layouts.party.YTplayer')
     @endif
 @endsection

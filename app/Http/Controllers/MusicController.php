@@ -71,6 +71,8 @@ class MusicController extends Controller
                     $platformResult['error'] = "YouTube API did not respond.";
                 } else {
                     // On success
+                    // return response()->json($videoResponse);
+
                     $videos = $videoResponse->items;
                     $filteredVideos = $yt->filterVideos($videos, $dataSaver, true);
                     $platformResult['tracks'] = $filteredVideos;
@@ -170,7 +172,7 @@ class MusicController extends Controller
         $nextTrack = TrackInQueue::where('party_id', $party->id)->where('currently_playing', false)->orderBy('score', 'DESC')->first();
         $isRecommended = false;
 
-        //Move the played song into TrackPlayed db
+        // Move the played song into TrackPlayed db & delete from the queue
         $nowEndedTrack = TrackInQueue::where('party_id', $party->id)->where('currently_playing', true)->first();
 
         if ($nowEndedTrack) {
@@ -184,9 +186,9 @@ class MusicController extends Controller
             $nowEndedTrack->delete();
         }
 
-        // No next track in queue, set recommended song
+        // No next track in queue, get recommended song from spotify
         if (!isset($nextTrack)) {
-            $playedTracks = TracksPlayedInParty::where('party_id', $party->id)->select('track_uri')->inRandomOrder()->take(5)->get()->toArray();
+            $playedTracks = TracksPlayedInParty::where('party_id', $party->id)->where('platform', "Spotify")->select('track_uri')->inRandomOrder()->take(5)->get()->toArray();
 
             if (sizeof($playedTracks) > 0) {
                 $sp = new SpotifyController();
@@ -207,23 +209,23 @@ class MusicController extends Controller
             }
         }
 
-        //Start song
-        $response = "";
+        // Start song on Spotify
         if ($nextTrack->platform === 'Spotify') {
             $sp = new SpotifyController();
             $response = $sp->playTrack($party->playback_device_id, $nextTrack->track_uri);
+
+            // Error playing song
+            if (!$response['success']) {
+                return response()->json($response);
+            }
         }
 
-        //Error playing song
-        if (!$response['success']) {
-            return response()->json($response);
-        }
-
-        //Set the new song currently_playing status to true
+        // Set the new song currently_playing status to true
         $nextTrack->currently_playing = true;
         $nextTrack->save();
 
-        return response()->json(['track_uri' => $nextTrack->track_uri, 'is_recommended' => $isRecommended]);
+        // When next track is from YouTube, just send the uri, frontend handles the rest
+        return response()->json(['platform' => $nextTrack->platform, 'track_uri' => $nextTrack->track_uri, 'is_recommended' => $isRecommended]);
     }
 
     public function getSongsInQueue(Request $request)
@@ -238,24 +240,29 @@ class MusicController extends Controller
             return response()->json(['error' => 'There is no track in the queue!']);
         }
 
+        $filteredSpTracks = [];
+        $filteredYtTracks = [];
+
         // Spotify tracks
         $spTracks = array_values(array_filter($songs, function ($song) {
             return !strcmp($song['platform'], "Spotify");
         }));
 
-        $sp = new SpotifyController();
-        $spSongData = $sp->fetchTrackInfos($spTracks);
+        if (count($spTracks) > 0) {
+            $sp = new SpotifyController();
+            $spSongData = $sp->fetchTrackInfos($spTracks);
 
-        if (!$spSongData['success']) {
-            return response()->json(['success' => false, 'error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
-        }
+            if (!$spSongData['success']) {
+                return response()->json(['success' => false, 'error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
+            }
 
-        $filteredSpTracks = $sp->filterTracks($spSongData['tracks'], $dataSaver, false);
-        for ($i = 0; $i < count($filteredSpTracks); $i++) {
-            $filteredSpTracks[$i]['id'] = $spTracks[$i]['id'];
-            if (!$dataSaver) {
-                $username = User::find($spTracks[$i]['addedBy'])->username;
-                $filteredSpTracks[$i]['addedBy'] = $username;
+            $filteredSpTracks = $sp->filterTracks($spSongData['tracks'], $dataSaver, false);
+            for ($i = 0; $i < count($filteredSpTracks); $i++) {
+                $filteredSpTracks[$i]['id'] = $spTracks[$i]['id'];
+                if (!$dataSaver) {
+                    $username = User::find($spTracks[$i]['addedBy'])->username;
+                    $filteredSpTracks[$i]['addedBy'] = $username;
+                }
             }
         }
 
@@ -264,24 +271,25 @@ class MusicController extends Controller
             return !strcmp($song['platform'], "YouTube");
         }));
 
-        $yt = new YouTubeController();
-        $ytVideoData = $yt->fetchVideoInfos($ytTracks);
+        if (count($ytTracks) > 0) {
+            $yt = new YouTubeController();
+            $ytVideoData = $yt->fetchVideoInfos($ytTracks);
 
-        $filteredYtTracks = $yt->filterVideos($ytVideoData['tracks'], $dataSaver, false);
+            $filteredYtTracks = $yt->filterVideos($ytVideoData['tracks'], $dataSaver, false);
 
-        for ($i = 0; $i < count($filteredYtTracks); $i++) {
-            $filteredYtTracks[$i]['id'] = $ytTracks[$i]['id'];
-            if (!$dataSaver) {
-                $username = User::find($ytTracks[$i]['addedBy'])->username;
-                $filteredYtTracks[$i]['addedBy'] = $username;
+            for ($i = 0; $i < count($filteredYtTracks); $i++) {
+                $filteredYtTracks[$i]['id'] = $ytTracks[$i]['id'];
+                if (!$dataSaver) {
+                    $username = User::find($ytTracks[$i]['addedBy'])->username;
+                    $filteredYtTracks[$i]['addedBy'] = $username;
+                }
             }
         }
-
 
         // TODO priority (DESC order in score) losed, temporarily using the id
         // Merge results and apply the sort (id)
         $allTracks = array_merge($filteredSpTracks, $filteredYtTracks);
-        $sortedAllTrack = usort($allTracks, function($t1, $t2) {
+        $sortedAllTrack = usort($allTracks, function ($t1, $t2) {
             return ($t1['id'] < $t2['id']) ? -1 : 1;
         });
 

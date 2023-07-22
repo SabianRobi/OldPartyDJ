@@ -148,6 +148,8 @@ async function sendSearchRequest(e) {
         }&platforms=${platforms.join(",")}`
     ).then((res) => res.json());
 
+    // console.log(response);
+
     let errorCount = 0;
     let platformsSuccess = platforms.slice(0, platforms.length);
     response.forEach((platformResult) => {
@@ -520,37 +522,37 @@ function clearResults() {
 }
 
 function addedToQueueFeedback(card, success) {
-    card.classList.remove("dark:border-gray-700");
-    card.classList.remove("dark:bg-gray-800");
-    card.classList.remove("dark:hover:bg-gray-700");
-    card.classList.remove("bg-white");
-    card.classList.remove("hover:bg-gray-100");
-
-    if (success) {
-        card.classList.add("dark:border-green-800");
-        card.classList.add("border-green-400");
-        card.classList.add("dark:bg-green-700");
-        card.classList.add("bg-green-400");
-    } else {
-        card.classList.add("dark:border-red-800");
-        card.classList.add("border-red-400");
-        card.classList.add("dark:bg-red-700");
-        card.classList.add("bg-red-500");
-    }
-    setTimeout(() => {
-        if (success) {
-            card.classList.remove("dark:border-green-800");
-            card.classList.remove("dark:bg-green-700");
-        } else {
-            card.classList.remove("dark:border-red-800");
-            card.classList.remove("dark:bg-red-700");
-        }
-        card.classList.add("dark:border-gray-700");
-        card.classList.add("dark:bg-gray-800");
-        card.classList.add("dark:hover:bg-gray-700");
-        card.classList.add("bg-white");
-        card.classList.add("hover:bg-gray-100");
-    }, 1000);
+    // TODO implement normal feedback
+    // card.classList.remove("dark:border-gray-700");
+    // card.classList.remove("dark:bg-gray-800");
+    // card.classList.remove("dark:hover:bg-gray-700");
+    // card.classList.remove("bg-white");
+    // card.classList.remove("hover:bg-gray-100");
+    // if (success) {
+    //     card.classList.add("dark:border-green-800");
+    //     card.classList.add("border-green-400");
+    //     card.classList.add("dark:bg-green-700");
+    //     card.classList.add("bg-green-400");
+    // } else {
+    //     card.classList.add("dark:border-red-800");
+    //     card.classList.add("border-red-400");
+    //     card.classList.add("dark:bg-red-700");
+    //     card.classList.add("bg-red-500");
+    // }
+    // setTimeout(() => {
+    //     if (success) {
+    //         card.classList.remove("dark:border-green-800");
+    //         card.classList.remove("dark:bg-green-700");
+    //     } else {
+    //         card.classList.remove("dark:border-red-800");
+    //         card.classList.remove("dark:bg-red-700");
+    //     }
+    //     card.classList.add("dark:border-gray-700");
+    //     card.classList.add("dark:bg-gray-800");
+    //     card.classList.add("dark:hover:bg-gray-700");
+    //     card.classList.add("bg-white");
+    //     card.classList.add("hover:bg-gray-100");
+    // }, 1000);
 }
 
 console.log("Party JS successfully loaded!");
