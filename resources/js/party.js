@@ -141,7 +141,7 @@ async function sendSearchRequest(e) {
     console.log(`Searching '${query}' on ${platforms.join(", ")}...`);
 
     const response = await fetch(
-        `/party/search?query=${query}&dataSaver=${
+        `/party/search?query=${encodeURIComponent(query)}&dataSaver=${
             dataSaver ? 1 : 0
         }&offset=${offset}&creator=${
             isCreator ? 1 : 0

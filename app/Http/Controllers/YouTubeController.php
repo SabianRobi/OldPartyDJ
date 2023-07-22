@@ -22,8 +22,7 @@ class YouTubeController extends Controller
         $result = [];
 
         // Send the query to YouTube
-        $finalLink = $this->api . $this->searchApi . '&maxResults=' . $limit . '&q=' . str_replace(' ', '%20', $query) . '&key=' . env('YOUTUBE_API_KEY');
-        // TODO: use a normal converter instead of str replace (for example & causes bad search results)
+        $finalLink = $this->api . $this->searchApi . '&maxResults=' . $limit . '&q=' . rawurlencode($query) . '&key=' . env('YOUTUBE_API_KEY');
         $result = json_decode(@file_get_contents($finalLink));
 
         return response()->json($result);
