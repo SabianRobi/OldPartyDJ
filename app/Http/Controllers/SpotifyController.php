@@ -112,7 +112,7 @@ class SpotifyController extends Controller
         $query = $request->input('query');
         $offset = $request->input('offset');
         $isCreator = $request->boolean('creator');
-        $limit = 5;
+        $limit = 10; // TODO reset to 5
         $result = [];
 
         try {
@@ -186,7 +186,7 @@ class SpotifyController extends Controller
         }
 
         $mc = new MusicController();
-        $mc->playNextTrack();
+        return $mc->playNextTrack();
     }
 
     public function playTrack($playbackDeviceId, $trackUri)

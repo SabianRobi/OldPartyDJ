@@ -141,7 +141,6 @@ Generate DB
 
 [ ] addedToQueueFeedback
 [ ] YT image
-[ ] if the first track is from yt, it wont start
 
 
 [ ] ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web\_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 39

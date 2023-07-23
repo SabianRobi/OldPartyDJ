@@ -101,9 +101,15 @@ class MusicController extends Controller
         ];
 
         $sp = new SpotifyController();
-        $sp->activatePlayer();
+        $isFirstTrackYT = null;
+        $isFirstTrackYT = $sp->activatePlayer();
 
-        return response()->json($data);
+        // TODO Sends bacb every time
+        if(isset($isFirstTrackYT)) {
+            return response()->json(array_merge($isFirstTrackYT->original, ['playback_device_id' => $party->playback_device_id]));
+        } else {
+            return response()->json($data);
+        }
     }
 
     public function addTrackToQueue(Request $request)

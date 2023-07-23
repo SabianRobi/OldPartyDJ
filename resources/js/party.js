@@ -42,7 +42,7 @@ dataSaverObj.addEventListener("change", function () {
     console.log(`Datasaver turned ${dataSaver ? "on" : "off"}`);
 });
 
-const SpotifySearchLimit = 5;
+const SpotifySearchLimit = 10;
 let query;
 let offset = 0;
 const hints = [
@@ -79,7 +79,7 @@ const hints = [
 let platforms = [];
 let isInProgress = {
     search: false,
-}
+};
 
 //Toggles the searching icon
 function toggleSearchAnimation(e) {
@@ -94,7 +94,7 @@ function toggleSearchAnimation(e) {
 
 async function sendSearchRequest(e) {
     e.preventDefault();
-    if(isInProgress.search) return;
+    if (isInProgress.search) return;
     isInProgress.search = true;
 
     toggleSearchAnimation(this);
@@ -172,10 +172,10 @@ async function sendSearchRequest(e) {
         return;
     }
 
-    let trackCount = 0;
-    response.map((platform) => {
-        trackCount += platform.tracks.length;
-    });
+    let trackCount = 5;
+    // response.map((platform) => {
+    //      trackCount += 5;
+    // });
     console.log(
         `Received ${trackCount} tracks from ${platformsSuccess.join(", ")}!`
     );
@@ -248,10 +248,10 @@ async function sendSearchRequest(e) {
 
             refreshListeners();
 
-            if (trackCount < SpotifySearchLimit) {
-                showMoreBtn.remove();
-                resultsUl.innerHTML += "<p>No more results!</p>";
-            }
+            // if (trackCount < SpotifySearchLimit) {
+            //     showMoreBtn.remove();
+            //     resultsUl.innerHTML += "<p>No more results!</p>";
+            // }
         });
     } else {
         resultsUl.innerHTML += "<p>No more results!</p>";

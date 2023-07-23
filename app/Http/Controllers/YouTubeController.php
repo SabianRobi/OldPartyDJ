@@ -18,7 +18,7 @@ class YouTubeController extends Controller
     {
         $query = $request->input('query');
         // $offset = $request->input('offset'); // TODO
-        $limit = 5;
+        $limit = 10; // TODO reset to 5
         $result = [];
 
         // Send the query to YouTube

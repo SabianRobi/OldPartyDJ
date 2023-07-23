@@ -222,9 +222,20 @@ async function setDeviceId(device_id) {
     }).then((res) => res.json());
 
     if (response["playback_device_id"] == device_id) {
-        currentTrack.platform = "Spotify"; //TODO not sure its ok
-        currentTrack.isPlaying = true;
         console.log("Device ID set!");
+
+        // When YT video is the first track in queue, start it
+        if(response['platform'] === "YouTube") {
+            if (currentTrack.isPlaying && currentTrack.platform === "Spotify") {
+                SPPlayer.togglePlay();
+            }
+            YTPlayer.setVolume(playerVolumeBar.value*100);
+            YTPlayer.loadVideoById(response["track_uri"]);
+            currentTrack.platform = "YouTube";
+        } else {
+            currentTrack.platform = "Spotify";
+        }
+        currentTrack.isPlaying = true;
     } else if (response["tokenExpired"]) {
         console.error(
             "Could not set Device ID due to expired token. Refreshing..."
