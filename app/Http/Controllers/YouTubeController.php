@@ -82,9 +82,4 @@ class YouTubeController extends Controller
 
         return ['success' => true, 'tracks' => $videos->items];
     }
-
-    public function test()
-    {
-        return view('test.yt');
-    }
 }
