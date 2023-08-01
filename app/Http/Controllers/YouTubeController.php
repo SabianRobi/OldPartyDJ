@@ -10,7 +10,12 @@ class YouTubeController extends Controller
     private $api = 'https://www.googleapis.com/youtube/v3/';
     private $searchApi = 'search?part=snippet&kind=video&videoCaption=any';
     private $fetchVideosApi = 'videos?part=snippet';
+    private $key;
 
+    public function __construct()
+    {
+        $this->key = Config::get("google.youtube.api_key");
+    }
 
     // Get search results
     public function searchVideos(Request $request)
@@ -21,8 +26,7 @@ class YouTubeController extends Controller
         $result = [];
 
         // Send the query to YouTube
-        $key = Config::get("google.youtube.api_key");
-        $finalLink = $this->api . $this->searchApi . '&maxResults=' . $limit . '&q=' . rawurlencode($query) . '&key=' . $key;
+        $finalLink = $this->api . $this->searchApi . '&maxResults=' . $limit . '&q=' . rawurlencode($query) . '&key=' . $this->key;
         $result = json_decode(@file_get_contents($finalLink));
 
         return response()->json($result);
@@ -75,7 +79,7 @@ class YouTubeController extends Controller
             array_push($uris, $video['track_uri']);
         }
 
-        $finalLink = $this->api . $this->fetchVideosApi . '&key=' . env('YOUTUBE_API_KEY') . '&id=' . implode('&id=', $uris);
+        $finalLink = $this->api . $this->fetchVideosApi . '&key=' . $this->key . '&id=' . implode('&id=', $uris);
 
 
         $videos = json_decode(@file_get_contents($finalLink));
