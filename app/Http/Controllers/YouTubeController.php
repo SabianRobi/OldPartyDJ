@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
-use function PHPUnit\Framework\isNull;
+use Illuminate\Support\Facades\Config;
 
 class YouTubeController extends Controller
 {
@@ -22,7 +21,8 @@ class YouTubeController extends Controller
         $result = [];
 
         // Send the query to YouTube
-        $finalLink = $this->api . $this->searchApi . '&maxResults=' . $limit . '&q=' . rawurlencode($query) . '&key=' . env('YOUTUBE_API_KEY');
+        $key = Config::get("google.youtube.api_key");
+        $finalLink = $this->api . $this->searchApi . '&maxResults=' . $limit . '&q=' . rawurlencode($query) . '&key=' . $key;
         $result = json_decode(@file_get_contents($finalLink));
 
         return response()->json($result);
