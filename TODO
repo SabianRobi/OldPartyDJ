@@ -46,7 +46,7 @@
 [X] 'Show more' option after the 5 results from Spotify
 [X] Let the user remove their requested songs from the queue
 [X] Let users see what is playing currently
-[ ] Player: pause music when pressing space
+[X] Player: pause music when pressing space
 [X] Clicking twice on the Search button on paty pages redirects to a 404 page
 [_] Remove required login to Spotify -> Premuim not required, only for hosting!
 

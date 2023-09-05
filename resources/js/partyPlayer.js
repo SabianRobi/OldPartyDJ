@@ -22,6 +22,7 @@ playerTogglePlayObj.addEventListener("click", playerTogglePlay);
 playerNextObj.addEventListener("click", playerNext);
 const playerVolumeBar = document.querySelector("#player_volume");
 playerVolumeBar.addEventListener("input", throttle(onVolumeChange, 1000));
+document.addEventListener("keypress", keyPressed);
 
 let SPPlayer;
 let YTPlayer;
@@ -31,6 +32,13 @@ let currentTrack = {
     isPlaying: false,
     platform: "",
 };
+
+function keyPressed(event) {
+    // Space pressed and not pressed while typing a song title to search for
+    if(event.code === "Space" && event.srcElement.id !== "query") {
+        playerTogglePlayObj.click();
+    }
+}
 
 // Initalizing YT player:
 let tag = document.createElement("script");
@@ -225,11 +233,11 @@ async function setDeviceId(device_id) {
         console.log("Device ID set!");
 
         // When YT video is the first track in queue, start it
-        if(response['platform'] === "YouTube") {
+        if (response["platform"] === "YouTube") {
             if (currentTrack.isPlaying && currentTrack.platform === "Spotify") {
                 SPPlayer.togglePlay();
             }
-            YTPlayer.setVolume(playerVolumeBar.value*100);
+            YTPlayer.setVolume(playerVolumeBar.value * 100);
             YTPlayer.loadVideoById(response["track_uri"]);
             currentTrack.platform = "YouTube";
         } else {
@@ -275,7 +283,7 @@ async function playNextTrack() {
         if (currentTrack.isPlaying && currentTrack.platform === "Spotify") {
             SPPlayer.togglePlay();
         }
-        YTPlayer.setVolume(playerVolumeBar.value*100);
+        YTPlayer.setVolume(playerVolumeBar.value * 100);
         YTPlayer.loadVideoById(response["track_uri"]);
     }
 
@@ -307,7 +315,7 @@ function onYTPlayerReady() {
 function onYTPlayerStateChange(event) {
     console.log("YT player state changed to:", event);
 
-    if(event.data === 0) {
+    if (event.data === 0) {
         console.log("Track ended, playing next one...");
         playNextTrack();
         return;
