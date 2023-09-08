@@ -18,21 +18,21 @@
 
                     <!-- Party name -->
                     <div>
-                        <x-input-label for="name" :value="__('Name')" :required="__('')" />
+                        <x-input-label for="party_name" :value="__('Party name')" :required="__('')" />
 
-                        <x-text-input id="name" class="block mt-1 w-full" type="text" name="name"
-                            :value="old('name')" required autofocus />
+                        <x-text-input id="party_name" class="block mt-1 w-full" type="text" name="party_name"
+                            :value="old('party_name')" required autofocus />
 
-                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                        <x-input-error :messages="$errors->get('party_name')" class="mt-2" />
                     </div>
 
                     <!-- Password -->
                     <div class="mt-4">
-                        <x-input-label for="password" :value="__('Password')" />
+                        <x-input-label for="party_password" :value="__('Party password')" />
 
-                        <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" />
+                        <x-text-input id="party_password" class="block mt-1 w-full" type="password" name="party_password" />
 
-                        <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                        <x-input-error :messages="$errors->get('party_password')" class="mt-2" />
                     </div>
 
                     <div class="flex items-center justify-end mt-4">

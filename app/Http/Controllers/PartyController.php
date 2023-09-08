@@ -24,7 +24,7 @@ class PartyController extends Controller
         ]);
     }
 
-    //Create party
+    // Create party
     public function create()
     {
         if ($this->checkAlredyInParty()) {
@@ -52,16 +52,16 @@ class PartyController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|min:3|max:255|unique:parties,name',
-            'password' => 'nullable|string|min:3|max:255',
+            'party_name' => 'required|string|min:3|max:255|unique:parties,name',
+            'party_password' => 'nullable|string|min:3|max:255',
         ]);
 
         $user = Auth::user();
 
         $party = new Party();
-        $party->name = $validated['name'];
-        if ($validated['password'] !== null) {
-            $party->password = Hash::make($validated['password']);
+        $party->name = $validated['party_name'];
+        if ($validated['party_password'] !== null) {
+            $party->password = Hash::make($validated['party_password']);
         }
         $party->creator = $user->id;
         $party->save();
@@ -111,19 +111,19 @@ class PartyController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|min:3|max:255|exists:parties,name',
-            'password' => 'nullable|string|min:3|max:255',
+            'party_name' => 'required|string|min:3|max:255|exists:parties,name',
+            'party_password' => 'nullable|string|min:3|max:255',
         ], [
             'name.exists' => 'There is no party with this name!',
         ]);
 
-        $party = Party::where('name', $validated['name'])->first();
+        $party = Party::where('name', $validated['party_name'])->first();
 
         //Cheking if the party has password and it's correctly given
-        if ($party->password && !Hash::check($validated['password'], $party->password)) {
+        if ($party->password && !Hash::check($validated['party_password'], $party->password)) {
             return redirect()->route('joinPageParty')
                 ->withInput($validated)
-                ->withErrors(['password' => 'Incorrect password!']);
+                ->withErrors(['party_password' => 'Incorrect password!']);
         }
 
         //Joining party

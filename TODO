@@ -102,7 +102,7 @@
 [_] Show total length of queued songs
 [X] Seperate party-user relationship
 [X] Recommended track song not working (Spotify user was missing)
-[ ] Rename party creation form to don't autofill with login credentials
+[X] Rename party creation form to don't autofill with login credentials
 
 # Tests
 
