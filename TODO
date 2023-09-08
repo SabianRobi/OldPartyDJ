@@ -102,6 +102,7 @@
 [_] Show total length of queued songs
 [X] Seperate party-user relationship
 [X] Recommended track song not working (Spotify user was missing)
+[ ] Rename party creation form to don't autofill with login credentials
 
 # Tests
 
@@ -120,6 +121,7 @@
     -   Add 'addedAt / playedAt' timestamp to queued tracks
 -   When a user watching queued songs, get automatic updates
 -   Write documentation
+- Join party as guest with limited access
 
 # Before deployment:
 
@@ -133,15 +135,19 @@ Generate DB
 
 # NOW:
 
+[X] Spotify player continues playing when YT player starts
+[X] Spotify login does not work - cache problems
+[X] Next track does not play automatically after a Spotify track
 [X] Double clicking on the search button gets 404 page
-[_] Remove required login to Spotify
+[ ] Remove required login to Spotify
 [ ] Next page search on YT
-
 [ ] Spotify token not refreshing automatically
-
 [ ] addedToQueueFeedback
 [ ] YT image
 
 
 [ ] ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web\_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 39
 from yt api (when sending lots a requests)
+
+ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web\_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 43
+    INFO: when searching for 30y

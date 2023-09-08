@@ -32,10 +32,11 @@ let currentTrack = {
     isPlaying: false,
     platform: "",
 };
+let SpotifyEndTrackCounter = 0;
 
 function keyPressed(event) {
     // Space pressed and not pressed while typing a song title to search for
-    if(event.code === "Space" && event.srcElement.id !== "query") {
+    if (event.code === "Space" && event.srcElement.id !== "query") {
         playerTogglePlayObj.click();
     }
 }
@@ -108,32 +109,11 @@ function addListenersToPlayer() {
         console.log("Device ID has gone offline", device_id);
     });
 
-    SPPlayer.addListener("initialization_error", ({ message }) => {
-        console.error("initialization_error:", message);
-    });
-
-    SPPlayer.addListener("authentication_error", async ({ message }) => {
-        console.error("authentication_error:", message);
-        if (message === "Authentication failed") {
-            const success = await refreshToken();
-            setSpotifyToken(await getSpotifyToken());
-            if (!success) {
-                console.error("Could not refresh Spotify token!");
-                return;
-            }
-            console.log("Initalizing player again...");
-            activatePlayerInner();
-        }
-    });
-
-    SPPlayer.addListener("account_error", ({ message }) => {
-        console.error("account_error:", message);
-    });
-
+    // Player state changed
     // TODO random error: cannot destructure 'position' (when sp token expires?)
     SPPlayer.addListener(
         "player_state_changed",
-        async ({ position, duration, track_window: { current_track } }) => {
+        async ({ track_window: { current_track, previous_tracks } }) => {
             if (currentTrack.platform === "Spotify") {
                 let artists = "";
                 current_track["artists"].forEach((artist) => {
@@ -148,16 +128,57 @@ function addListenersToPlayer() {
                     volume: await SPPlayer.getVolume(),
                 };
                 updatePlayerGUI(GUInfos);
-                if (position === duration) {
-                    console.log("Track ended, playing next one...");
-                    playNextTrack();
+
+                if (
+                    previous_tracks.find(
+                        (track) => track.id === current_track.id
+                    )
+                ) {
+                    // Counter is neccessary, because the event fires 3 times at once
+                    SpotifyEndTrackCounter++;
+                    if (SpotifyEndTrackCounter % 3 == 0) {
+                        console.log("Track ended, playing next one...");
+                        currentTrack.isPlaying = false;
+                        playNextTrack();
+                    }
                 }
             }
         }
     );
 
+    // Autoplay failed
     SPPlayer.addListener("autoplay_failed", () => {
         console.log("Autoplay is not allowed by the browser autoplay rules");
+    });
+
+    // Init error
+    SPPlayer.addListener("initialization_error", ({ message }) => {
+        console.error("initialization_error:", message);
+    });
+
+    // Auth error
+    SPPlayer.addListener("authentication_error", async ({ message }) => {
+        console.error("authentication_error:", message);
+        if (message === "Authentication failed") {
+            const success = await refreshToken();
+            setSpotifyToken(await getSpotifyToken());
+            if (!success) {
+                console.error("Could not refresh Spotify token!");
+                return;
+            }
+            console.log("Initalizing player again...");
+            activatePlayerInner();
+        }
+    });
+
+    // Account error
+    SPPlayer.addListener("account_error", ({ message }) => {
+        console.error("account_error:", message);
+    });
+
+    // Playback error
+    SPPlayer.addListener("playback_error", ({ message }) => {
+        console.error("playback_error:", message);
     });
 }
 
@@ -283,7 +304,6 @@ async function playNextTrack() {
         if (currentTrack.isPlaying && currentTrack.platform === "Spotify") {
             SPPlayer.togglePlay();
         }
-        YTPlayer.setVolume(playerVolumeBar.value * 100);
         YTPlayer.loadVideoById(response["track_uri"]);
     }
 
@@ -317,6 +337,7 @@ function onYTPlayerStateChange(event) {
 
     if (event.data === 0) {
         console.log("Track ended, playing next one...");
+        currentTrack.isPlaying = false;
         playNextTrack();
         return;
     }
