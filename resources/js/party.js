@@ -100,34 +100,42 @@ let platforms = {
         reachedEndOfResults: false,
     },
     getEnabledNames() {
-        const p = [];
-        if (this.Spotify.enabled) {
-            p.push(this.Spotify.name);
-        }
-        if (this.YouTube.enabled) {
-            p.push(this.YouTube.name);
-        }
-        return p;
+        const names = [];
+
+        this.getNames().forEach((platform) => {
+            platform = platforms[platform];
+
+            if (platform.enabled) {
+                names.push(platform.name);
+            }
+        });
+        return names;
     },
     getEnabledOffsets() {
         const off = [];
-        if (this.Spotify.enabled) {
-            off.push(this.Spotify.offset);
-        }
-        if (this.YouTube.enabled) {
-            off.push(this.YouTube.offset);
-        }
+
+        this.getNames().forEach((platform) => {
+            platform = platforms[platform];
+
+            if (platform.enabled) {
+                off.push(platform.offset);
+            }
+        });
+
         return off;
     },
     getEnabledLimits() {
-        const lims = [];
-        if (this.Spotify.enabled) {
-            lims.push(this.Spotify.limit);
-        }
-        if (this.YouTube.enabled) {
-            lims.push(this.YouTube.limit);
-        }
-        return lims;
+        const limits = [];
+
+        this.getNames().forEach((platform) => {
+            platform = platforms[platform];
+
+            if (platform.enabled) {
+                limits.push(platform.limit);
+            }
+        });
+
+        return limits;
     },
     getNames() {
         const names = [];
