@@ -110,8 +110,10 @@
 [X] Next page search on Spotify
 [X] Handle offsets seperately
 [X] Next page search on YT - UNDER TESTING (quota reached)
-[ ] Show "End of results / no more tracks" when no more tracks received on search
-    [ ] Spotify token not refreshing automatically - Trying
+[X] Show "End of results / no more tracks" when no more tracks received on search
+    [ ] Check with multiple platforms
+[ ] Spotify token not refreshing automatically
+        Change Stashed
 [ ] addedToQueueFeedback
 [ ] YT image
 [ ] If the first track from YT, it won't start

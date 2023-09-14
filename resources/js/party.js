@@ -89,6 +89,7 @@ let platforms = {
         enabled: true, // Search on this platform?
         offset: 0, // Skip the first {offset} tracks when doing search
         limit: 5, // Returned track count
+        reachedEndOfResults: false, // When no more tracks found this will be true
     },
     YouTube: {
         name: "YouTube",
@@ -96,6 +97,7 @@ let platforms = {
         offset: 0,
         limit: 5,
         nextPageToken: "",
+        reachedEndOfResults: false,
     },
     getEnabledNames() {
         const p = [];
@@ -126,6 +128,25 @@ let platforms = {
             lims.push(this.YouTube.limit);
         }
         return lims;
+    },
+    getNames() {
+        const names = [];
+        Object.values(platforms).forEach((entry) => {
+            if (entry.hasOwnProperty("reachedEndOfResults")) {
+                names.push(entry.name);
+            }
+        });
+        return names;
+    },
+    resetValues() {
+        this.getNames().forEach((platform) => {
+            platform = platforms[platform];
+
+            platform.offset = 0;
+            platform.reachedEndOfResults = false;
+        });
+
+        this.YouTube.nextPageToken = "";
     },
 };
 let isInProgress = {
@@ -180,6 +201,9 @@ async function sendSearchRequest(e) {
         isInProgress.search = false;
         return;
     }
+
+    // Reseting values
+    platforms.resetValues();
 
     // Sending query to backend
     query = query.trim();
@@ -570,6 +594,13 @@ function refreshResultList(isFirstSearch, cleanResponse, platformsSuccess) {
     }
 
     cleanResponse.forEach((platformResults) => {
+        if (
+            platformResults.tracks.length <
+            platforms[platformResults.platform].limit
+        ) {
+            platforms[platformResults.platform].reachedEndOfResults = true;
+        }
+
         platformResults.tracks.forEach((track) => {
             let length = new Date(track["length"]);
             const card = getMusicCardHTML(
@@ -587,12 +618,27 @@ function refreshResultList(isFirstSearch, cleanResponse, platformsSuccess) {
         });
     });
 
-    // Showing "load more" button(s)
-    resultsUl.innerHTML += "<p>Load more results from:</p>";
+    // Show "load more" button(s)
+    let allReached = true;
     platformsSuccess.forEach((platform) => {
-        const btn = getShowMoreButton(platform);
-        resultsUl.appendChild(btn);
+        if (!platforms[platform].reachedEndOfResults) {
+            allReached = false;
+        }
     });
+    console.log(allReached);
+
+    if (!allReached) {
+        resultsUl.innerHTML += "<p>Load more results from:</p>";
+        platformsSuccess.forEach((platform) => {
+            if (!platforms[platform].reachedEndOfResults) {
+                const btn = getShowMoreButton(platform);
+                resultsUl.appendChild(btn);
+            }
+        });
+    } else {
+        resultsUl.innerHTML +=
+            "<p>You have reached the end of the results!</p>";
+    }
 }
 
 function getShowMoreButton(platformName) {
