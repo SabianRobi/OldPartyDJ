@@ -120,6 +120,7 @@
     from yt api (when sending lots a requests)
     -   ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web\_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 43
             INFO: when searching for 30y
+[ ]  platforms.blade.php, Line 20 (isSpotifyConnected): BUGGY, if state is present it says also connected, even there is no tokens
 
 # Tests
 

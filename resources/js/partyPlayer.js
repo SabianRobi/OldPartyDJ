@@ -353,11 +353,3 @@ function onYTPlayerStateChange(event) {
 }
 
 console.log("Player JS successfully loaded!");
-
-// TODO list:
-// YT image
-// if the first track is from yt, it wont start
-
-// Remove required login to Spotify | PREMIUM NOT REQUIRED !!
-// Next page search on YT
-// addedToQueueFeedback
