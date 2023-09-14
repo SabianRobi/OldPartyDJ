@@ -33,7 +33,7 @@ class SpotifyController extends Controller
         $this->session->setRefreshToken($token->refresh_token);
     }
 
-    //Login
+    // Login
     public function login()
     {
         // Generate state
@@ -65,7 +65,7 @@ class SpotifyController extends Controller
         return redirect($url);
     }
 
-    //Callback
+    // Callback
     public function callback(Request $request)
     {
         $spotify = SpotifyThings::where([
@@ -90,7 +90,7 @@ class SpotifyController extends Controller
         return back();
     }
 
-    //Disconnect
+    // Disconnect
     public function disconnect()
     {
         $spotify = SpotifyThings::where('owner', Auth::id());
@@ -106,13 +106,9 @@ class SpotifyController extends Controller
         return back();
     }
 
-    public function searchTracks(Request $request)
+    public function searchTracks(String $query, int $offset, int $limit, bool $isCreator)
     {
         $this->setCredentials();
-        $query = $request->input('query');
-        $offset = $request->input('offset');
-        $isCreator = $request->boolean('creator');
-        $limit = 10; // TODO reset to 5
         $result = [];
 
         try {
@@ -127,7 +123,7 @@ class SpotifyController extends Controller
                     return response()->json(['error' => 'Spotify token expired, please refresh it!', 'tokenExpired' => true]);
                 } else {
                     $this->refreshToken();
-                    return $this->searchTracks($request);
+                    return $this->searchTracks($query, $offset, $limit, $isCreator);
                 }
             } else {
                 return response()->json(['error' => $e->getMessage()]);

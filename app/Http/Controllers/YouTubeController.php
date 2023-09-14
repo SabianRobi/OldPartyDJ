@@ -18,15 +18,12 @@ class YouTubeController extends Controller
     }
 
     // Get search results
-    public function searchVideos(Request $request)
+    public function searchVideos(String $query, $offset, int $limit, bool $isCreator)
     {
-        $query = $request->input('query');
-        // $offset = $request->input('offset'); // TODO
-        $limit = 10; // TODO reset to 5
         $result = [];
 
         // Send the query to YouTube
-        $finalLink = $this->api . $this->searchApi . '&maxResults=' . $limit . '&q=' . rawurlencode($query) . '&key=' . $this->key;
+        $finalLink = $this->api . $this->searchApi . '&maxResults=' . $limit . '&q=' . rawurlencode($query) . ($offset === "noToken" ? "" : ('&pageToken=' . $offset)) . '&key=' . $this->key;
         $result = json_decode(@file_get_contents($finalLink));
 
         return response()->json($result);

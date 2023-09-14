@@ -21,18 +21,35 @@ class MusicController extends Controller
                 'query' => 'required|string|min:1',
                 'dataSaver' => 'required|boolean',
                 'creator' => 'required|boolean',
-                'offset' => 'required|integer|min:0',
-                'platforms' => 'required|string'
+                'platforms' => 'required|string',
+                'offsets' => 'required|string',
+                'limits' => 'required|string',
             ]);
         } catch (ValidationException $e) {
             return response()->json(['error' => 'Required fields did not specified!', 'message' => $e->getMessage()]);
         }
 
         $platforms = explode(',', $request->string('platforms'));
+        $offsets = explode(',', $request->string('offsets'));
+        $limits = explode(',', $request->string('limits'));
+
+        // TODO: test this
+        if (count($platforms) != count($offsets) || count($platforms) != count($limits)) {
+            return response()->json(['error' => 'Platform count, offset count and limit count does not matches.']);
+        }
+
+        $query = $request->string('query');
         $dataSaver = $request->boolean('dataSaver');
+        $isCreator = $request->boolean('creator');
+
+
         $results = [];
 
-        foreach ($platforms as $platform) {
+        for ($i = 0; $i < count($platforms); $i++) {
+            $platform = $platforms[$i];
+            $offset = $offsets[$i];
+            $limit = $limits[$i];
+
             $platformResult = [
                 'platform' => $platform,
                 // 'tracks' => [],
@@ -41,19 +58,20 @@ class MusicController extends Controller
 
             if ($platform == "Spotify") {
                 $sp = new SpotifyController();
-                $tracks = ($sp->searchTracks($request))->original->tracks->items;
+                $resp = $sp->searchTracks($query, $offset, $limit, $isCreator)->getData();
 
                 // Check whether the search was successful
-                if (isset($tracks['error'])) {
+                if (in_array('error', get_object_vars($resp))) {
                     // On error
-                    $platformResult['error'] = $tracks['error'];
+                    $platformResult['error'] = $resp->error;
 
                     // Check whether the search failed due to expired token
-                    if (isset($result['tokenExpired'])) {
-                        $platformResult['tokenExpired'] = $tracks['tokenExpired'];
+                    if (in_array('tokenExpired', get_object_vars($resp))) {
+                        $platformResult['tokenExpired'] = $resp->tokenExpired;
                     }
                 } else {
                     // On successful search
+                    $tracks = $resp->tracks->items;
                     $filteredTracks = $sp->filterTracks($tracks, $dataSaver, true);
                     $platformResult['tracks'] = $filteredTracks;
                 }
@@ -62,8 +80,7 @@ class MusicController extends Controller
             if ($platform == "YouTube") {
                 $yt = new YouTubeController();
 
-                $videoResponse = ($yt->searchVideos($request))->original;
-                // ($yt->searchVideos($request))->original->nextPageToken; // For supporting pagination
+                $videoResponse = ($yt->searchVideos($query, $offset, $limit, $isCreator))->original;
 
                 // Check whether the search was successful (empty object)
                 if (count((array)$videoResponse) == 0) {
@@ -76,6 +93,7 @@ class MusicController extends Controller
                     $videos = $videoResponse->items;
                     $filteredVideos = $yt->filterVideos($videos, $dataSaver, true);
                     $platformResult['tracks'] = $filteredVideos;
+                    $platformResult['nextPageToken'] = $videoResponse->nextPageToken;
                 }
             }
             array_push($results, $platformResult);
@@ -105,7 +123,7 @@ class MusicController extends Controller
         $isFirstTrackYT = $sp->activatePlayer();
 
         // TODO Sends bacb every time
-        if(isset($isFirstTrackYT)) {
+        if (isset($isFirstTrackYT)) {
             return response()->json(array_merge($isFirstTrackYT->original, ['playback_device_id' => $party->playback_device_id]));
         } else {
             return response()->json($data);

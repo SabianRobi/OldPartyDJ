@@ -22,8 +22,16 @@ const dataSaverObj = document.querySelector("#dataSaver");
 searchBtn.addEventListener("click", sendSearchRequest);
 // searchForm.addEventListener("submit", sendSearchRequest);
 
-const doSearchSpotify = document.querySelector("#searchSpotify");
-const doSearchYouTube = document.querySelector("#searchYouTube");
+document
+    .querySelector("#searchSpotify")
+    .addEventListener("change", function () {
+        platforms.Spotify.enabled = this.checked;
+    });
+document
+    .querySelector("#searchYouTube")
+    .addEventListener("change", function () {
+        platforms.YouTube.enabled = this.checked;
+    });
 
 getSongsBtn.addEventListener("click", function () {
     pushFeedback(this);
@@ -44,7 +52,6 @@ dataSaverObj.addEventListener("change", function () {
 
 const SpotifySearchLimit = 10;
 let query;
-let offset = 0;
 const hints = [
     "Blue",
     "abcdefu",
@@ -76,12 +83,56 @@ const hints = [
     "Csepereg az eső",
     "Érik a szőlő",
 ];
-let platforms = [];
+let platforms = {
+    Spotify: {
+        name: "Spotify", // Name of the platform
+        enabled: true, // Search on this platform?
+        offset: 0, // Skip the first {offset} tracks when doing search
+        limit: 5, // Returned track count
+    },
+    YouTube: {
+        name: "YouTube",
+        enabled: true,
+        offset: 0,
+        limit: 5,
+        nextPageToken: "",
+    },
+    getEnabledNames() {
+        const p = [];
+        if (this.Spotify.enabled) {
+            p.push(this.Spotify.name);
+        }
+        if (this.YouTube.enabled) {
+            p.push(this.YouTube.name);
+        }
+        return p;
+    },
+    getEnabledOffsets() {
+        const off = [];
+        if (this.Spotify.enabled) {
+            off.push(this.Spotify.offset);
+        }
+        if (this.YouTube.enabled) {
+            off.push(this.YouTube.offset);
+        }
+        return off;
+    },
+    getEnabledLimits() {
+        const lims = [];
+        if (this.Spotify.enabled) {
+            lims.push(this.Spotify.limit);
+        }
+        if (this.YouTube.enabled) {
+            lims.push(this.YouTube.limit);
+        }
+        return lims;
+    },
+};
 let isInProgress = {
     search: false,
 };
 
-//Toggles the searching icon
+// Toggles the searching icon
 function toggleSearchAnimation(e) {
     if (e.dataset.inProgress === "false") {
         e.dataset.inProgress = "true";
@@ -100,16 +151,7 @@ async function sendSearchRequest(e) {
     toggleSearchAnimation(this);
     pushFeedback(this);
 
-    platforms = [];
-    if (doSearchSpotify.checked) {
-        platforms.push("Spotify");
-    }
-    if (doSearchYouTube.checked) {
-        platforms.push("YouTube");
-    }
-
     query = queryInp.value == "" ? queryInp.placeholder : queryInp.value;
-    offset = 0;
 
     // Error handling: Empty query
     if (query.trim().length === 0) {
@@ -124,8 +166,10 @@ async function sendSearchRequest(e) {
         return;
     }
 
+    const enabledPlatformNames = platforms.getEnabledNames();
+
     // Error handling: No platforms selected
-    if (platforms.length === 0) {
+    if (enabledPlatformNames.length === 0) {
         console.warn("Set at least one platform to search on!");
         const text = queryInp.value;
         queryInp.value = "Please choose at least one platform!";
@@ -137,176 +181,27 @@ async function sendSearchRequest(e) {
         return;
     }
 
+    // Sending query to backend
     query = query.trim();
     queryInp.value = query;
 
-    console.log(`Searching '${query}' on ${platforms.join(", ")}...`);
-
-    // TODO handle unexcpeted errors
-    const response = await fetch(
-        `/party/search?query=${encodeURIComponent(query)}&dataSaver=${
-            dataSaver ? 1 : 0
-        }&offset=${offset}&creator=${
-            isCreator ? 1 : 0
-        }&platforms=${platforms.join(",")}`
-    ).then((res) => res.json());
-
-    // console.log(response);
-
-    let errorCount = 0;
-    let platformsSuccess = platforms.slice(0, platforms.length);
-    response.forEach((platformResult) => {
-        if (platformResult["error"]) {
-            console.error(platformResult["platform"], platformResult["error"]);
-            platformsSuccess = platformsSuccess.filter((p) => {
-                p !== platformResult["platform"];
-            });
-            errorCount++;
-        }
-    });
-
-    if (errorCount === platforms.length) {
-        // All platform search failed
-        toggleSearchAnimation(this);
-        isInProgress.search = false;
-        return;
-    }
-
-    let trackCount = 5;
-    // response.map((platform) => {
-    //      trackCount += 5;
-    // });
     console.log(
-        `Received ${trackCount} tracks from ${platformsSuccess.join(", ")}!`
+        `Searching '${query}' on ${enabledPlatformNames.join(", ")}...`
     );
 
-    clearResults();
-
-    const queueText = document.createElement("p");
-    queueText.innerText = "Search results:";
-    resultsUl.appendChild(queueText);
-
-    response.forEach((platformResults) => {
-        platformResults.tracks.forEach((track) => {
-            let length = new Date(track["length"]);
-            const card = getMusicCardHTML(
-                track["image"],
-                track["title"],
-                track["artists"],
-                length.getMinutes() + "m" + length.getSeconds() + "s",
-                track["uri"],
-                platformResults.platform,
-                undefined,
-                track["id"],
-                "addToQueue"
-            );
-            resultsUl.appendChild(card);
-        });
-    });
-    offset = trackCount; //TODO manage offset per platform
-
-    if (trackCount === SpotifySearchLimit) {
-        resultsUl.innerHTML += `<button id="showMore" name="showMore" data-in-progress="false" data-original-value="Show more"
-        class="bg-blue-500 hover:bg-blue-300 text-white hover:text-black py-2 px-2 my-2 rounded">Show more</button>`;
-
-        const showMoreBtn = resultsUl.querySelector("#showMore");
-        showMoreBtn.addEventListener("click", async function () {
-            pushFeedback(showMoreBtn);
-            toggleSearchAnimation(showMoreBtn);
-
-            const result = await sendOnlySearchRequest(offset);
-
-            resultsUl.removeChild(showMoreBtn);
-
-            result.forEach((platformResults) => {
-                platformResults.tracks.forEach((track) => {
-                    let length = new Date(track["length"]);
-                    const card = getMusicCardHTML(
-                        track["image"],
-                        track["title"],
-                        track["artists"],
-                        length.getMinutes() + "m" + length.getSeconds() + "s",
-                        track["uri"],
-                        platformResults.platform,
-                        track["id"],
-                        undefined,
-                        "addToQueue"
-                    );
-                    resultsUl.appendChild(card);
-                });
-            });
-
-            let trackCount = 0;
-            result.map((platform) => {
-                trackCount += platform.tracks.length;
-            });
-
-            offset += trackCount; //TODO manage offsets per platform
-
-            resultsUl.appendChild(showMoreBtn);
-            toggleSearchAnimation(showMoreBtn);
-
-            refreshListeners();
-
-            // if (trackCount < SpotifySearchLimit) {
-            //     showMoreBtn.remove();
-            //     resultsUl.innerHTML += "<p>No more results!</p>";
-            // }
-        });
-    } else {
-        resultsUl.innerHTML += "<p>No more results!</p>";
-    }
+    const responseObj = await sendSearchQuery(enabledPlatformNames);
+    const { cleanResponse, platformsSuccess } = await handleSearchErrorHandling(
+        responseObj
+    );
+    refreshResultList(true, cleanResponse, platformsSuccess);
 
     queryInp.value = "";
     refreshListeners();
     changeHint();
     toggleSearchAnimation(this);
     isInProgress.search = false;
-}
 
-//Sends AJAX request to make a search in the Spotify database
-async function sendOnlySearchRequest(offset) {
-    const response = await fetch(
-        `/party/search?query=${query}&dataSaver=${
-            dataSaver ? 1 : 0
-        }&offset=${offset}&creator=${
-            isCreator ? 1 : 0
-        }&platforms=${platforms.join(",")}`
-    ).then((res) => res.json());
-
-    response.forEach(
-        (platformResult) =>
-            async function () {
-                if (platformResult["error"]) {
-                    //TODO check isset
-                    if (
-                        isCreator &&
-                        platformResult["token_expired"] &&
-                        platformResult["platform"] === "Spotify"
-                    ) {
-                        console.error(
-                            "Could not get tracks due to expired Spotify token. Refreshing..."
-                        );
-
-                        let success = await refreshToken();
-                        if (success) {
-                            setSpotifyToken(await getSpotifyToken());
-                        }
-                        return sendOnlySearchRequest(offset);
-                    } else {
-                        console.error(response["error"]);
-
-                        const text = queryInp.value;
-                        queryInp.value = "Unexcepted error, please try again!";
-                        setTimeout(() => {
-                            queryInp.value = text;
-                        }, 1000);
-                        return;
-                    }
-                }
-            }
-    );
-    return response;
+    console.log("Search complete!");
 }
 
 function refreshListeners() {
@@ -554,6 +449,182 @@ function addedToQueueFeedback(card, success) {
     //     card.classList.add("bg-white");
     //     card.classList.add("hover:bg-gray-100");
     // }, 1000);
+}
+
+async function sendSearchQuery(platformNames) {
+    let searchedNames = [];
+    let searchedLimits = [];
+    let searchedOffsets = [];
+
+    platformNames.forEach((pname) => {
+        searchedNames.push(platforms[pname].name);
+        searchedLimits.push(platforms[pname].limit);
+        searchedOffsets.push(
+            pname === "YouTube"
+                ? platforms[pname].nextPageToken === ""
+                    ? "noToken"
+                    : platforms[pname].nextPageToken
+                : platforms[pname].offset
+        );
+    });
+
+    const reply = await fetch(
+        `/party/search?query=${encodeURIComponent(query)}&dataSaver=${
+            dataSaver ? 1 : 0
+        }&offsets=${searchedOffsets.join(",")}&platforms=${searchedNames.join(
+            ","
+        )}&limits=${searchedLimits.join(",")}&creator=${isCreator ? 1 : 0}`
+    );
+
+    return reply;
+}
+
+async function handleSearchErrorHandling(responseObj) {
+    // TODO May return nothing, errors can occur
+    // Backend response error handling
+    if (!responseObj.ok) {
+        console.error(responseObj.statusText);
+        toggleSearchAnimation(this);
+        isInProgress.search = false;
+        return;
+    }
+
+    const cleanResponse = await responseObj.json();
+    const enabledPlatforms = platforms.getEnabledNames();
+
+    let errorCount = 0;
+    let platformsSuccess = enabledPlatforms.slice(0, enabledPlatforms.length);
+    let isSpotifyTokenExpired = false;
+    const platformNames = [];
+
+    cleanResponse.forEach(async (platformResult) => {
+        platformNames.push(platformResult["platform"]);
+
+        if (platformResult["error"]) {
+            console.error(
+                "[" + platformResult["platform"] + "]:",
+                platformResult["error"]
+            );
+
+            if (
+                isCreator &&
+                platformResult["platform"] === "Spotify" &&
+                platformResult["tokenExpired"]
+            ) {
+                isSpotifyTokenExpired = true;
+            }
+
+            platformsSuccess = platformsSuccess.filter((p) => {
+                p !== platformResult["platform"];
+            });
+            errorCount++;
+        } else {
+            if (platformResult["platform"] === "Spotify") {
+                platforms.Spotify.offset += platformResult["tracks"].length;
+            }
+            if (platformResult["platform"] === "YouTube") {
+                platforms.YouTube.offset += platformResult["tracks"].length;
+                platforms.YouTube.nextPageToken =
+                    platformResult["nextPageToken"];
+            }
+        }
+    });
+
+    if (isSpotifyTokenExpired) {
+        console.log("Trying to refresh token");
+        const success = await refreshToken();
+        if (success) {
+            setSpotifyToken(await getSpotifyToken());
+
+            const responseObj = await sendSearchQuery(platformNames);
+            return await handleSearchErrorHandling(responseObj);
+        }
+    }
+
+    if (errorCount === enabledPlatforms.length) {
+        // All platform search failed
+        toggleSearchAnimation(searchBtn);
+        isInProgress.search = false;
+        return;
+    }
+
+    return { cleanResponse, platformsSuccess };
+}
+
+function refreshResultList(isFirstSearch, cleanResponse, platformsSuccess) {
+    if (isFirstSearch) {
+        clearResults();
+        resultsUl.innerHTML += "<p>Search results:</p>";
+    } else {
+        // Remove existing "load more" buttons
+        const buttons = Array.from(resultsUl.childNodes).filter((node) => {
+            return (
+                node.nodeName === "BUTTON" ||
+                (node.nodeName === "P" &&
+                    Array.from(resultsUl.childNodes)[0] !== node)
+            );
+        });
+        buttons.forEach((btn) => {
+            btn.remove();
+        });
+    }
+
+    cleanResponse.forEach((platformResults) => {
+        platformResults.tracks.forEach((track) => {
+            let length = new Date(track["length"]);
+            const card = getMusicCardHTML(
+                track["image"],
+                track["title"],
+                track["artists"],
+                length.getMinutes() + "m" + length.getSeconds() + "s",
+                track["uri"],
+                platformResults.platform,
+                undefined,
+                track["id"],
+                "addToQueue"
+            );
+            resultsUl.appendChild(card);
+        });
+    });
+
+    // Showing "load more" button(s)
+    resultsUl.innerHTML += "<p>Load more results from:</p>";
+    platformsSuccess.forEach((platform) => {
+        const btn = getShowMoreButton(platform);
+        resultsUl.appendChild(btn);
+    });
+}
+
+function getShowMoreButton(platformName) {
+    const platform = platforms[platformName];
+
+    const newBtn = document.createElement("button");
+    newBtn.id = `showMoreBtn${platform.name}`;
+    newBtn.name = `showMoreBtn${platform.name}`;
+    newBtn.dataset.inProgress = false;
+    newBtn.dataset.originalValue = platform.name;
+    newBtn.classList.add(
+        "bg-blue-500",
+        "hover:bg-blue-400",
+        "text-white",
+        "hover:text-black",
+        "hover:bold",
+        "p-2",
+        "m-2",
+        "rounded"
+    );
+    newBtn.innerText = newBtn.dataset.originalValue;
+
+    newBtn.addEventListener("click", async function () {
+        pushFeedback(this);
+        toggleSearchAnimation(this);
+
+        const responseObj = await sendSearchQuery([platform.name]);
+        const { cleanResponse, platformsSuccess } =
+            await handleSearchErrorHandling(responseObj);
+        refreshResultList(false, cleanResponse, platformsSuccess);
+    });
+    return newBtn;
 }
 
 console.log("Party JS successfully loaded!");

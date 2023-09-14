@@ -48,7 +48,7 @@
 [X] Let users see what is playing currently
 [X] Player: pause music when pressing space
 [X] Clicking twice on the Search button on paty pages redirects to a 404 page
-[_] Remove required login to Spotify -> Premuim not required, only for hosting!
+[ ] Remove required login to Spotify -> Premuim not required, only for hosting!
 
 ## Player
 
@@ -104,6 +104,23 @@
 [X] Recommended track song not working (Spotify user was missing)
 [X] Rename party creation form to don't autofill with login credentials
 
+[X] Spotify player continues playing when YT player starts
+[X] Next track does not play automatically after a Spotify track
+[X] Double clicking on the search button gets 404 page
+[X] Next page search on Spotify
+[X] Handle offsets seperately
+[X] Next page search on YT - UNDER TESTING (quota reached)
+[ ] Show "End of results / no more tracks" when no more tracks received on search
+    [ ] Spotify token not refreshing automatically - Trying
+[ ] addedToQueueFeedback
+[ ] YT image
+[ ] If the first track from YT, it won't start
+[ ] YT search random returns errors:
+    -   ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 39
+    from yt api (when sending lots a requests)
+    -   ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web\_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 43
+            INFO: when searching for 30y
+
 # Tests
 
 [ ] Write tests
@@ -121,7 +138,7 @@
     -   Add 'addedAt / playedAt' timestamp to queued tracks
 -   When a user watching queued songs, get automatic updates
 -   Write documentation
-- Join party as guest with limited access
+-   Join party as guest with limited access
 
 # Before deployment:
 
@@ -131,23 +148,3 @@
 
 Set Spotify client id, secret, redirect uri in .env file
 Generate DB
-
-
-# NOW:
-
-[X] Spotify player continues playing when YT player starts
-[X] Spotify login does not work - cache problems
-[X] Next track does not play automatically after a Spotify track
-[X] Double clicking on the search button gets 404 page
-[ ] Remove required login to Spotify
-[ ] Next page search on YT
-[ ] Spotify token not refreshing automatically
-[ ] addedToQueueFeedback
-[ ] YT image
-
-
-[ ] ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web\_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 39
-from yt api (when sending lots a requests)
-
-ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web\_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 43
-    INFO: when searching for 30y
