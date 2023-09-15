@@ -111,11 +111,13 @@
 [X] Handle offsets seperately
 [X] Next page search on YT - UNDER TESTING (quota reached)
 [X] Show "End of results / no more tracks" when no more tracks received on search
-    [ ] Check with multiple platforms
+[X] Check with multiple platforms - YT always returns something
 [ ] Spotify token not refreshing automatically
         Change Stashed
+[ ] When searching both platforms and Spotify token expired, it will give "500 Internal Server error" when processing the second query
 [ ] addedToQueueFeedback
 [ ] YT image
+[ ] YT video length
 [ ] If the first track from YT, it won't start
 [ ] YT search random returns errors:
     -   ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 39

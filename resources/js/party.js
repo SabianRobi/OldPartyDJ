@@ -633,7 +633,6 @@ function refreshResultList(isFirstSearch, cleanResponse, platformsSuccess) {
             allReached = false;
         }
     });
-    console.log(allReached);
 
     if (!allReached) {
         resultsUl.innerHTML += "<p>Load more results from:</p>";
