@@ -148,6 +148,7 @@ class SpotifyController extends Controller
 
             $token->save();
         }
+        // TODO handle errors
         return response()->json(['success' => $success]);
     }
 

@@ -1,4 +1,4 @@
-import { throttle } from "lodash";
+import { isNull, throttle } from "lodash";
 import {
     dataSaver,
     pushFeedback,
@@ -8,6 +8,7 @@ import {
     refreshToken,
     csrfToken,
 } from "./partyCommon.js";
+import { isSpotifyEnabled } from "./party.js";
 
 // const playerPrevObj = document.querySelector("#spotify_player_previous");
 const playerTogglePlayObj = document.querySelector("#player_toggle_play");
@@ -24,7 +25,7 @@ const playerVolumeBar = document.querySelector("#player_volume");
 playerVolumeBar.addEventListener("input", throttle(onVolumeChange, 1000));
 document.addEventListener("keypress", keyPressed);
 
-let SPPlayer;
+let SPPlayer = null;
 let YTPlayer;
 let volume = 0.25;
 let firstStart = true;
@@ -52,7 +53,9 @@ function onYouTubeIframeAPIReady() {
         height: "200",
         width: "200",
         videoId: "dQw4w9WgXcQ",
+        origin: "http://localhost:8000", //TODO test this deployed
         playerVars: {
+            origin: "http://localhost:8000",
             playsinline: 1,
             controls: 0,
             disablekb: 1,
@@ -68,7 +71,7 @@ function onYouTubeIframeAPIReady() {
 }
 setTimeout(() => {
     onYouTubeIframeAPIReady();
-}, 500);
+}, 2000);
 
 window.onSpotifyWebPlaybackSDKReady = async () => {
     setSpotifyToken(await getSpotifyToken());
@@ -76,16 +79,17 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
 };
 
 function activatePlayerInner() {
-    initPlayer();
+    initSpotifyPlayer();
     //TODO: terminate loading if error throws
     addListenersToPlayer();
     connectPlayer();
 }
 
-function initPlayer() {
+function initSpotifyPlayer() {
     SPPlayer = new Spotify.Player({
         name: "PartyDJ Web Player",
         getOAuthToken: async (callback) => {
+            // Token expired
             if (!firstStart) {
                 await refreshToken();
                 firstStart = false;
@@ -114,6 +118,7 @@ function addListenersToPlayer() {
     SPPlayer.addListener(
         "player_state_changed",
         async ({ track_window: { current_track, previous_tracks } }) => {
+            console.log("adasonas odasno dnasodnas ");
             if (currentTrack.platform === "Spotify") {
                 let artists = "";
                 current_track["artists"].forEach((artist) => {
@@ -215,12 +220,13 @@ function playerTogglePlay(e) {
 function playerNext(e) {
     pushFeedback(e.target);
     playNextTrack();
-    //player.nextTrack();
 }
 
 function onVolumeChange(e) {
     YTPlayer.setVolume(e.target.value * 100);
-    SPPlayer.setVolume(e.target.value);
+    if (isSpotifyEnabled) {
+        SPPlayer.setVolume(e.target.value);
+    }
 }
 
 async function updatePlayerGUI(infos) {
@@ -254,6 +260,7 @@ async function setDeviceId(device_id) {
         console.log("Device ID set!");
 
         // When YT video is the first track in queue, start it
+        // May not be required
         if (response["platform"] === "YouTube") {
             if (currentTrack.isPlaying && currentTrack.platform === "Spotify") {
                 SPPlayer.togglePlay();
@@ -264,6 +271,7 @@ async function setDeviceId(device_id) {
         } else {
             currentTrack.platform = "Spotify";
         }
+        //
         currentTrack.isPlaying = true;
     } else if (response["tokenExpired"]) {
         console.error(
@@ -280,24 +288,31 @@ async function setDeviceId(device_id) {
 async function playNextTrack() {
     console.log("Sending request to play next track...");
 
-    const response = await fetch("/party/playNextTrack", {
+    const responseObj = await fetch("/party/playNextTrack", {
         method: "POST",
         headers: {
             "X-CSRF-TOKEN": csrfToken,
         },
-    }).then((res) => res.json());
+    });
 
-    if (response["platform"] === "Spotify") {
+    if (!responseObj.ok) {
+        console.error(responseObj.statusText);
+        return;
+    }
+
+    const response = await responseObj.json();
+
+    if (response["error"]) {
+        console.error("Could not play next track:", response);
+        return;
+    } else if (response["platform"] === "Spotify") {
         if (response["tokenExpired"]) {
             console.error(
                 "Could not set Device ID due to expired token. Refreshing..."
             );
             await refreshToken();
             setSpotifyToken(await getSpotifyToken());
-            playNextTrack();
-        } else if (response["error"]) {
-            console.error("Could not play next track:", response);
-            return;
+            return playNextTrack();
         }
         YTPlayer.pauseVideo();
     } else if (response["platform"] === "YouTube") {
@@ -330,11 +345,17 @@ updateMarquees();
 function onYTPlayerReady() {
     console.log("YouTube player is ready to play videos!");
     YTPlayer.setVolume(volume * 100);
+
+    if (isNull(SPPlayer)) {
+        console.log(
+            "No Spotify connected, sneding request to play next track from YT"
+        );
+        playNextTrack();
+    }
 }
 
 function onYTPlayerStateChange(event) {
-    console.log("YT player state changed to:", event);
-
+    console.log(event);
     if (event.data === 0) {
         console.log("Track ended, playing next one...");
         currentTrack.isPlaying = false;

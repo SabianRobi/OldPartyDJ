@@ -48,7 +48,7 @@
 [X] Let users see what is playing currently
 [X] Player: pause music when pressing space
 [X] Clicking twice on the Search button on paty pages redirects to a 404 page
-[ ] Remove required login to Spotify -> Premuim not required, only for hosting!
+[X] Remove required login to Spotify -> Premuim not required, only for hosting!
 
 ## Player
 
@@ -59,6 +59,8 @@
 [X] Add padding/margin around title / artist, because button get too close if the text is short
 [X] Add feedback when track successfully added to queue
 [X] Add auto-play when there is no track in queue
+    [!] Add YT recommended - YT API does not support recommending
+    [X] If the first track from YT, it won't start
 
 # Security
 
@@ -118,13 +120,17 @@
 [ ] addedToQueueFeedback
 [ ] YT image
 [ ] YT video length
-[ ] If the first track from YT, it won't start
 [ ] YT search random returns errors:
     -   ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 39
     from yt api (when sending lots a requests)
     -   ErrorException: Undefined property: stdClass::$videoId in file C:\Users\Robi\Desktop\web\_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 43
             INFO: when searching for 30y
-[ ]  platforms.blade.php, Line 20 (isSpotifyConnected): BUGGY, if state is present it says also connected, even there is no tokens
+    - ErrorException: Undefined property: stdClass::$videoId in file
+    C:\Users\Robi\Desktop\web\_PartyDJ_Laravel\PartyDJ\app\Http\Controllers\YouTubeController.php on line 40
+
+[ ] platforms.blade.php, Line 20 (isSpotifyConnected): BUGGY, if state is present it says also connected, even there is no tokens
+[ ] Only YT mode: when no music is playing because ended, next song only will start when user clicks on the "Skip" button, not automatically
+[ ] No track in queue user feedback
 
 # Tests
 
@@ -153,3 +159,7 @@
 
 Set Spotify client id, secret, redirect uri in .env file
 Generate DB
+
+admin / creator role:
+    Change queue order
+    can delete everyone's track from queue

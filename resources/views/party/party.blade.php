@@ -4,21 +4,21 @@
 
 @section('header', 'nothing')
 
-@if ($loggedInWithSpotify)
-    @section('viteImports')
-        @vite(['resources/js/party.js', 'resources/js/marquee-text-element.js'])
-    @endsection
-@endif
+@section('viteImports')
+    @vite(['resources/js/party.js', 'resources/js/marquee-text-element.js'])
+@endsection
 
 @section('content')
     @include('layouts.party.participant')
 
-    @if ($loggedInWithSpotify && $creator)
+    @if ($creator)
         @section('scripts')
-            <script src="https://sdk.scdn.co/spotify-player.js"></script>
-            <script>
-                let token = "{{ $spotifyToken }}";
-            </script>
+            @if ($loggedInWithSpotify)
+                <script src="https://sdk.scdn.co/spotify-player.js"></script>
+                <script>
+                    let token = "{{ $spotifyToken }}";
+                </script>
+            @endif
             @vite(['resources/js/partyPlayer.js'])
         @endsection
         @include('layouts.party.player')

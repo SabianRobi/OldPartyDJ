@@ -21,12 +21,18 @@ const leaveParty = document.querySelector("#leaveParty");
 const dataSaverObj = document.querySelector("#dataSaver");
 searchBtn.addEventListener("click", sendSearchRequest);
 // searchForm.addEventListener("submit", sendSearchRequest);
+export const isSpotifyEnabled = document.querySelector("#searchSpotify")
+    ? true
+    : false;
 
-document
-    .querySelector("#searchSpotify")
-    .addEventListener("change", function () {
-        platforms.Spotify.enabled = this.checked;
-    });
+if (isSpotifyEnabled) {
+    document
+        .querySelector("#searchSpotify")
+        .addEventListener("change", function () {
+            platforms.Spotify.enabled = this.checked;
+        });
+}
+
 document
     .querySelector("#searchYouTube")
     .addEventListener("change", function () {
@@ -50,7 +56,6 @@ dataSaverObj.addEventListener("change", function () {
     console.log(`Datasaver turned ${dataSaver ? "on" : "off"}`);
 });
 
-const SpotifySearchLimit = 10;
 let query;
 const hints = [
     "Blue",
@@ -86,14 +91,14 @@ const hints = [
 let platforms = {
     Spotify: {
         name: "Spotify", // Name of the platform
-        enabled: true, // Search on this platform?
+        enabled: false, // Search on this platform?
         offset: 0, // Skip the first {offset} tracks when doing search
         limit: 5, // Returned track count
         reachedEndOfResults: false, // When no more tracks found this will be true
     },
     YouTube: {
         name: "YouTube",
-        enabled: true,
+        enabled: false,
         offset: 0,
         limit: 5,
         nextPageToken: "",

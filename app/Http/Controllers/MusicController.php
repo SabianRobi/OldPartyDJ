@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Party;
+use App\Models\SpotifyThings;
 use App\Models\TrackInQueue;
 use App\Models\TracksPlayedInParty;
 use Illuminate\Http\Request;
@@ -14,6 +15,14 @@ use Illuminate\Validation\ValidationException;
 
 class MusicController extends Controller
 {
+    private $isLoggedInWithSpotify;
+
+    public function __construct()
+    {
+        $this->isLoggedInWithSpotify = SpotifyThings::where('owner', Auth::id())->get()->count() == 1;
+        //TODO bugos
+    }
+
     public function searchTrack(Request $request)
     {
         try {
@@ -134,7 +143,7 @@ class MusicController extends Controller
     {
         $validated = $request->validate(
             [
-                'uri' => 'required',
+                'uri' => 'required|string',
                 'platform' => Rule::in(['Spotify', 'YouTube']),
             ],
         );
@@ -152,13 +161,16 @@ class MusicController extends Controller
         $trackInQueue->currently_playing = false;
         $trackInQueue->save();
 
-        //Check if player stopped because of no more tracks were in the queue
-        if ($party->waiting_for_track) {
-            $party->waiting_for_track = false;
-            $party->save();
+        // Check if player stopped because of no more tracks were in the queue
+        // if ($party->waiting_for_track) {
+        //     $party->waiting_for_track = false;
+        //     $party->save();
 
-            $this->playNextTrack();
-        }
+        //     // TODO can return errors
+        //     // TODO method will fail when not the creator adds the track -> websocket needed
+        //     return $this->playNextTrack();
+        // }
+        // TODO
 
         $data = [
             'track_uri' => $trackInQueue->track_uri,
@@ -210,26 +222,33 @@ class MusicController extends Controller
             $nowEndedTrack->delete();
         }
 
-        // No next track in queue, get recommended song from spotify
+        // No next track in queue
         if (!isset($nextTrack)) {
-            $playedTracks = TracksPlayedInParty::where('party_id', $party->id)->where('platform', "Spotify")->select('track_uri')->inRandomOrder()->take(5)->get()->toArray();
+            if (!$this->isLoggedInWithSpotify) {
+                $party->waiting_for_track = true;
+                $party->save();
+                return response()->json(['error' => "No track in queue, autoplay only works with Spotify!"]);
+            }
 
-            if (sizeof($playedTracks) > 0) {
+            $playedSpotifyTracks = TracksPlayedInParty::where('party_id', $party->id)->where('platform', 'Spotify')->select('track_uri')->inRandomOrder()->take(5)->get()->toArray();
+
+            if (sizeof($playedSpotifyTracks) > 0) {
                 $sp = new SpotifyController();
-                $recTrack = $sp->getRecommended($playedTracks);
+                $recTrack = $sp->getRecommended($playedSpotifyTracks);
 
                 $nextTrack = new TrackInQueue();
                 $nextTrack->party_id = $party->id;
-                $nextTrack->addedBy = User::where('username', 'Spotify')->first()->id;
+                $nextTrack->addedBy = User::firstWhere('username', 'Spotify')->id;
                 $nextTrack->platform = $recTrack['platform'];
                 $nextTrack->track_uri = $recTrack['uri'];
                 $nextTrack->score = 0;
                 $nextTrack->currently_playing = false;
+
                 $nextTrack->save();
 
                 $isRecommended = true;
             } else {
-                return response()->json(['error' => 'There is no track in queue!']);
+                return response()->json(['error' => "To enable autoplay, play at least one song from Spotify!"]);
             }
         }
 
@@ -242,11 +261,16 @@ class MusicController extends Controller
             if (!$response['success']) {
                 return response()->json($response);
             }
+            $party->waiting_for_track = false;
+            $party->save();
         }
 
         // Set the new song currently_playing status to true
         $nextTrack->currently_playing = true;
         $nextTrack->save();
+
+        $party->waiting_for_track = false;
+        $party->save();
 
         // When next track is from YouTube, just send the uri, frontend handles the rest
         return response()->json(['platform' => $nextTrack->platform, 'track_uri' => $nextTrack->track_uri, 'is_recommended' => $isRecommended]);
