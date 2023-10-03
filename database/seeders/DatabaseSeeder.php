@@ -17,8 +17,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        // Create admin user and example users when running in local
         if (!strcmp(env("APP_ENV", 'production'), "local")) {
-            //admin
+            // admin
             $admin = new User();
             $admin->name = 'Admin User';
             $admin->username = 'admin';
@@ -27,7 +28,7 @@ class DatabaseSeeder extends Seeder
             $admin->is_admin = true;
             $admin->save();
 
-            //Users
+            // Users
             for ($i = 0; $i < 5; $i++) {
                 $user = new User();
                 $user->name = 'Example User ' . $i;
@@ -38,7 +39,7 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        //Spotify
+        // local Spotify user
         $spotify = new User();
         $spotify->name = 'Spotify';
         $spotify->username = 'Spotify';

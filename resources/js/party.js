@@ -9,22 +9,22 @@ import {
     refreshToken,
 } from "./partyCommon.js";
 
-const searchForm = document.querySelector("#searchForm");
-const queryInp = document.querySelector("#query");
-const searchBtn = document.querySelector("#searchBtn");
-const resultsUl = document.querySelector("#results");
-const queueUl = document.querySelector("#queue");
+const queryInp = document.querySelector("#query");          // The search field
+const searchBtn = document.querySelector("#searchBtn");     // Search button next to the search field
+const resultsUl = document.querySelector("#results");       // Result list
+const queueUl = document.querySelector("#queue");           // Queue list
 
-const getSongsBtn = document.querySelector("#getSongs");
-const clearResultsBtn = document.querySelector("#clearResults");
-const leaveParty = document.querySelector("#leaveParty");
-const dataSaverObj = document.querySelector("#dataSaver");
+const getSongsBtn = document.querySelector("#getSongs");                    // Watch queue button
+const clearResultsBtn = document.querySelector("#clearResults");            // Clear results button
+const leaveParty = document.querySelector("#leaveParty");                   // Leave party button
+const dataSaverObj = document.querySelector("#dataSaver");                  // Data saver button
+
 searchBtn.addEventListener("click", sendSearchRequest);
-// searchForm.addEventListener("submit", sendSearchRequest);
 export const isSpotifyEnabled = document.querySelector("#searchSpotify")
     ? true
     : false;
 
+// Activate the "select Spotify" to search on button
 if (isSpotifyEnabled) {
     document
         .querySelector("#searchSpotify")
@@ -33,12 +33,14 @@ if (isSpotifyEnabled) {
         });
 }
 
+// Activate the "select YouTube" to search on button
 document
     .querySelector("#searchYouTube")
     .addEventListener("change", function () {
         platforms.YouTube.enabled = this.checked;
     });
 
+// Event listeners, explained later
 getSongsBtn.addEventListener("click", function () {
     pushFeedback(this);
     getSongsInQueue(this);
@@ -52,11 +54,12 @@ leaveParty.addEventListener("click", function () {
 });
 dataSaverObj.addEventListener("change", function () {
     pushFeedback(this.nextSibling.nextSibling);
-    setDataSaver(!dataSaver);
+    setDataSaver(!dataSaver);                                       // Toggles data saving
     console.log(`Datasaver turned ${dataSaver ? "on" : "off"}`);
 });
 
 let query;
+// Music names that show in the search bar when it is empty
 const hints = [
     "Blue",
     "abcdefu",
@@ -88,6 +91,7 @@ const hints = [
     "Csepereg az eső",
     "Érik a szőlő",
 ];
+// Setting platform infos and (offset, limit, reachedEndOfResults) parameters to manage pagination ('search more')
 let platforms = {
     Spotify: {
         name: "Spotify", // Name of the platform
@@ -101,9 +105,10 @@ let platforms = {
         enabled: false,
         offset: 0,
         limit: 5,
-        nextPageToken: "",
+        nextPageToken: "",          // YouTube uses a pageToken to get the next x amount of results.
         reachedEndOfResults: false,
     },
+    // Returns an array of the currently enabled platform names
     getEnabledNames() {
         const names = [];
 
@@ -116,6 +121,7 @@ let platforms = {
         });
         return names;
     },
+    // Returns an array of the currently enabled platform offsets
     getEnabledOffsets() {
         const off = [];
 
@@ -129,6 +135,7 @@ let platforms = {
 
         return off;
     },
+    // Returns an array of the currently enabled platform limits
     getEnabledLimits() {
         const limits = [];
 
@@ -142,6 +149,7 @@ let platforms = {
 
         return limits;
     },
+    // Returns all the platform names
     getNames() {
         const names = [];
         Object.values(platforms).forEach((entry) => {
@@ -151,6 +159,7 @@ let platforms = {
         });
         return names;
     },
+    // Resets te platforms pagination infos
     resetValues() {
         this.getNames().forEach((platform) => {
             platform = platforms[platform];
@@ -162,11 +171,12 @@ let platforms = {
         this.YouTube.nextPageToken = "";
     },
 };
+// Needed to prevent sending a search request multiple times at once
 let isInProgress = {
     search: false,
 };
 
-// Toggles the searching icon
+// Toggles the searching icon (text - gif)
 function toggleSearchAnimation(e) {
     if (e.dataset.inProgress === "false") {
         e.dataset.inProgress = "true";
@@ -177,25 +187,30 @@ function toggleSearchAnimation(e) {
     }
 }
 
+// Sends the search request to backend & displays the results
 async function sendSearchRequest(e) {
     e.preventDefault();
     if (isInProgress.search) return;
     isInProgress.search = true;
 
-    toggleSearchAnimation(this);
-    pushFeedback(this);
+    toggleSearchAnimation(this);    // Replaces the search text to the loading gif
+    pushFeedback(this);             // fancy animation
 
     query = queryInp.value == "" ? queryInp.placeholder : queryInp.value;
 
-    // Error handling: Empty query
+    // Error handling: Empty string
     if (query.trim().length === 0) {
         console.warn("Please be more specific!");
+
+        // Stupid way of giving user feedback, but it works
+        // Replaces the searchbar text to the "Please be more specific!" text then hides after a sec
         const text = queryInp.value;
         queryInp.value = "Please be more specific!";
         setTimeout(() => {
             queryInp.value = text;
         }, 1000);
-        toggleSearchAnimation(this);
+
+        toggleSearchAnimation(this);    // Stops the loading gif
         isInProgress.search = false;
         return;
     }
@@ -205,6 +220,8 @@ async function sendSearchRequest(e) {
     // Error handling: No platforms selected
     if (enabledPlatformNames.length === 0) {
         console.warn("Set at least one platform to search on!");
+
+        // Here we go again with the stupid way of giving user feedback
         const text = queryInp.value;
         queryInp.value = "Please choose at least one platform!";
         setTimeout(() => {
@@ -215,7 +232,7 @@ async function sendSearchRequest(e) {
         return;
     }
 
-    // Reseting values
+    // Reseting platform pagination values
     platforms.resetValues();
 
     // Sending query to backend
@@ -226,26 +243,36 @@ async function sendSearchRequest(e) {
         `Searching '${query}' on ${enabledPlatformNames.join(", ")}...`
     );
 
+    // sendSearchQuery: sends the search query to backend, searches the given platfroms (detailed description at the function)
     const responseObj = await sendSearchQuery(enabledPlatformNames);
+
+    // handleSearchErrorHandling: handles the errors that backend can respond with (detailed description at the function)
+    // cleanResponse: an object, the response itself from the backend
+    // platformsSuccess: an array of platform names where the search succeeded
     const { cleanResponse, platformsSuccess } = await handleSearchErrorHandling(
         responseObj
     );
+    // Displays the results [cleanResponse] to the user (detailed description at the function)
     refreshResultList(true, cleanResponse, platformsSuccess);
 
+    // Resetting the search bar content
     queryInp.value = "";
-    refreshListeners();
+    refreshListeners();     // Adding event listeners to recently displayed tracks (addToQueue and removeFromQueue events)
     changeHint();
-    toggleSearchAnimation(this);
+    toggleSearchAnimation(this);    // Stops the loading gif
     isInProgress.search = false;
 
     console.log("Search complete!");
 }
 
+// Adds event listeners (addToQueue and removeFromQueue events) to displayed tracks in resultsUl and queueUl
 function refreshListeners() {
+    // Selecting the
     let resultCards = resultsUl.querySelectorAll("[data-event-type]");
     let queueCards = queueUl.querySelectorAll("[data-event-type]");
-    let cards = [...resultCards, ...queueCards];
+    let cards = [...resultCards, ...queueCards]; // merge the two card arrays
 
+    // Reads the card's dataset and adds the correct event listener to it
     cards.forEach((card) => {
         if (card.dataset.eventType === "addToQueue") {
             card.addEventListener("click", (e) => {
@@ -262,6 +289,7 @@ function refreshListeners() {
     });
 }
 
+// Returns the HTML code of a card (at search results or when watching the queue)
 function getMusicCardHTML(
     image,
     title,
@@ -313,11 +341,14 @@ function getMusicCardHTML(
     return div;
 }
 
+// Sends a request to backend to add a track to the queue
+// card: the clicked result/music at search results
 async function addToQueue(card) {
     const uri = card.dataset.uri;
     const platform = card.dataset.platform;
     console.log(`Adding track ${uri} to queue...`);
 
+    // Creating and sending the form then converting the response to JSON - error handling missing? idk
     const form = new FormData();
     form.set("uri", uri);
     form.set("platform", platform);
@@ -330,6 +361,7 @@ async function addToQueue(card) {
         body: form,
     }).then((res) => res.json());
 
+    // Animates and logs
     if (response["track_uri"] == uri) {
         addedToQueueFeedback(card, true);
         console.log("Successfully added track to queue!");
@@ -337,12 +369,15 @@ async function addToQueue(card) {
         addedToQueueFeedback(card, false);
         console.error("Failed to add track to queue:", response);
     }
-    return response;
+    return response; // not sure why we need to return anything
 }
 
+// Sends a request to backend to remove a track from the queue
+// card: the clicked result/music at 'watching queue'
 async function removeFromQueue(card) {
     const id = card.dataset.id;
 
+    // Creating and sending the form
     const form = new FormData();
     form.set("id", id);
 
@@ -354,6 +389,7 @@ async function removeFromQueue(card) {
         body: form,
     }).then((res) => res.json());
 
+    // Animation & error handling (without user feedback - TODO)
     addedToQueueFeedback(card, false);
     if (response["success"]) {
         console.log("Successfully removed track from queue!");
@@ -366,26 +402,32 @@ async function removeFromQueue(card) {
     }
 }
 
+// Changes the hint in the searchbar
 function changeHint() {
     queryInp.placeholder = hints.at(Math.floor(Math.random() * hints.length));
 }
 changeHint();
 
+// Queries the backend for tracks in the queue
 async function getSongsInQueue(e) {
     toggleSearchAnimation(e);
     console.log("Getting songs is queue...");
+    // Sending the 'request'
     const response = await fetch(
         `/party/getSongsInQueue?dataSaver=${dataSaver}`
     ).then((res) => res.json());
 
+    // Error handling: happens at backend, when Spotify token expired during getting the track infos from the Spotify API
     if (response["tokenExpired"]) {
         console.error(
             "Could not get tracks in queue due to expired token. Refreshing..."
         );
+        // Refreshing and setting a new SP token
         await refreshToken();
         setSpotifyToken(await getSpotifyToken());
         getSongsInQueue(e);
     } else if (response["error"]) {
+        // Other error occured
         console.error("Could not get tracks in queue:", response);
 
         toggleSearchAnimation(e);
@@ -396,9 +438,10 @@ async function getSongsInQueue(e) {
     }
     console.log(`There is ${response.length} track(s) in the queue.`, response);
 
+    // Clearing the result list
     clearResults();
 
-    //Now playing
+    // Displaying the Now playing song (1st song in the queue)
     let textObj = document.createElement("p");
     textObj.innerHTML = "Now playing:";
     queueUl.append(textObj);
@@ -417,11 +460,12 @@ async function getSongsInQueue(e) {
     );
     queueUl.appendChild(card);
 
-    //Queue
+    // Displaying the queue
     let textObj2 = document.createElement("p");
     textObj2.innerHTML = "Queued tracks:";
     queueUl.append(textObj2);
 
+    // Cuts down the first of the queue (which is currently playing)
     if (response.slice(1).length > 0) {
         response.slice(1).forEach((track) => {
             let length = new Date(track["length"]);
@@ -439,6 +483,7 @@ async function getSongsInQueue(e) {
             queueUl.appendChild(card);
         });
     } else {
+        // Empty queue case
         let textObj3 = document.createElement("p");
         textObj3.classList.add("pl-4");
         textObj3.innerHTML = "No tracks in queue!";
@@ -449,11 +494,13 @@ async function getSongsInQueue(e) {
     toggleSearchAnimation(e);
 }
 
+// Clears the result and queue lists
 function clearResults() {
     resultsUl.innerHTML = "";
     queueUl.innerHTML = "";
 }
 
+// This was an attempt to give normal user feedback when adding/removing a track to/from the queue
 function addedToQueueFeedback(card, success) {
     // TODO implement normal feedback
     // card.classList.remove("dark:border-gray-700");
@@ -488,7 +535,9 @@ function addedToQueueFeedback(card, success) {
     // }, 1000);
 }
 
+// Sends a search query to the backend with the given platform names
 async function sendSearchQuery(platformNames) {
+    // Getting the platforms & infos about them
     let searchedNames = [];
     let searchedLimits = [];
     let searchedOffsets = [];
@@ -505,6 +554,11 @@ async function sendSearchQuery(platformNames) {
         );
     });
 
+    // Sending the query to backend
+    // every nth element of the arrays 'connected' the nth platform name. For example:
+    // [Spotify, YouTube], [0,5], [5,10]
+    //      Spotify, 0 offset, 5 limit
+    //      YouTube, 5 offset, 10 limit
     const reply = await fetch(
         `/party/search?query=${encodeURIComponent(query)}&dataSaver=${
             dataSaver ? 1 : 0
@@ -516,8 +570,9 @@ async function sendSearchQuery(platformNames) {
     return reply;
 }
 
+// Handles the errors that can the backend respond with
 async function handleSearchErrorHandling(responseObj) {
-    // TODO May return nothing, errors can occur
+    // TODO May return nothing, errors can occur - why can backend give back empty response?
     // Backend response error handling
     if (!responseObj.ok) {
         console.error(responseObj.statusText);
@@ -530,19 +585,23 @@ async function handleSearchErrorHandling(responseObj) {
     const enabledPlatforms = platforms.getEnabledNames();
 
     let errorCount = 0;
-    let platformsSuccess = enabledPlatforms.slice(0, enabledPlatforms.length);
+    let platformsSuccess = enabledPlatforms.slice(0, enabledPlatforms.length);  // array containing the platform names which succeeded the search request
     let isSpotifyTokenExpired = false;
     const platformNames = [];
 
+    // Going through the platforms
     cleanResponse.forEach(async (platformResult) => {
         platformNames.push(platformResult["platform"]);
 
+        // If the platform gave error
         if (platformResult["error"]) {
+            // Log it to console
             console.error(
                 "[" + platformResult["platform"] + "]:",
                 platformResult["error"]
             );
 
+            // If the SP token expired refresh it later in this function
             if (
                 isCreator &&
                 platformResult["platform"] === "Spotify" &&
@@ -551,11 +610,13 @@ async function handleSearchErrorHandling(responseObj) {
                 isSpotifyTokenExpired = true;
             }
 
+            // Remove the platform name from the platformsSuccess array, because the platform had errors
             platformsSuccess = platformsSuccess.filter((p) => {
                 p !== platformResult["platform"];
             });
             errorCount++;
         } else {
+            // Success, setting the new offsets
             if (platformResult["platform"] === "Spotify") {
                 platforms.Spotify.offset += platformResult["tracks"].length;
             }
@@ -567,6 +628,7 @@ async function handleSearchErrorHandling(responseObj) {
         }
     });
 
+    // Refreshing the SP token if neccessary
     if (isSpotifyTokenExpired) {
         console.log("Trying to refresh token");
         const success = await refreshToken();
@@ -578,16 +640,20 @@ async function handleSearchErrorHandling(responseObj) {
         }
     }
 
+    // If all platform search failed
     if (errorCount === enabledPlatforms.length) {
-        // All platform search failed
         toggleSearchAnimation(searchBtn);
         isInProgress.search = false;
         return;
     }
 
+    // Gives back the response and an array of succeeded platform names
     return { cleanResponse, platformsSuccess };
 }
 
+// Updates the GUI of the result list
+// cleanResponse: contains the card/track infos
+// platformsSuccess: platform names where the search is succeeded
 function refreshResultList(isFirstSearch, cleanResponse, platformsSuccess) {
     if (isFirstSearch) {
         clearResults();
@@ -606,6 +672,7 @@ function refreshResultList(isFirstSearch, cleanResponse, platformsSuccess) {
         });
     }
 
+    // Adding the new cards to the result list
     cleanResponse.forEach((platformResults) => {
         if (
             platformResults.tracks.length <
@@ -631,7 +698,7 @@ function refreshResultList(isFirstSearch, cleanResponse, platformsSuccess) {
         });
     });
 
-    // Show "load more" button(s)
+    // Show "load more" button(s) when the platform did not reach the end of its results
     let allReached = true;
     platformsSuccess.forEach((platform) => {
         if (!platforms[platform].reachedEndOfResults) {
@@ -639,6 +706,7 @@ function refreshResultList(isFirstSearch, cleanResponse, platformsSuccess) {
         }
     });
 
+    // If not all platforms reached the end / responded with zero tracks, add the 'load more' button
     if (!allReached) {
         resultsUl.innerHTML += "<p>Load more results from:</p>";
         platformsSuccess.forEach((platform) => {
@@ -653,6 +721,7 @@ function refreshResultList(isFirstSearch, cleanResponse, platformsSuccess) {
     }
 }
 
+// Returns a 'load more' button's DOM object
 function getShowMoreButton(platformName) {
     const platform = platforms[platformName];
 
