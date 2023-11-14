@@ -1,13 +1,17 @@
 # PartyDJ
 
+## Archived project
+**Currently this project is being rewritten in Spring Boot.**
+There are some comments in JS files which explains how things work, it's only intended to help my teammate who makes a new frontend, it's not an official, good looking documentation.
+
 ## Introduction
 
 Have you ever been at a house party and wanted to play your favourite music? With this fullstack web application it is possible that everyone who participating the party can play their songs! But how does it work? 
 
-The owner of the party can create a party and others can join. Everyone in the party can add tracks from their own device to the queue, which plays automatically. They don't have to borrow anyone elses phone or go to the laptop to add their music. Just tap it on their own phone, that's so simple.
+The owner of the party can create a party and others can join. Everyone in the party can add tracks from their own device to the queue, which plays automatically. They don't have to borrow anyone elses phone or go to the laptop to add your music. Just tap it on your favourite music on your own phone, and it will play.
 
 ## Features
-- Playing songs from Spotify
+- Playing songs from Spotify & YouTube
 - Protecting parties with password
 - No stupid credit system
 - No user limit
